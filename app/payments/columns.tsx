@@ -1,101 +1,51 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ColumnCheckboxFilter } from "../../components/ColumnCheckboxFilter";
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-};
+import { Input } from "@/components/ui/input";
+import { User } from "@/data/dummyData"; // สมมุติ
+import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
 
 export const getColumns = (
-  setData: (updater: (prev: User[]) => User[]) => void,
-  deleteRow: (rowId: string) => void
+  onDelete?: (id: string) => void
 ): ColumnDef<User>[] => [
   {
     accessorKey: "id",
     header: "Id",
-    cell: ({ row }) => (
-      <Input
-        className="w-30"
-        defaultValue={row.original.id}
-        onBlur={(e) => {
-          setData((prev) =>
-            prev.map((r) =>
-              r.id === row.original.id ? { ...r, id: e.target.value } : r
-            )
-          );
-        }}
-      />
-    ),
+    cell: ({ row }) => <span>{row.original.id}</span>,
   },
   {
     accessorKey: "name",
+    // ใส่ filter header dropdown!
     header: ({ column, table }) => (
       <div className="flex items-center gap-2">
         Name
         <ColumnCheckboxFilter column={column} table={table} />
       </div>
     ),
+    // รองรับ filter แบบ multi-checkbox
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue || filterValue.length === 0) return true;
-      // value ใน cell
-      const value = row.getValue(columnId);
-      // filterValue เป็น array
-      return filterValue.includes(value);
+      // ในกรณีที่ filterValue เป็น array
+      return filterValue.includes(row.getValue(columnId));
     },
-    cell: ({ row }) => (
-      <Input
-        defaultValue={row.original.name}
-        onBlur={(e) => {
-          setData((prev) =>
-            prev.map((r) =>
-              r.id === row.original.id ? { ...r, name: e.target.value } : r
-            )
-          );
-        }}
-      />
-    ),
+    // (optional) enableFacetedValues: true,
   },
   {
     accessorKey: "email",
-    header: ({ column, table }) => (
-      <div className="flex items-center gap-2">
-        Email
-        <ColumnCheckboxFilter column={column} table={table} />
-      </div>
-    ),
-    filterFn: (row, columnId, filterValue) => {
-      if (!filterValue || filterValue.length === 0) return true;
-      // value ใน cell
-      const value = row.getValue(columnId);
-      // filterValue เป็น array
-      return filterValue.includes(value);
-    },
-    cell: ({ row }) => (
-      <Input
-        defaultValue={row.original.email}
-        onBlur={(e) => {
-          setData((prev) =>
-            prev.map((r) =>
-              r.id === row.original.id ? { ...r, email: e.target.value } : r
-            )
-          );
-        }}
-      />
-    ),
+    header: "Email",
+    cell: ({ row }) => <span>{row.original.email}</span>,
   },
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
-      <Button
-        size="sm"
-        variant="destructive"
-        onClick={() => deleteRow(row.original.id)}
-      >
-        Delete
-      </Button>
-    ),
+    cell: ({ row }) =>
+      onDelete ? (
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={() => onDelete(row.original.id)}
+        >
+          Delete
+        </Button>
+      ) : null,
   },
 ];
