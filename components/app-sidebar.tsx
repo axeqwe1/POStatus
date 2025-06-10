@@ -46,7 +46,7 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Example-Data-Table",
       url: "./payments",
       icon: IconListDetails,
     },

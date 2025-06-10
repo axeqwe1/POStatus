@@ -14,20 +14,8 @@ import { IconLayoutColumns } from "@tabler/icons-react";
 import { users } from "@/data/dummyData";
 export default function Page() {
   return (
-    <div>
-      <Card className="bg-gradient-to-br from-white to-slate-50">
-        <CardHeader>
-          <CardTitle>Card Title</CardTitle>
-          <CardDescription>Card Description</CardDescription>
-          <CardAction>Card Action</CardAction>
-        </CardHeader>
-        <CardContent>
-          <DataTable data={users} />
-        </CardContent>
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
-      </Card>
+    <div className="max-w-[1400px]">
+      <DataTable data={users} />
     </div>
   );
 }

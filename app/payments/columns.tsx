@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import { ColumnCheckboxFilter } from "../../components/ColumnCheckboxFilter";
 export type User = {
   id: string;
   name: string;
@@ -13,8 +13,37 @@ export const getColumns = (
   deleteRow: (rowId: string) => void
 ): ColumnDef<User>[] => [
   {
+    accessorKey: "id",
+    header: "Id",
+    cell: ({ row }) => (
+      <Input
+        className="w-30"
+        defaultValue={row.original.id}
+        onBlur={(e) => {
+          setData((prev) =>
+            prev.map((r) =>
+              r.id === row.original.id ? { ...r, id: e.target.value } : r
+            )
+          );
+        }}
+      />
+    ),
+  },
+  {
     accessorKey: "name",
-    header: "Name",
+    header: ({ column, table }) => (
+      <div className="flex items-center gap-2">
+        Name
+        <ColumnCheckboxFilter column={column} table={table} />
+      </div>
+    ),
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      // value ใน cell
+      const value = row.getValue(columnId);
+      // filterValue เป็น array
+      return filterValue.includes(value);
+    },
     cell: ({ row }) => (
       <Input
         defaultValue={row.original.name}
@@ -30,7 +59,19 @@ export const getColumns = (
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: ({ column, table }) => (
+      <div className="flex items-center gap-2">
+        Email
+        <ColumnCheckboxFilter column={column} table={table} />
+      </div>
+    ),
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      // value ใน cell
+      const value = row.getValue(columnId);
+      // filterValue เป็น array
+      return filterValue.includes(value);
+    },
     cell: ({ row }) => (
       <Input
         defaultValue={row.original.email}
