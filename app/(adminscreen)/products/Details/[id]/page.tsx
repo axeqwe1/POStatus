@@ -1,10 +1,8 @@
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
+type DetailProps = {
+  params: { id: string };
+};
 
-export default function ProductDetailPage({ params }: PageProps) {
+export default function ProductDetailPage({ params }: DetailProps) {
   const { id } = params;
 
   return (
