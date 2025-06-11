@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
 
 export function NavMain({
   items,
@@ -21,6 +22,8 @@ export function NavMain({
   }[];
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -47,7 +50,11 @@ export function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
-                className={`hover:cursor-pointer`}
+                className={`hover:cursor-pointer ${
+                  pathname === item.url
+                    ? "bg-primary text-white hover:bg-primary hover:text-white"
+                    : "hover:bg-muted"
+                }`}
                 onClick={() => router.push(item.url)}
                 tooltip={item.title}
               >

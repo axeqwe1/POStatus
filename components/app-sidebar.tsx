@@ -19,10 +19,10 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 
-import { NavDocuments } from "@/components/nav-documents";
-import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
+import { NavDocuments } from "@/components/navComponent/nav-documents";
+import { NavMain } from "@/components/navComponent/nav-main";
+import { NavSecondary } from "@/components/navComponent/nav-secondary";
+import { NavUser } from "@/components/navComponent/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +32,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
+import { NavSidebar } from "./navComponent/nav-sidebar";
+import { BookAIcon, Bot, Settings2, SquareActivityIcon } from "lucide-react";
+import { masterDataSidebar } from "@/data/sidebar-menu";
 const data = {
   user: {
     name: "shadcn",
@@ -42,28 +44,18 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "./dashboard",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
       title: "Example-Data-Table",
-      url: "./payments",
+      url: "/payments",
       icon: IconListDetails,
     },
     {
       title: "Analytics",
       url: "#",
       icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
     },
   ],
   navClouds: [
@@ -114,6 +106,57 @@ const data = {
       ],
     },
   ],
+  navProduct: [
+    {
+      title: "ProductManagement",
+      url: "#",
+      icon: SquareActivityIcon,
+      // isActive: true,
+      items: [],
+    },
+    {
+      title: "Models",
+      url: "#",
+      icon: Bot,
+      items: [
+        {
+          title: "Genesis",
+          url: "#",
+        },
+        {
+          title: "Explorer",
+          url: "#",
+        },
+        {
+          title: "Quantum",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings2,
+      items: [
+        // {
+        //   title: "General",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Team",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Billing",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Limits",
+        //   url: "#",
+        // },
+      ],
+    },
+  ],
   navSecondary: [
     {
       title: "Settings",
@@ -151,6 +194,9 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // const masterdataSidebar = sidebarData.find(
+  //   (item) => item.label.replace(/\s+/g, "").toLowerCase() === "masterdata"
+  // );
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -170,8 +216,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {/* <NavDocuments items={data.documents} /> */}
+        <NavSidebar items={masterDataSidebar} LabelName={"Master Data"} />
+        {/* <NavSecondary items={data.navSecondary} className="" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
