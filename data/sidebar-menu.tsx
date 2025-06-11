@@ -1,4 +1,14 @@
 import { SidebarData, SidebarItem } from "@/types/sidebar";
+import {
+  IconBox,
+  IconBrandProducthunt,
+  IconBuilding,
+  IconCategory,
+  IconShirt,
+  IconShirtFilled,
+  IconTower,
+  IconUser,
+} from "@tabler/icons-react";
 import { BookAIcon, Bot, Settings2, SquareActivityIcon } from "lucide-react";
 
 // export const sidebarData: SidebarData = [
@@ -47,15 +57,66 @@ export const masterDataSidebar: SidebarItem[] = [
   {
     title: "Product Management",
     url: "/products",
-    icon: SquareActivityIcon,
+    icon: IconBrandProducthunt,
     items: [
       { title: "All Products", url: "/products/All" },
       { title: "Add Product", url: "/products/AddProduct" },
     ],
   },
   {
-    title: "System Settings",
-    url: "/settings",
-    icon: Settings2,
+    title: "Variant Management",
+    url: "/variants",
+    icon: IconShirt,
+    items: [
+      { title: "Size", url: "variants/size" },
+      { title: "Color", url: "variants/color" },
+      { title: "Unit", url: "variants/unit" },
+    ],
+  },
+  {
+    title: "Category Management",
+    url: "/category",
+    icon: IconCategory,
+    // items: [
+    //   { title: "Size", url: "variants/size" },
+    //   { title: "Color", url: "variants/color" },
+    //   { title: "Unit", url: "variants/unit" },
+    // ],
+  },
+];
+
+export const stockDataSideBar: SidebarItem[] = [
+  {
+    title: "Stock Management",
+    url: "/stocks",
+    icon: IconBox,
+    items: [
+      { title: "Stock", url: "/stocks/All" },
+      { title: "Stock Take", url: "/stocks/stocktake" },
+    ],
+  },
+];
+export const organizeDataSideBar: SidebarItem[] = [
+  {
+    title: "Organization Management",
+    url: "/organize",
+    icon: IconBuilding,
+    items: [
+      { title: "Department", url: "/organize/Department" },
+      { title: "Company", url: "/organize/Company" },
+    ],
+  },
+];
+export const userDataSideBar: SidebarItem[] = [
+  {
+    title: "User Management",
+    url: "/users",
+    icon: IconUser,
+    items: [
+      { title: "User", url: "/users/All" },
+      { title: "Role", url: "/users/Role" },
+      { title: "Permission", url: "/user/Permission" },
+      { title: "AssignPermission", url: "/users/AssignPermission" },
+    ],
   },
 ];

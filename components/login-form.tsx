@@ -1,14 +1,24 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { redirect } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    redirect("/dashboard");
+  };
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-muted-foreground text-sm text-balance">
@@ -17,8 +27,8 @@ export function LoginForm({
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="email">Username</Label>
-          <Input id="email" type="email" placeholder="username" required />
+          <Label htmlFor="username">Username</Label>
+          <Input id="username" type="text" placeholder="username" required />
         </div>
         <div className="grid gap-3">
           <div className="flex items-center">

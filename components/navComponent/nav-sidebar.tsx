@@ -73,9 +73,14 @@ export function NavSidebar({ items, LabelName }: NavProductProps) {
             // กรณีไม่มี sub-menu
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
+                className={`hover:cursor-pointer ${
+                  pathname === item.url
+                    ? "bg-primary text-white hover:bg-primary hover:text-white"
+                    : "hover:bg-muted"
+                }`}
                 tooltip={item.title}
                 asChild
-                isActive={pathname == item.url}
+                // isActive={pathname == item.url}
               >
                 <a href={item.url}>
                   {item.icon && <item.icon />}
