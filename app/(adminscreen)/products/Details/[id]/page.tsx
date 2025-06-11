@@ -1,9 +1,9 @@
 type DetailProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export default function ProductDetailPage({ params }: DetailProps) {
-  const { id } = params;
+export default async function ProductDetailPage({ params }: DetailProps) {
+  const { id } = await params;
 
   return (
     <div>
