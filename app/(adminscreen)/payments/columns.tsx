@@ -3,16 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/data/dummyData"; // สมมุติ
 import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
+import { ArrowUpDown } from "lucide-react";
 
 export const getColumns = (
   onDelete?: (id: string) => void
 ): ColumnDef<User>[] => [
   {
+    id: "id",
     accessorKey: "id",
-    header: "Id",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          ID
+          <ArrowUpDown />
+        </Button>
+      );
+    },
     cell: ({ row }) => <span>{row.original.id}</span>,
   },
   {
+    // id: "name",
     accessorKey: "name",
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
@@ -27,9 +40,11 @@ export const getColumns = (
       // ในกรณีที่ filterValue เป็น array
       return filterValue.includes(row.getValue(columnId));
     },
+    cell: ({ row }) => <span>{row.original.name}</span>,
     // (optional) enableFacetedValues: true,
   },
   {
+    id: "email",
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => <span>{row.original.email}</span>,

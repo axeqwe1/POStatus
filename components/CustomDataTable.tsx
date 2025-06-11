@@ -25,12 +25,21 @@ import {
 } from "@/components/ui/table";
 import CustomTableFooter from "@/components/CustomTableFooter";
 import CustomFilterDropdown from "./CustomFilterDropdown";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { Input } from "./ui/input";
+import { ColumnFilter } from "./ColumnFilter";
 
 interface CustomDataTableProps<TData> {
   data: TData[];
   columns: ColumnDef<TData, any>[];
   initialPageSize?: number;
   className?: string;
+  collapse?: boolean;
 }
 
 export function CustomDataTable<TData>({
@@ -38,6 +47,7 @@ export function CustomDataTable<TData>({
   columns,
   initialPageSize = 10,
   className,
+  collapse = true,
 }: CustomDataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -72,10 +82,11 @@ export function CustomDataTable<TData>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
-
+  const [openRow, setOpenRow] = React.useState<string | null>(null);
   return (
     <div className={className}>
-      <div className="flex flex-row-reverse">
+      <div className="flex flex-row justify-between mb-3">
+        <ColumnFilter table={table} />
         <CustomFilterDropdown table={table} />
       </div>
       <div className="w-full overflow-x-auto">
@@ -83,6 +94,7 @@ export function CustomDataTable<TData>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
+                {collapse && <TableHead></TableHead>}
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
@@ -97,15 +109,75 @@ export function CustomDataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+            {!collapse ? (
+              <>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
+              </>
+            ) : (
+              <React.Fragment>
+                {table.getRowModel().rows.map((row) => (
+                  <React.Fragment key={row.id}>
+                    <TableRow>
+                      <TableCell>
+                        <button
+                          onClick={() =>
+                            setOpenRow(openRow === row.id ? null : row.id)
+                          }
+                          className="bg-transparent border-0"
+                        >
+                          <ChevronDown
+                            className={`transition-transform ${
+                              openRow === row.id ? "rotate-180" : ""
+                            }`}
+                            size={18}
+                          />
+                        </button>
+                      </TableCell>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {openRow === row.id && (
+                      <TableRow className="bg-muted">
+                        <TableCell colSpan={row.getVisibleCells().length + 1}>
+                          {/* Sub Table หรือเนื้อหาเพิ่มเติม */}
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>id</TableHead>
+                                <TableHead>Note</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>{row.id}</TableCell>
+                                <TableCell></TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                ))}
+              </React.Fragment>
+            )}
           </TableBody>
         </Table>
       </div>

@@ -1,3 +1,5 @@
+"use client";
+import { Fragment, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -24,9 +26,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNav } from "@/context/navContext";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export function SiteHeader() {
-  // const { breadcrump } = useNav();
+  const { breadcrump, setPathName } = useNav();
+  const pathName = usePathname();
+
+  useEffect(() => {
+    setPathName(pathName);
+  }, [pathName]);
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -36,23 +45,25 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/components">Components</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>
-                <h1 className="text-base font-medium">Documents</h1>
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Breadcrumb>
+            <BreadcrumbList>
+              {breadcrump.map((item, index) => (
+                <Fragment key={index}>
+                  <BreadcrumbItem key={index}>
+                    <BreadcrumbLink key={index}>
+                      {item.toUpperCase()}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  {index < breadcrump.length - 1 && (
+                    <BreadcrumbSeparator key={`separator-${index}`} />
+                  )}
+                </Fragment>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </Suspense>
+
         {/* <h1 className="text-base font-medium">Documents</h1> */}
         <div className="ml-auto flex items-center gap-2">
           <DropdownMenu>

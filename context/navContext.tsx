@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-
+import { usePathname } from "next/navigation";
 interface navContextProps {
   pathname: string;
   setPathName: (path: string) => void;
@@ -23,13 +23,12 @@ interface navProviderProps {
 const NavProvider = ({ children }: navProviderProps) => {
   const [pathname, setPathName] = useState<string>("");
   const [breadcrump, setBreadcrump] = useState<string[]>([]);
-
+  const currentPathname = usePathname();
   // useMemo เพื่อเป็นการ memorize value ที่มีการคำนวนหนัก ป้องกันคำนวณซ้ำตอน re-render ใหม่  คำนวนใหม่เฉพาะที่ค่า dependency ที่กำหนดมีการเปลี่ยนแปลง
   // ใช้ useMemo เพื่อจดจำค่าที่ได้จากการคำนวณหนัก ไม่ให้คำนวณใหม่ทุกครั้งที่ component re-render
   // จะคำนวณใหม่ก็ต่อเมื่อค่าใน dependency array เปลี่ยนแปลงเท่านั้น
   const filterBreadcrump = useMemo(() => {
     const Pathsplit = pathname.split("/").filter(Boolean); // ["product","example"]
-    console.log(Pathsplit);
     return Pathsplit;
   }, [pathname]);
 
@@ -37,6 +36,10 @@ const NavProvider = ({ children }: navProviderProps) => {
     setBreadcrump(filterBreadcrump);
   }, [filterBreadcrump]);
 
+  useEffect(() => {
+    setPathName(currentPathname);
+    console.log(currentPathname);
+  }, []);
   //   useEffect(() => {
   //     const Pathsplit = pathname.split("/").filter(Boolean);
   //     setBreadcrump(Pathsplit);
