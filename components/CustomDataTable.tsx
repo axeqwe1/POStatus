@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -34,21 +34,31 @@ import { ChevronDown } from "lucide-react";
 import { Input } from "./ui/input";
 import { ColumnFilter } from "./ColumnFilter";
 
-interface CustomDataTableProps<TData> {
+interface CustomDataTableProps<TData, TSubData = TData> {
   data: TData[];
   columns: ColumnDef<TData, any>[];
+  subColumns?: ColumnDef<TSubData, any>[];
   initialPageSize?: number;
   className?: string;
   collapse?: boolean;
+  subtableData?: TSubData[] | any[];
+  findSubtableData?: (rowId: string) => void;
+  showSubFooter?: boolean; // Optional prop to control footer visibility
+  setSubShowFooter?: (show: boolean) => void; // Optional prop to control footer visibility from parent
 }
 
-export function CustomDataTable<TData>({
+export function CustomDataTable<TData, TSubData>({
   data,
   columns,
+  subColumns = [],
   initialPageSize = 10,
   className,
   collapse = true,
-}: CustomDataTableProps<TData>) {
+  subtableData = [], // Default to empty array if not provided
+  showSubFooter = true,
+  findSubtableData = (rowId: string) => {},
+}: CustomDataTableProps<TData, TSubData>) {
+  const [openRow, setOpenRow] = React.useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -82,16 +92,23 @@ export function CustomDataTable<TData>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
-  const [openRow, setOpenRow] = React.useState<string | null>(null);
+
+  // useEffect(() => {
+  //   if (subColumns.length > 0) {
+  //     // If subColumns are provided, set the subtableData to an empty array initially
+  //     setOpenRow(null);
+  //   }
+  // }, [subtableData, subColumns]);
+
   return (
     <div className={className}>
-      <div className="flex flex-row justify-between mb-3">
+      <div className="flex flex-row justify-between my-3 px-3">
         <ColumnFilter table={table} />
         <CustomFilterDropdown table={table} />
       </div>
       <div className="w-full overflow-x-auto">
         <Table className="min-w-[700px]">
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {collapse && <TableHead></TableHead>}
@@ -131,9 +148,11 @@ export function CustomDataTable<TData>({
                     <TableRow>
                       <TableCell>
                         <button
-                          onClick={() =>
-                            setOpenRow(openRow === row.id ? null : row.id)
-                          }
+                          onClick={() => {
+                            setOpenRow(openRow === row.id ? null : row.id);
+                            findSubtableData(row.id);
+                            console.log(openRow, row.id, subtableData);
+                          }}
                           className="bg-transparent border-0"
                         >
                           <ChevronDown
@@ -157,20 +176,13 @@ export function CustomDataTable<TData>({
                       <TableRow className="bg-muted">
                         <TableCell colSpan={row.getVisibleCells().length + 1}>
                           {/* Sub Table หรือเนื้อหาเพิ่มเติม */}
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>id</TableHead>
-                                <TableHead>Note</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              <TableRow>
-                                <TableCell>{row.id}</TableCell>
-                                <TableCell></TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
+                          <CustomDataTable
+                            className="rounded-lg border"
+                            data={subtableData}
+                            columns={subColumns} // หรือจะส่ง columns ใหม่ก็ได้ถ้า subtable ต่างจาก main table
+                            collapse={false}
+                            showSubFooter={true}
+                          />
                         </TableCell>
                       </TableRow>
                     )}
@@ -181,7 +193,7 @@ export function CustomDataTable<TData>({
           </TableBody>
         </Table>
       </div>
-      <CustomTableFooter table={table} />
+      {showSubFooter && <CustomTableFooter table={table} />}
     </div>
   );
 }

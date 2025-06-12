@@ -56,26 +56,26 @@ import { BookAIcon, Bot, Settings2, SquareActivityIcon } from "lucide-react";
 export const masterDataSidebar: SidebarItem[] = [
   {
     title: "Product Management",
-    url: "/products",
+    url: "/masterdata/products",
     icon: IconBrandProducthunt,
     items: [
-      { title: "All Products", url: "/products/All" },
-      { title: "Add Product", url: "/products/AddProduct" },
+      { title: "All Products", url: "/masterdata/products/All" },
+      { title: "Add Product", url: "/masterdata/products/AddProduct" },
     ],
   },
   {
     title: "Variant Management",
-    url: "/variants",
+    url: "/masterdata/variants",
     icon: IconShirt,
     items: [
-      { title: "Size", url: "variants/size" },
-      { title: "Color", url: "variants/color" },
-      { title: "Unit", url: "variants/unit" },
+      { title: "Size", url: "/masterdata/variants/size" },
+      { title: "Color", url: "/masterdata/variants/color" },
+      { title: "Unit", url: "/masterdata/variants/unit" },
     ],
   },
   {
     title: "Category Management",
-    url: "/category",
+    url: "/masterdata/category",
     icon: IconCategory,
     // items: [
     //   { title: "Size", url: "variants/size" },
@@ -88,11 +88,11 @@ export const masterDataSidebar: SidebarItem[] = [
 export const stockDataSideBar: SidebarItem[] = [
   {
     title: "Stock Management",
-    url: "/stocks",
+    url: "/stock",
     icon: IconBox,
     items: [
-      { title: "Stock", url: "/stocks/All" },
-      { title: "Stock Take", url: "/stocks/stocktake" },
+      { title: "Stock", url: "/stock" },
+      { title: "Stock Take", url: "stockTake" },
     ],
   },
 ];

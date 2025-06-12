@@ -34,7 +34,7 @@ export default function CustomFilterDropdown({ table }: any) {
             .map((column: any) => (
               <DropdownMenuCheckboxItem
                 key={column.id}
-                className="capitalize hover:bg-slate-100 px-4 py-2 pl-8 relative" // <-- pl-8 เพื่อเว้นซ้ายให้ icon
+                className="capitalize hover:bg-slate-100 hover:cursor-pointer px-4 py-2 pl-8 relative" // <-- pl-8 เพื่อเว้นซ้ายให้ icon
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >

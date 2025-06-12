@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Suspense } from "react";
 import NavProvider from "@/context/navContext";
 import Head from "next/head";
+import { Toaster } from "@/components/ui/sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -44,7 +45,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavProvider>{children}</NavProvider>
+        <NavProvider>
+          {children}
+          <Toaster className="bg-slate-300" />
+        </NavProvider>
       </body>
     </html>
   );

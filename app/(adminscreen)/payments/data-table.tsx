@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { CustomDataTable } from "@/components/CustomDataTable";
 import { getColumns } from "./columns";
-import { User } from "@/data/dummyData";
+import { User } from "@/types/datatype";
 export default function DataTable({ data }: { data: User[] }) {
   const [users, setUsers] = useState(data);
 

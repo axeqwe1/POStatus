@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User } from "@/data/dummyData"; // สมมุติ
+import { User } from "@/types/datatype"; // สมมุติ
 import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
 import { ArrowUpDown } from "lucide-react";
 
@@ -25,7 +25,7 @@ export const getColumns = (
     cell: ({ row }) => <span>{row.original.id}</span>,
   },
   {
-    // id: "name",
+    id: "name",
     accessorKey: "name",
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
@@ -34,12 +34,7 @@ export const getColumns = (
         <ColumnCheckboxFilter column={column} table={table} />
       </div>
     ),
-    // รองรับ filter แบบ multi-checkbox
-    filterFn: (row, columnId, filterValue) => {
-      if (!filterValue || filterValue.length === 0) return true;
-      // ในกรณีที่ filterValue เป็น array
-      return filterValue.includes(row.getValue(columnId));
-    },
+
     cell: ({ row }) => <span>{row.original.name}</span>,
     // (optional) enableFacetedValues: true,
   },
