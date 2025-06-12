@@ -47,7 +47,7 @@ export default function RootLayout({
       >
         <NavProvider>
           {children}
-          <Toaster className="bg-slate-300" />
+          <Toaster position="top-center" richColors={true} />
         </NavProvider>
       </body>
     </html>
