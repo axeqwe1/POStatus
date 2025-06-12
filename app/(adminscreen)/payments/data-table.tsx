@@ -14,7 +14,7 @@ export default function DataTable({ data }: { data: User[] }) {
 
   return (
     <div className="max-w-[1200px] mx-auto">
-      <CustomDataTable data={users} columns={columns} collapse={true} />
+      <CustomDataTable data={users} columns={columns} collapse={false} />
     </div>
   );
 }
