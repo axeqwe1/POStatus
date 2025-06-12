@@ -91,19 +91,19 @@ export const stockDataSideBar: SidebarItem[] = [
     url: "/stock",
     icon: IconBox,
     items: [
-      { title: "Stock", url: "/stock" },
-      { title: "Stock Take", url: "stockTake" },
+      { title: "Stock", url: "/stock/stock" },
+      { title: "Stock Take", url: "/stock/stockTake" },
     ],
   },
 ];
 export const organizeDataSideBar: SidebarItem[] = [
   {
     title: "Organization Management",
-    url: "/organize",
+    url: "/orgranization",
     icon: IconBuilding,
     items: [
-      { title: "Department", url: "/organize/Department" },
-      { title: "Company", url: "/organize/Company" },
+      { title: "Department", url: "/orgranization/department" },
+      { title: "Company", url: "/orgranization/company" },
     ],
   },
 ];
@@ -113,10 +113,10 @@ export const userDataSideBar: SidebarItem[] = [
     url: "/users",
     icon: IconUser,
     items: [
-      { title: "User", url: "/users/All" },
-      { title: "Role", url: "/users/Role" },
-      { title: "Permission", url: "/user/Permission" },
-      { title: "AssignPermission", url: "/users/AssignPermission" },
+      { title: "User", url: "/users/user" },
+      { title: "Role", url: "/users/role" },
+      { title: "Permission", url: "/users/permission" },
+      { title: "AssignPermission", url: "/users/assignpermission" },
     ],
   },
 ];
