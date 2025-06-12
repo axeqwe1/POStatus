@@ -82,10 +82,10 @@ export function NavSidebar({ items, LabelName }: NavProductProps) {
                 asChild
                 // isActive={pathname == item.url}
               >
-                <a href={item.url}>
+                <Link href={item.url} passHref>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )
