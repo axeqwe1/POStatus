@@ -213,29 +213,55 @@ export const getSubColumns = (
     cell: ({ row }) => {
       const [value, setValue] = useState(row.original.unit);
 
-      const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-          console.log(`Saving ${row.original.id} with value: ${value}`);
-          e.preventDefault();
-          toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 1000)), // your save logic here
-            {
+      // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      //   if (e.key === "Enter") {
+      //     console.log(`Saving ${row.original.id} with value: ${value}`);
+      //     e.preventDefault();
+      //     toast.promise(
+      //       new Promise((resolve) => setTimeout(resolve, 1000)), // your save logic here
+      //       {
+      //         loading: `Saving ${row.original.id}`,
+      //         success: "Done",
+      //         error: "Error",
+      //       }
+      //     );
+      //   }
+      // };
+
+      return (
+        <form
+          onSubmit={(e: any) => {
+            e.preventDefault();
+
+            toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
               loading: `Saving ${row.original.id}`,
               success: "Done",
               error: "Error",
-            }
-          );
-        }
-      };
-
-      return (
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={value}
-          onKeyDown={handleKeyDown}
-          onChange={(e: any) => setValue(e.target.value)}
-          id={`${row.original.id}-unit`}
-        />
+            });
+          }}
+        >
+          <Label htmlFor={`${row.original.id}-target`} className="sr-only">
+            Unit
+          </Label>
+          <Input
+            className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+            defaultValue={row.original.unit}
+            id={`${row.original.id}-target`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)), // <-- Save logic
+                  {
+                    loading: `Saving ${row.original.id}`,
+                    success: "Done",
+                    error: "Error",
+                  }
+                );
+              }
+            }}
+          />
+        </form>
       );
     },
   },
