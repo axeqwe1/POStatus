@@ -23,7 +23,7 @@ export function ColumnFilter<TData>({ table }: ColumnFilterProps<TData>) {
   return (
     <>
       {firstChoice && (
-        <div className="flex items-center gap-2 max-w-sm">
+        <div className="grid grid-cols-1 md:flex items-center gap-2 max-w-sm">
           <Select value={selectedColumn} onValueChange={setSelectedColumn}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Select column" />
