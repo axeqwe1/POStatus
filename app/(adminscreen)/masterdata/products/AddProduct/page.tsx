@@ -20,6 +20,15 @@ import { Label } from "@/components/ui/label";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel,
+} from "@/components/ui/select";
 
 const variantSchema = z.object({
   name: z.string().min(1, "Variant name is required"),
@@ -94,7 +103,7 @@ export default function ProductFormPage() {
                 name="productName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name</FormLabel>
+                    <FormLabel>Category</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter product name" {...field} />
                     </FormControl>
@@ -102,7 +111,58 @@ export default function ProductFormPage() {
                   </FormItem>
                 )}
               />
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="productName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Brand</FormLabel>
+                      <FormControl>
+                        <Select>
+                          <SelectTrigger className="w-full border-1 rounded-sm">
+                            <SelectValue placeholder="Select Brand" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Brand</SelectLabel>
+                              <SelectItem value="light">Light</SelectItem>
+                              <SelectItem value="dark">Dark</SelectItem>
+                              <SelectItem value="system">System</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="productName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Select>
+                          <SelectTrigger className="w-full border-1 rounded-sm">
+                            <SelectValue placeholder="Select Brand" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Brand</SelectLabel>
+                              <SelectItem value="light">Light</SelectItem>
+                              <SelectItem value="dark">Dark</SelectItem>
+                              <SelectItem value="system">System</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="description"

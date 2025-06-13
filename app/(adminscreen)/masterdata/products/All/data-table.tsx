@@ -82,6 +82,7 @@ export default function DataTable({ data }: DataTableProps) {
       </div>
       {isDesktop ? (
         <Dialog
+          // shorthand !! is convert to boolean in condition: true if has data, false if not has data
           open={!!editItem}
           onOpenChange={(open) =>
             !open && setEditItem ? setEditItem(null) : {}
@@ -92,7 +93,10 @@ export default function DataTable({ data }: DataTableProps) {
               <DialogTitle>Edit Product</DialogTitle>
               <DialogDescription>Edit your product below.</DialogDescription>
             </DialogHeader>
-            <ProductForm product={isProduct(editItem) ? editItem : undefined} />
+            <ProductForm
+              onSuccess={() => setEditItem(null)} // ✅ เพิ่มตรงนี้
+              product={isProduct(editItem) ? editItem : undefined}
+            />
           </DialogContent>
         </Dialog>
       ) : (
@@ -110,6 +114,7 @@ export default function DataTable({ data }: DataTableProps) {
             {isProduct(editItem) ? (
               <ProductForm
                 product={isProduct(editItem) ? editItem : undefined}
+                onSuccess={() => setEditItem(null)} // ✅ เพิ่มตรงนี้
                 className="px-4"
               />
             ) : (
