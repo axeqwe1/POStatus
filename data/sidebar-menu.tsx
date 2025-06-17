@@ -115,8 +115,7 @@ export const userDataSideBar: SidebarItem[] = [
     items: [
       { title: "User", url: "/users/user" },
       { title: "Role", url: "/users/role" },
-      { title: "Permission", url: "/users/permission" },
-      { title: "AssignPermission", url: "/users/assignpermission" },
+      { title: "Supplier", url: "/users/supplier" },
     ],
   },
 ];

@@ -113,7 +113,7 @@ export function CustomDataTable<TData, TSubData>({
               <TableRow key={headerGroup.id}>
                 {collapse && <TableHead></TableHead>}
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="pl-6">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -128,10 +128,10 @@ export function CustomDataTable<TData, TSubData>({
           <TableBody>
             {!collapse ? (
               <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
+                {table.getRowModel().rows.map((row, index) => (
+                  <TableRow key={index}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="pl-6">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -143,8 +143,8 @@ export function CustomDataTable<TData, TSubData>({
               </>
             ) : (
               <React.Fragment>
-                {table.getRowModel().rows.map((row) => (
-                  <React.Fragment key={row.id}>
+                {table.getRowModel().rows.map((row, index) => (
+                  <React.Fragment key={index}>
                     <TableRow>
                       <TableCell>
                         <button

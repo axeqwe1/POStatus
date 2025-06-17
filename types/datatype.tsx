@@ -21,3 +21,20 @@ export interface Variant {
   sku?: string; // รหัสสินค้า (optional)
   imageUrl?: string; // URL รูปภาพ (optional)
 }
+
+export interface PO_Status {
+  PONo: string;
+  Supreceive: boolean;
+  downloadDate: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  contactPerson: string; // ชื่อผู้ติดต่อ
+  contactEmail: string; // อีเมลผู้ติดต่อ
+  contactPhone: string; // เบอร์โทรผู้ติดต่อ
+}

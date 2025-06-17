@@ -36,13 +36,47 @@ Axios.interceptors.request.use(
   }
 );
 
+// Response Interceptor
 Axios.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      alert("Session expired! Please login again.");
-      window.location.href = "/login";
+  async (error) => {
+    const originalRequest = error.config;
+
+    // ตรวจจับ 401 และป้องกันไม่ให้วนลูป
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/auth/refresh")
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        // เรียก refresh token
+        const res = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {}, // ถ้า refresh ใช้ cookie อย่างเดียว ไม่ต้องใส่ body
+          {
+            withCredentials: true,
+          }
+        );
+
+        const newAccessToken = res.data.accessToken;
+        localStorage.setItem("token", newAccessToken);
+
+        // แก้ token ใหม่ให้กับ request ที่ล้มเหลว
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+
+        // ลองยิง request เดิมซ้ำ
+        return Axios(originalRequest);
+      } catch (refreshError) {
+        console.error("Refresh token failed:", refreshError);
+        localStorage.removeItem("token");
+        // redirect ไป login ได้เลย
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
     }
+
     return Promise.reject(error);
   }
 );

@@ -7,7 +7,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/navComponent/app-sidebar";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -17,6 +17,8 @@ import { Suspense } from "react";
 import NavProvider from "@/context/navContext";
 import Head from "next/head";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/context/authContext";
+import AuthGuard from "@/components/AuthGuard/AuthGuard";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -45,10 +47,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavProvider>
-          {children}
-          <Toaster position="top-center" richColors={true} />
-        </NavProvider>
+        <AuthProvider>
+          <AuthGuard>
+            <NavProvider>
+              {children}
+              <Toaster position="top-center" richColors={true} />
+            </NavProvider>
+          </AuthGuard>
+        </AuthProvider>
       </body>
     </html>
   );

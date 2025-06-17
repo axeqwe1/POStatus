@@ -1,4 +1,4 @@
-import { Product, User } from "@/types/datatype";
+import { PO_Status, Product, User } from "@/types/datatype";
 
 export const users: User[] = [
   { id: "1", name: "John Doe", email: "john1@email.com" },
@@ -106,5 +106,28 @@ export const ListProduct: Product[] = [
         sku: "NIKE-AIRMAX-RED-BLACK-42",
       },
     ],
+  },
+];
+
+export const ListPo: PO_Status[] = [
+  {
+    PONo: "YPTPO-24-02961",
+    Supreceive: true,
+    downloadDate: "2023-10-01",
+  },
+  {
+    PONo: "YPTPO-24-03503",
+    Supreceive: false,
+    downloadDate: "2023-10-02",
+  },
+  {
+    PONo: "YPTPO-24-03910",
+    Supreceive: true,
+    downloadDate: "2023-10-03",
+  },
+  {
+    PONo: "YPTPO-24-03988",
+    Supreceive: false,
+    downloadDate: "2023-10-04",
   },
 ];

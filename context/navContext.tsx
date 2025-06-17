@@ -28,7 +28,8 @@ const NavProvider = ({ children }: navProviderProps) => {
   // ใช้ useMemo เพื่อจดจำค่าที่ได้จากการคำนวณหนัก ไม่ให้คำนวณใหม่ทุกครั้งที่ component re-render
   // จะคำนวณใหม่ก็ต่อเมื่อค่าใน dependency array เปลี่ยนแปลงเท่านั้น
   const filterBreadcrump = useMemo(() => {
-    const Pathsplit = pathname.split("/").filter(Boolean); // ["product","example"]
+    const removeUnderscore = pathname.replaceAll("_", " "); // แทนที่ _ ด้วย space
+    const Pathsplit = removeUnderscore.split("/").filter(Boolean); // ["product","example"]
     return Pathsplit;
   }, [pathname]);
 

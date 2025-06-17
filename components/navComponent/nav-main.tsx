@@ -54,7 +54,7 @@ export function NavMain({
                 className={`hover:cursor-pointer ${
                   pathname === item.url
                     ? "bg-primary text-white hover:bg-primary hover:text-white"
-                    : "hover:bg-muted"
+                    : "hover:bg-primary-foreground/50"
                 }`}
                 onClick={() => router.push(item.url)}
                 tooltip={item.title}

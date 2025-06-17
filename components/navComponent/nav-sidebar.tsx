@@ -36,7 +36,6 @@ export function NavSidebar({ items, LabelName }: NavProductProps) {
           item.items && item.items.length > 0 ? (
             <Collapsible
               key={item.title}
-              asChild
               defaultOpen={`/${firstPath}` == item.url}
               className="group/collapsible"
             >
@@ -44,7 +43,11 @@ export function NavSidebar({ items, LabelName }: NavProductProps) {
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="group-data-[state=open]/collapsible:bg-primary-foreground"
+                    className="
+                        data-[state=open]:bg-primary-foreground
+                        data-[state=open]:hover:bg-primary-foreground/50
+                        data-[state=closed]:hover:bg-primary-foreground/50
+                    "
                   >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -59,6 +62,7 @@ export function NavSidebar({ items, LabelName }: NavProductProps) {
                           <SidebarMenuSubButton
                             asChild
                             isActive={pathname == subItem.url}
+                            className="hover:bg-primary-foreground/50"
                           >
                             <span>{subItem.title}</span>
                           </SidebarMenuSubButton>
