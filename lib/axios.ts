@@ -42,36 +42,40 @@ Axios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // ตรวจจับ 401 และป้องกันไม่ให้วนลูป
+    const isUnauthorized = error.response?.status === 401;
+    const url = new URL(originalRequest.url, API_BASE_URL).pathname;
+    const isRefreshCall = url === "/api/Auth/refresh";
+    const isLoginCall = url === "/api/Auth/login";
+
+    // ถ้าเป็น login call ที่ fail ให้ส่ง error กลับไปตรงๆ
+    if (isUnauthorized && isLoginCall) {
+      return Promise.reject(error);
+    }
+
     if (
-      error.response?.status === 401 &&
+      isUnauthorized &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/refresh")
+      !isRefreshCall &&
+      !isLoginCall
     ) {
       originalRequest._retry = true;
 
       try {
-        // เรียก refresh token
+        // ส่ง request โดยไม่ต้องใส่ body เพราะ backend อ่านจาก cookie
         const res = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          {}, // ถ้า refresh ใช้ cookie อย่างเดียว ไม่ต้องใส่ body
+          `${API_BASE_URL}/api/Auth/refresh`,
+          {}, // empty body
           {
             withCredentials: true,
           }
         );
 
-        const newAccessToken = res.data.accessToken;
-        localStorage.setItem("token", newAccessToken);
-
-        // แก้ token ใหม่ให้กับ request ที่ล้มเหลว
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-
-        // ลองยิง request เดิมซ้ำ
+        // ไม่ต้องเก็บ token ใน localStorage เพราะใช้ cookie
+        // แค่ retry original request
         return Axios(originalRequest);
       } catch (refreshError) {
         console.error("Refresh token failed:", refreshError);
-        localStorage.removeItem("token");
-        // redirect ไป login ได้เลย
+        // redirect ไป login page
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }

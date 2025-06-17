@@ -72,7 +72,7 @@ const data = {
     },
     {
       title: "Add Supplier",
-      url: "/suppliers",
+      url: "/Supplier",
       icon: IconBox,
     },
     // {

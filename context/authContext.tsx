@@ -5,6 +5,7 @@ import { useState, createContext } from "react";
 
 interface AuthContextProps {
   isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>; // ใช้สำหรับการเปลี่ยนแปลงสถานะการล็อกอิน
   user: { id: string; name: string } | null;
   login: (user: { id: string; name: string }) => void;
   logout: () => void;
@@ -34,7 +35,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, setIsAuthenticated, user, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

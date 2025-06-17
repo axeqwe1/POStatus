@@ -4,57 +4,94 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { redirect } from "next/navigation";
+import { log } from "console";
+import { login } from "@/lib/api/auth";
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { useAuth } from "@/context/authContext";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const { setIsAuthenticated } = useAuth();
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    redirect("/PO_Status");
+    console.log(e.target.username.value, e.target.password.value);
+    const res = await login(e.target.username.value, e.target.password.value);
+    if (res.status === 200) {
+      setIsAuthenticated(true); // Set authenticated state
+      // Handle successful login, e.g., redirect to dashboard
+      redirect("/PO_Status");
+    } else {
+      // Handle error, e.g., show error message
+      if (res.status === 401) {
+        setErrorMessage("Invalid username or password. Please try again.");
+        setIsError(true);
+      } else if (res.status === 500) {
+        setErrorMessage("Server error. Please try again later.");
+        setIsError(true);
+      } else {
+        setErrorMessage("An unexpected error occurred. Please try again.");
+        setIsError(true);
+      }
+    }
   };
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={cn("flex flex-col gap-6", className)}
-      {...props}
-    >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Login to your account</h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Enter your username to login to your account
-        </p>
-      </div>
-      <div className="grid gap-6">
-        <div className="grid gap-3">
-          <Label htmlFor="username">Username</Label>
-          <Input id="username" type="text" placeholder="username" required />
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className={cn("flex flex-col gap-6", className)}
+        {...props}
+      >
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <p className="text-muted-foreground text-sm text-balance">
+            Enter your username to login to your account
+          </p>
         </div>
-        <div className="grid gap-3">
-          <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
-            {/* <a
+        {isError && (
+          <Alert className="text-red-500 text-sm bg-red-200">
+            <AlertTitle>
+              <span className="font-semibold">Login Failed!</span>
+            </AlertTitle>
+            <AlertDescription className="text-red-500 text-sm text-center">
+              {errorMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+        <div className="grid gap-6">
+          <div className="grid gap-3">
+            <Label htmlFor="username">Username</Label>
+            <Input id="username" type="text" placeholder="username" required />
+          </div>
+          <div className="grid gap-3">
+            <div className="flex items-center">
+              <Label htmlFor="password">Password</Label>
+              {/* <a
               href="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
             </a> */}
+            </div>
+            <Input
+              id="password"
+              type="password"
+              placeholder="password"
+              required
+            />
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="password"
-            required
-          />
-        </div>
-        <Button
-          variant={"default"}
-          type="submit"
-          className="w-full hover:cursor-pointer text-white"
-        >
-          Login
-        </Button>
-        {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+          <Button
+            variant={"default"}
+            type="submit"
+            className="w-full hover:cursor-pointer text-white"
+          >
+            Login
+          </Button>
+          {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
           <span className="bg-background text-muted-foreground relative z-10 px-2">
             Or continue with
           </span>
@@ -68,13 +105,14 @@ export function LoginForm({
           </svg>
           Login with GitHub
         </Button> */}
-      </div>
-      {/* <div className="text-center text-sm">
+        </div>
+        {/* <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
         <a href="#" className="underline underline-offset-4">
           Sign up
         </a>
       </div> */}
-    </form>
+      </form>
+    </>
   );
 }
