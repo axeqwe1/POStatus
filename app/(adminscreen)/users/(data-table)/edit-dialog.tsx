@@ -34,6 +34,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import supplier, { getSuppliers } from "@/lib/api/supplier";
+import { useEffect, useState } from "react";
+import { getRoleAll } from "@/lib/api/role";
+import { updateUser } from "@/lib/api/user";
 interface UserFormProps extends React.ComponentProps<"form"> {
   user?: User;
   onSuccess?: () => void; // ✅ เพิ่ม
@@ -56,28 +60,28 @@ export function UserForm({
   user,
   onSuccess, // ✅ รับ callback
 }: UserFormProps) {
-  const options = ["Apple", "Banana", "Cherry", "Durian", "Elderberry"];
-  const [value, setValue] = React.useState("");
-
+  const [valueSupplier, setValueSupplier] = useState("");
+  const [suppliers, setSuppliers] = useState<string[]>([]);
+  const [valueRole, setValueRole] = useState("");
+  const [roles, setRoles] = useState<string[]>([]);
   const formRef = React.useRef<HTMLFormElement>(null);
-  React.useEffect(() => {
-    console.log(user);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted");
     const formData = new FormData(formRef.current!);
-
     const password = formData.get("password");
     const updatePayload: any = {
-      username: formData.get("name"),
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
+      Username: formData.get("username"),
+      FirstName: formData.get("firstName"),
+      LastName: formData.get("lastName"),
+      Email: formData.get("email"),
+      RoleName: valueRole,
+      SupplierId: valueSupplier, // ถ้า backend ไม่ใช้ก็ลบออก
     };
 
     if (password) {
-      updatePayload.password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
+      updatePayload.Password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
     }
 
     console.log(updatePayload);
@@ -85,9 +89,22 @@ export function UserForm({
     let errormessage = "";
     const result = await toast.promise(
       new Promise((resolve, reject) => {
-        setTimeout(() => {
-          reject(new Error("Failed to save"));
-        }, 1000);
+        if (user != null) {
+          const updateRequest = { updatePayload };
+          updateUser(user?.userId, updatePayload)
+            .then((res) => {
+              console.log(res);
+              onSuccess?.();
+              resolve("Update Success");
+            })
+            .catch((error) => {
+              onSuccess?.();
+              reject(new Error(error));
+            });
+        } else {
+          onSuccess?.();
+          reject(new Error("Not Found UserId"));
+        }
       }),
       {
         loading: "Saving...",
@@ -102,9 +119,60 @@ export function UserForm({
 
     // จะไม่ถึงตรงนี้ เพราะจะ throw error
     console.log(result);
-
-    onSuccess?.();
   };
+
+  useEffect(() => {
+    const fetchSupplier = async () => {
+      try {
+        const res = await getSuppliers();
+        const supplierData = res.data.data.map(
+          (supplier: any) => supplier.supplierCode
+        );
+
+        setSuppliers(
+          res.data.data.map((supplier: any) => supplier.supplierCode)
+        ); // Assuming the API returns an array of suppliers with a 'name' property
+        if (user?.supplierCode) {
+          console.log(supplierData);
+          setValueSupplier(
+            supplierData.find(
+              (supplier: any) => supplier === user.supplierCode
+            ) || ""
+          );
+        }
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch suppliers");
+        }
+        return res;
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+        throw error; // Re-throw the error for further handling if needed
+      }
+    };
+
+    const fetchRole = async () => {
+      try {
+        const res = await getRoleAll();
+        // console.log(res.data.map((role: any) => role.name));
+        setRoles(res.data.map((role: any) => role.roleName)); // Assuming the API returns an array of roles with a 'name' property
+        if (user?.roleId) {
+          setValueRole(
+            res.data.find((role: any) => role.roleId === user.roleId)
+              ?.roleName || ""
+          );
+        }
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch roles");
+        }
+        return res;
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+        throw error; // Re-throw the error for further handling if needed
+      }
+    };
+    fetchSupplier();
+    fetchRole();
+  }, [user]);
   return (
     <>
       <form
@@ -112,7 +180,6 @@ export function UserForm({
         onSubmit={handleSubmit}
         className={cn("grid items-start gap-3", className)}
       >
-        <div className="grid gap-1"></div>
         <div className="grid gap-3">
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             <div>
@@ -139,6 +206,19 @@ export function UserForm({
             </div>
           </div>
         </div>
+        <div className="grid gap-1">
+          <div className="grid gap-1">
+            <Label className="pb-1" htmlFor="email">
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="text"
+              defaultValue={user?.email ?? ""}
+            />
+          </div>
+        </div>
         <div className="grid gap-3">
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             <div className="grid gap-1">
@@ -146,13 +226,13 @@ export function UserForm({
                 Role
               </Label>
               <InputDropdown
-                options={options}
-                value={value}
-                onChange={setValue}
+                options={roles}
+                value={valueRole}
+                onChange={setValueRole}
                 placeholder="Select Role"
                 className="max-w-sm"
-                inputClassName="bg-yellow-50 text-red-600 p-3"
-                dropdownClassName="bg-gray-100 border-blue-400"
+                inputClassName="p-3"
+                dropdownClassName=" border-blue-400"
                 optionClassName="hover:bg-blue-600 hover:text-white"
               />
             </div>
@@ -161,23 +241,28 @@ export function UserForm({
                 Supplier
               </Label>
               <InputDropdown
-                options={options}
-                value={value}
-                onChange={setValue}
+                options={suppliers}
+                value={valueSupplier}
+                onChange={setValueSupplier}
                 placeholder="Select Supplier"
                 className="max-w-sm"
-                inputClassName="bg-yellow-50 text-red-600 p-3"
-                dropdownClassName="bg-gray-100 border-blue-400"
+                inputClassName="p-3"
+                dropdownClassName=" border-blue-400"
                 optionClassName="hover:bg-blue-600 hover:text-white"
               />
             </div>
           </div>
         </div>
         <div className="grid gap-1">
-          <Label className="pb-1" htmlFor="name">
+          <Label className="pb-1" htmlFor="username">
             Username
           </Label>
-          <Input id="name" name="name" defaultValue={user?.username ?? ""} />
+          <Input
+            id="username"
+            name="username"
+            type="text"
+            defaultValue={user?.username ?? ""}
+          />
         </div>
         <div className="grid gap-1">
           <Label className="pb-1" htmlFor="password">

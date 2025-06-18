@@ -39,6 +39,7 @@ export interface User {
   lastName: string;
   email: string;
   username: string;
+  password: string;
   role: string; // เช่น 'admin', 'user', 'supplier'
   roleId: number;
   supplierCode?: string; // optional, ถ้าเป็นผู้ใช้ที่เป็น supplier

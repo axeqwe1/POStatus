@@ -10,3 +10,14 @@ export const getUserAll = async () => {
     throw ex; // Re-throw the error for further handling if needed
   }
 };
+
+export const updateUser = async (userId: number, data: any) => {
+  try {
+    const res = await apiService.put("/api/User/UpdateUser/" + userId, data);
+    console.log(res);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

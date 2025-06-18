@@ -26,8 +26,9 @@ import { UserForm } from "./edit-dialog";
 
 interface DataTableProps {
   data: User[];
+  onSuccess: () => void;
 }
-export default function DataTable({ data }: DataTableProps) {
+export default function DataTable({ data, onSuccess }: DataTableProps) {
   const [datas, setDatas] = useState<User[]>([]);
   const [isEdit, setIsEdit] = useState(false);
 
@@ -50,7 +51,9 @@ export default function DataTable({ data }: DataTableProps) {
     setEditItem,
     isDesktop
   );
-
+  const RefreshonSuccess = () => {
+    onSuccess?.();
+  };
   return (
     <>
       <div className="max-w-[1200px] mx-auto">
@@ -76,7 +79,11 @@ export default function DataTable({ data }: DataTableProps) {
               <DialogDescription>Edit your user below.</DialogDescription>
             </DialogHeader>
             <UserForm
-              onSuccess={() => setEditItem(null)} // ✅ เพิ่มตรงนี้
+              onSuccess={() => {
+                setEditItem(null);
+                console.log("trigger userform");
+                RefreshonSuccess();
+              }} // ✅ เพิ่มตรงนี้
               user={editItem ? editItem : undefined}
             />
           </DialogContent>
@@ -96,8 +103,12 @@ export default function DataTable({ data }: DataTableProps) {
             {editItem ? (
               <UserForm
                 user={editItem ? editItem : undefined}
-                onSuccess={() => setEditItem(null)} // ✅ เพิ่มตรงนี้
-                className="px-4"
+                onSuccess={() => {
+                  setEditItem(null);
+                  console.log("trigger userform");
+                  RefreshonSuccess();
+                }} // ✅ เพิ่มตรงนี้
+                className="overflow-y-auto px-4 pb-6 flex-1"
               />
             ) : (
               <>

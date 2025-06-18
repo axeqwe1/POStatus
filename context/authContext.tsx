@@ -30,27 +30,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = React.useState<UserDTO | null>(null);
 
   useEffect(() => {
-    const fetchSuppplier = async () => {
-      try {
-        // const supplierId = user?.supplierId; // ดึง supplierId จาก user
-        // if (!supplierId) return; // ถ้าไม่มี supplierId ก็ไม่ต้องทำอะไร
-        if (!document.cookie.includes("auth_status")) {
-          setUser(null); // ถ้าไม่มี refreshToken ใน cookie ให้ user เป็น null
-          setIsAuthenticated(false); // และสถานะการล็อกอินเป็น false
-          return;
-        }
-        const res = await getSuppliers(); // 🔁 เรียก API /api/Supplier/{supplierId}
-        if (res.status === 200) {
-          console.log("Supplier data:", res.data);
-          // คุณสามารถจัดการข้อมูลผู้จำหน่ายที่นี่ได้
-        } else {
-          console.error("Failed to fetch supplier data:", res.status);
-        }
-      } catch (ex: any) {
-        console.error("Error fetching supplier data:", ex);
-      }
-    };
-    fetchSuppplier();
     const fetchMe = async () => {
       try {
         if (!document.cookie.includes("auth_status")) {
