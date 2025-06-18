@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { redirect } from "next/navigation";
 import { log } from "console";
-import { login } from "@/lib/api/auth";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/context/authContext";
@@ -16,21 +15,19 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { setIsAuthenticated } = useAuth();
+  const { setIsAuthenticated, setUser, login } = useAuth();
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     console.log(e.target.username.value, e.target.password.value);
     const res = await login(e.target.username.value, e.target.password.value);
-    if (res.status === 200) {
-      setIsAuthenticated(true); // Set authenticated state
-      // Handle successful login, e.g., redirect to dashboard
+    if (res != null && res.status === 200) {
       redirect("/PO_Status");
     } else {
       // Handle error, e.g., show error message
-      if (res.status === 401) {
+      if (res != null && res.status === 401) {
         setErrorMessage("Invalid username or password. Please try again.");
         setIsError(true);
-      } else if (res.status === 500) {
+      } else if (res != null && res.status === 500) {
         setErrorMessage("Server error. Please try again later.");
         setIsError(true);
       } else {
@@ -39,6 +36,7 @@ export function LoginForm({
       }
     }
   };
+
   return (
     <>
       <form

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { useAuth } from "@/context/authContext";
 
 export function NavUser({
   user,
@@ -37,8 +38,11 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const { logout } = useAuth();
   const handleLogout = async () => {
-    redirect("/login");
+    // Call your logout function here, e.g., signOut()
+    // await signOut();
+    await logout();
   };
   return (
     <SidebarMenu>

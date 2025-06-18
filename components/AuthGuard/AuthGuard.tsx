@@ -8,14 +8,20 @@ interface PrivateRouteProps {
 }
 
 const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   React.useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login"); // ถ้าไม่ล็อกอิน ให้ไปหน้า login
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    } else {
+      router.push("/PO_Status");
     }
-  }, [isAuthenticated, router, pathname]);
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return <div>Loading...</div>; // ✅ หรือ Skeleton UI ก็ได้
+  }
 
   // ถ้ายังไม่ล็อกอิน แสดง Loading หรืออะไรชั่วคราวก่อน
   //   if (!isAuthenticated) {

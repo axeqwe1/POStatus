@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { refresh } from "./api/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -46,6 +47,9 @@ Axios.interceptors.response.use(
     const url = new URL(originalRequest.url, API_BASE_URL).pathname;
     const isRefreshCall = url === "/api/Auth/refresh";
     const isLoginCall = url === "/api/Auth/login";
+    const isLogoutCall = url === "/api/Auth/logout";
+    const hasAuthenCookie = document.cookie.includes("auth_status");
+    // const isCheckAuthen = url === "/api/Auth/me";
 
     // ถ้าเป็น login call ที่ fail ให้ส่ง error กลับไปตรงๆ
     if (isUnauthorized && isLoginCall) {
@@ -56,20 +60,15 @@ Axios.interceptors.response.use(
       isUnauthorized &&
       !originalRequest._retry &&
       !isRefreshCall &&
-      !isLoginCall
+      !isLoginCall &&
+      hasAuthenCookie
     ) {
       originalRequest._retry = true;
 
       try {
         // ส่ง request โดยไม่ต้องใส่ body เพราะ backend อ่านจาก cookie
-        const res = await axios.post(
-          `${API_BASE_URL}/api/Auth/refresh`,
-          {}, // empty body
-          {
-            withCredentials: true,
-          }
-        );
-
+        const res = await refresh();
+        console.log(res);
         // ไม่ต้องเก็บ token ใน localStorage เพราะใช้ cookie
         // แค่ retry original request
         return Axios(originalRequest);
