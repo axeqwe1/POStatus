@@ -1,6 +1,7 @@
 "use client";
 
 import { me, signIn, signOut } from "@/lib/api/auth";
+import { getSuppliers } from "@/lib/api/supplier";
 import { apiService } from "@/lib/axios";
 import { AxiosResponse } from "axios";
 import React, { ReactNode, useEffect } from "react";
@@ -29,6 +30,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = React.useState<UserDTO | null>(null);
 
   useEffect(() => {
+    const fetchSuppplier = async () => {
+      try {
+        // const supplierId = user?.supplierId; // ดึง supplierId จาก user
+        // if (!supplierId) return; // ถ้าไม่มี supplierId ก็ไม่ต้องทำอะไร
+        if (!document.cookie.includes("auth_status")) {
+          setUser(null); // ถ้าไม่มี refreshToken ใน cookie ให้ user เป็น null
+          setIsAuthenticated(false); // และสถานะการล็อกอินเป็น false
+          return;
+        }
+        const res = await getSuppliers(); // 🔁 เรียก API /api/Supplier/{supplierId}
+        if (res.status === 200) {
+          console.log("Supplier data:", res.data);
+          // คุณสามารถจัดการข้อมูลผู้จำหน่ายที่นี่ได้
+        } else {
+          console.error("Failed to fetch supplier data:", res.status);
+        }
+      } catch (ex: any) {
+        console.error("Error fetching supplier data:", ex);
+      }
+    };
+    fetchSuppplier();
     const fetchMe = async () => {
       try {
         if (!document.cookie.includes("auth_status")) {
@@ -46,10 +68,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email: res.data.email,
             supplierId: res.data.supplierId,
             username: res.data.username,
-            role: res.data.role, // สมมติว่า API ส่ง role มาด้วย
+            role: res.data.roleName, // สมมติว่า API ส่ง role มาด้วย
           };
+          localStorage.setItem("user", JSON.stringify(data)); // Save user data to localStorage
           setUser(data);
           setIsAuthenticated(true);
+          setIsLoading(false);
         } else {
           setIsAuthenticated(false);
         }
@@ -62,7 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     fetchMe();
-  }, [isAuthenticated]);
+  }, []);
 
   const login = async (
     username: string,

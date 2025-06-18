@@ -2,6 +2,7 @@
 import React from "react";
 import { useAuth } from "../../context/authContext"; // สมมติคุณมี custom hook ใช้ context
 import { useRouter, usePathname } from "next/navigation";
+import { motion } from "motion/react";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -14,13 +15,15 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
   React.useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/login");
-    } else {
-      router.push("/PO_Status");
     }
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // ✅ หรือ Skeleton UI ก็ได้
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    ); // ✅ หรือ Skeleton UI ก็ได้
   }
 
   // ถ้ายังไม่ล็อกอิน แสดง Loading หรืออะไรชั่วคราวก่อน

@@ -66,12 +66,12 @@ const data = {
     //   icon: IconListDetails,
     // },
     {
-      title: "Add User",
+      title: "User",
       url: "/users",
       icon: IconUsers,
     },
     {
-      title: "Add Supplier",
+      title: "Supplier",
       url: "/Supplier",
       icon: IconBox,
     },

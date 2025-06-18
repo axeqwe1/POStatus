@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Table } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
+import { useEffect } from "react";
 
 type Props<TData> = {
   column: any; // คุณสามารถใช้ Column<TData, TValue> ถ้า import type มาถูกต้อง
@@ -17,7 +18,7 @@ type Props<TData> = {
 export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
   // เอาค่า unique จาก facetedUniqueValues ของคอลัมน์นั้น
   const valuesMap = column.getFacetedUniqueValues();
-  const values: string[] = Array.from(valuesMap.keys());
+  const values: string[] = valuesMap ? Array.from(valuesMap.keys()) : [];
 
   // ค่าที่ถูกเลือกไว้
   const selected = (column.getFilterValue() as string[]) ?? [];
@@ -37,19 +38,23 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="max-h-64 overflow-y-auto">
-        {values.map((val) => (
-          <div key={val} className="flex items-center gap-2 px-2 py-1">
-            <Checkbox
-              checked={selected.includes(val)}
-              onCheckedChange={() => toggleValue(val)}
-              id={`filter-${column.id}-${val}`}
-            />
-            <label
-              htmlFor={`filter-${column.id}-${val}`}
-              className="text-sm cursor-pointer"
-            >
-              {val}
-            </label>
+        {values.map((val, index) => (
+          <div key={index} className="flex items-center gap-2 px-2 py-1">
+            {val !== "" ? (
+              <>
+                <Checkbox
+                  checked={selected.includes(val)}
+                  onCheckedChange={() => toggleValue(val)}
+                  id={`filter-${column.id}-${val}`}
+                />
+                <label
+                  htmlFor={`filter-${column.id}-${val}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {val}
+                </label>
+              </>
+            ) : null}
           </div>
         ))}
         {values.length === 0 && (

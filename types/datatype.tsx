@@ -1,9 +1,3 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
 export interface Product {
   id: string;
   name: string;
@@ -37,4 +31,15 @@ export interface Supplier {
   contactPerson: string; // ชื่อผู้ติดต่อ
   contactEmail: string; // อีเมลผู้ติดต่อ
   contactPhone: string; // เบอร์โทรผู้ติดต่อ
+}
+
+export interface User {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  role: string; // เช่น 'admin', 'user', 'supplier'
+  roleId: number;
+  supplierCode?: string; // optional, ถ้าเป็นผู้ใช้ที่เป็น supplier
 }

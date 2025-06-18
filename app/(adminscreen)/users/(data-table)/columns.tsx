@@ -1,7 +1,7 @@
 import { ColumnDef, RowExpanding } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PO_Status, Product, Variant } from "@/types/datatype"; // สมมุติ
+import { PO_Status, Product, User, Variant } from "@/types/datatype"; // สมมุติ
 import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
 
 import {
@@ -43,38 +43,31 @@ import { Badge } from "@/components/ui/badge";
 const dowloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
 export const getColumns = (
-  onDelete?: (id: string) => void,
+  onDelete?: (id: number) => void,
   isEdit?: boolean,
   setIsEdit?: (isEdit: boolean) => void,
-  editItem?: PO_Status | null,
-  setEditItem?: (item: PO_Status | null) => void,
+  editItem?: User | null,
+  setEditItem?: (item: User | null) => void,
   isDesktop?: boolean
-): ColumnDef<PO_Status>[] => [
+): ColumnDef<User>[] => [
   {
-    id: "PONo",
-    accessorKey: "PONo",
+    id: "Id",
+    accessorKey: "userId",
     header: ({ column }) => (
       <div className="flex items-center gap-2">
-        PONo
+        ID
         {/* <ColumnCheckboxFilter column={column} table={table} /> */}
       </div>
     ),
-    cell: ({ row }) => (
-      <a
-        href={`${dowloadUrl}pono=${row.original.PONo}&Company=POMatr`}
-        target="_blank"
-        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
-      >
-        {row.original.PONo}
-      </a>
-    ),
+    cell: ({ row }) => <span className="pl-1">{row.original.userId}</span>,
   },
   {
-    accessorKey: "Dowload",
+    id: "Fullname",
+    accessorFn: (row) => `${row.firstName} ${row.lastName}`,
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
       <div className="flex items-center gap-2">
-        Download
+        Fullname
         {/* <ColumnCheckboxFilter column={column} table={table} /> */}
       </div>
     ),
@@ -84,41 +77,72 @@ export const getColumns = (
     //   // ในกรณีที่ filterValue เป็น array
     //   return filterValue.includes(row.getValue(columnId));
     // },
-    cell: ({ row }) =>
-      row.original.Supreceive ? (
-        <Badge
-          variant="outline"
-          className={`text-muted-foreground px-1.5 ${
-            row.original.Supreceive
-              ? "bg-green-200 dark:bg-green-900"
-              : "bg-yellow-200 dark:bg-yellow-900"
-          }`}
-        >
-          {row.original.Supreceive ? (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          ) : (
-            <IconLoader />
-          )}
-          {row.original.Supreceive ? "Download" : " "}
-        </Badge>
-      ) : (
-        " "
-      ),
+    cell: ({ row }) => (
+      <span>
+        {row.original.firstName} {row.original.lastName}
+      </span>
+    ),
     // (optional) enableFacetedValues: true,
   },
   {
-    accessorKey: "downloaddate",
+    id: "Email",
+    accessorKey: "email",
     header: ({ column }) => (
       <div className="flex items-center gap-2">
-        Download Date
+        Email
         {/* <ColumnCheckboxFilter column={column} table={table} /> */}
       </div>
     ),
     cell: ({ row }) => {
-      const date = row.original.downloadDate;
+      return <span className="pl-1">{row.original.email}</span>;
+    },
+  },
+  {
+    id: "Role",
+    accessorKey: "role",
+    header: ({ column, table }) => (
+      <div className="flex items-center gap-2">
+        Role
+        <ColumnCheckboxFilter column={column} table={table} />
+      </div>
+    ),
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      // ในกรณีที่ filterValue เป็น array
+      return filterValue.includes(row.getValue(columnId));
+    },
+    cell: ({ row }) => {
+      return <Badge className="text-xs text-white">{row.original.role}</Badge>;
+    },
+  },
+  {
+    // id: "SupplierCode",
+    accessorKey: "supplierCode",
+    header: ({ column, table }) => {
+      // const uniqueValues = column.getFacetedUniqueValues()
+      //   ? Array.from(column.getFacetedUniqueValues().values())
+      //   : [];
+      // console.log("Unique Values:", column.getFacetedUniqueValues());
+      return (
+        <div className="flex items-center gap-2">
+          Supplier
+          <ColumnCheckboxFilter column={column} table={table} />
+        </div>
+      );
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      // ในกรณีที่ filterValue เป็น array
+      return filterValue.includes(row.getValue(columnId));
+    },
+    cell: ({ row }) => {
       return (
         <span className="pl-1">
-          {date ? new Date(date).toLocaleDateString() : "Not downloaded"}
+          {row.original.supplierCode ? (
+            row.original.supplierCode
+          ) : (
+            <span className="text-muted-foreground">No Supplier</span>
+          )}
         </span>
       );
     },
@@ -144,13 +168,23 @@ export const getColumns = (
               side="bottom"
               className="z-50 p-4 border-1 rounded-2xl bg-slate-50"
             >
-              <DropdownMenuItem className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer">
-                <a
-                  href={`${dowloadUrl}pono=${row.original.PONo}&Company=POMatr`}
-                  target="_blank"
-                >
-                  Dowload
-                </a>
+              <DropdownMenuItem
+                className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer"
+                onClick={
+                  () =>
+                    setEditItem?.(
+                      row.original
+                    ) /* เปิด Dialog/Drawer เพื่อแก้ไข */
+                }
+              >
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-red-600 hover:bg-red-50 hover:text-red-700 hover:cursor-pointer p-1 rounded-md"
+                onClick={() => onDelete?.(row.original.userId)}
+              >
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenuPortal>
