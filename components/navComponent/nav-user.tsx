@@ -55,7 +55,11 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                   {user ? user.name : "NO Name"}
                 </span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user ? user.email : "NO Email"}
+                  {user
+                    ? user.supplierId
+                      ? user.supplierId
+                      : "NO Supplier"
+                    : "No Data"}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -78,7 +82,11 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                     {user ? user.name : "NO Name"}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user ? user.email : "NO Email"}
+                    {user
+                      ? user.supplierId
+                        ? user.supplierId
+                        : "NO Supplier"
+                      : "No Data"}
                   </span>
                 </div>
               </div>

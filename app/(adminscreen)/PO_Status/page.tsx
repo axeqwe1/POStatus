@@ -56,7 +56,7 @@ export default function Page() {
     [filterByTab, masterData]
   );
   const handleRefreshData = async () => {
-    fetchPO(supplierId);
+    await fetchPO(supplierId);
   };
 
   useEffect(() => {

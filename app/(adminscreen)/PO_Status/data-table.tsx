@@ -40,9 +40,9 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
     setDatas((prev) => prev.filter((u) => u.PONo !== id));
   };
 
-  const handleEdit = (id: string) => {
+  const handleEdit = async (id: string) => {
     console.log(id);
-    SaveStatusDownload(id);
+    await SaveStatusDownload(id);
     onSuccess();
   };
 
