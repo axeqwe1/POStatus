@@ -1,6 +1,6 @@
 import { PO_Status, PoData } from "@/types/datatype";
 
-interface UserDTO {
+export interface UserDTO {
   id: string;
   name: string;
   email: string;
