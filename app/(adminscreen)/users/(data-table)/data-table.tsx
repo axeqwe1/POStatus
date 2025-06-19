@@ -76,6 +76,7 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
           columns={columns}
           collapse={false}
           setOpenModal={setOpenModal}
+          showAddBtn={true}
         />
         {/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
       </div>

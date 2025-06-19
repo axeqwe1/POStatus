@@ -47,7 +47,8 @@ interface CustomDataTableProps<TData, TSubData = TData> {
   subtableData?: TSubData[] | any[];
   findSubtableData?: (rowId: string) => void;
   showSubFooter?: boolean; // Optional prop to control footer visibility
-  setSubShowFooter?: (show: boolean) => void; // Optional prop to control footer visibility from parent
+  setSubShowFooter?: (show: boolean) => void; // Optional prop to control footer visibility from parent'
+  showAddBtn?: boolean;
 }
 
 export function CustomDataTable<TData, TSubData>({
@@ -60,6 +61,7 @@ export function CustomDataTable<TData, TSubData>({
   subtableData = [], // Default to empty array if not provided
   showSubFooter = true,
   openModal = false,
+  showAddBtn = false,
   setOpenModal = (isOpen: boolean) => {},
   findSubtableData = (rowId: string) => {},
 }: CustomDataTableProps<TData, TSubData>) {
@@ -111,14 +113,18 @@ export function CustomDataTable<TData, TSubData>({
         <ColumnFilter table={table} />
         <div className="flex flex-col-reverse md:flex-row sm:justify-center md:items-center gap-2">
           <CustomFilterDropdown table={table} />
-          <Button
-            onClick={() => {
-              setOpenModal(true);
-            }}
-            className="text-white hover:cursor-pointer"
-          >
-            Add Data
-          </Button>
+          {showAddBtn ? (
+            <Button
+              onClick={() => {
+                setOpenModal(true);
+              }}
+              className="text-white hover:cursor-pointer"
+            >
+              Add Data
+            </Button>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
       <div className="w-full overflow-x-auto">
