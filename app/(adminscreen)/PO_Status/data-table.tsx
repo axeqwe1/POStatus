@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CustomDataTable } from "@/components/CustomDataTable";
 import { getColumns } from "./columns";
 import { PO_Status, Product, Variant } from "@/types/datatype";
@@ -21,35 +21,47 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Drawer } from "vaul";
+import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
+import { TabsTrigger } from "@radix-ui/react-tabs";
+import { SaveStatusDownload } from "@/lib/api/po";
 
 interface DataTableProps {
   data: PO_Status[];
+  onSuccess: () => void;
 }
-export default function DataTable({ data }: DataTableProps) {
+export default function DataTable({ data, onSuccess }: DataTableProps) {
   const [datas, setDatas] = useState(data);
   const [isEdit, setIsEdit] = useState(false);
 
-  const [editItem, setEditItem] = useState<PO_Status | null>(null);
+  const [editItem, setEditItem] = useState<string>("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
   const handleDelete = (id: string) => {
     setDatas((prev) => prev.filter((u) => u.PONo !== id));
   };
-  const handleEdit = (id: boolean) => {
-    setIsEdit(id);
+
+  const handleEdit = (id: string) => {
+    console.log(id);
+    SaveStatusDownload(id);
+    onSuccess();
   };
+
+  useEffect(() => {
+    setDatas(data);
+  }, [data]);
 
   const columns = getColumns(
     handleDelete,
     isEdit,
     setIsEdit,
     editItem,
-    setEditItem,
+    handleEdit,
     isDesktop
   );
 
   return (
     <>
-      <div className="max-w-[1200px] mx-auto">
+      <div className="">
         <CustomDataTable<PO_Status, null>
           className="rounded-lg border "
           data={datas}

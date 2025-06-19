@@ -16,6 +16,13 @@ export interface Variant {
   imageUrl?: string; // URL รูปภาพ (optional)
 }
 
+export interface PoData {
+  poNo: string;
+  companyCode: string;
+  suppCode: string;
+  suppContact: string;
+  closePO: boolean;
+}
 export interface PO_Status {
   PONo: string;
   Supreceive: boolean;

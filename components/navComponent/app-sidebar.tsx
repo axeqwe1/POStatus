@@ -48,6 +48,7 @@ import {
   userDataSideBar,
   organizeDataSideBar,
 } from "@/data/sidebar-menu";
+import { useAuth } from "@/context/authContext";
 const data = {
   user: {
     name: "shadcn",
@@ -70,15 +71,10 @@ const data = {
       url: "/users",
       icon: IconUsers,
     },
-    {
-      title: "Supplier",
-      url: "/Supplier",
-      icon: IconBox,
-    },
     // {
-    //   title: "Shipments",
-    //   url: "/Shipments",
-    //   icon: TruckElectricIcon,
+    //   title: "Supplier",
+    //   url: "/Supplier",
+    //   icon: IconBox,
     // },
   ],
 };
@@ -87,6 +83,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // const masterdataSidebar = sidebarData.find(
   //   (item) => item.label.replace(/\s+/g, "").toLowerCase() === "masterdata"
   // );
+  const [fillterNav, setFilterNav] = React.useState<any[]>([]);
+  const { user } = useAuth();
+  console.log(user);
+
+  React.useEffect(() => {
+    const filteredNavMain = data.navMain.filter((item) => {
+      // ถ้าไม่ใช่ Admin → ซ่อนเมนู "User"
+      if (user?.role !== "Admin" && item.title === "User") {
+        return false;
+      }
+      return true;
+    });
+    setFilterNav(filteredNavMain);
+  }, [user]);
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -112,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="">
-        <NavMain items={data.navMain} />
+        <NavMain items={fillterNav} />
         {/* <NavSidebar items={userDataSideBar} LabelName={"User"} /> */}
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSidebar items={masterDataSidebar} LabelName={"Master Data"} />
@@ -123,7 +133,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavSecondary items={data.navSecondary} className="" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

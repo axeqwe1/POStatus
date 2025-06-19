@@ -74,8 +74,6 @@ export function UserForm({
       dataPayload.Password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
     }
 
-    console.log(dataPayload);
-
     let errormessage = "";
     const result = await toast.promise(
       new Promise((resolve, reject) => {
@@ -128,7 +126,7 @@ export function UserForm({
     );
 
     // จะไม่ถึงตรงนี้ เพราะจะ throw error
-    console.log(result);
+    // console.log(result);
   };
 
   useEffect(() => {

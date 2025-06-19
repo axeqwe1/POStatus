@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Target } from "lucide-react";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -46,8 +47,8 @@ export const getColumns = (
   onDelete?: (id: string) => void,
   isEdit?: boolean,
   setIsEdit?: (isEdit: boolean) => void,
-  editItem?: PO_Status | null,
-  setEditItem?: (item: PO_Status | null) => void,
+  editItem?: string,
+  setEditItem?: (item: string) => void,
   isDesktop?: boolean
 ): ColumnDef<PO_Status>[] => [
   {
@@ -62,6 +63,15 @@ export const getColumns = (
     cell: ({ row }) => (
       <a
         href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
+        onMouseDown={() => {
+          if (!row.original.Supreceive) {
+            setEditItem?.(row.original.PONo);
+          }
+          window.open(
+            `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
+            "_blank"
+          );
+        }}
         target="_blank"
         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
       >

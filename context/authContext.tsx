@@ -1,11 +1,13 @@
 "use client";
 
+import { UserDTO } from "@/data/dataDTO";
 import { me, signIn, signOut } from "@/lib/api/auth";
 import { getSuppliers } from "@/lib/api/supplier";
 import { apiService } from "@/lib/axios";
 import { AxiosResponse } from "axios";
 import React, { ReactNode, useEffect } from "react";
 import { useState, createContext } from "react";
+import { checkDomainOfScale } from "recharts/types/util/ChartUtils";
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -80,11 +82,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: res.data.email,
           supplierId: res.data.supplierId,
           username: res.data.username,
-          role: res.data.role, // สมมติว่า API ส่ง role มาด้วย
+          role: res.data.roleName, // สมมติว่า API ส่ง role มาด้วย
         };
-        setIsAuthenticated(true); // Set authenticated state
-        setUser(data); // Set user data
         localStorage.setItem("user", JSON.stringify(data)); // Save user data to localStorage
+
+        setIsAuthenticated(true); // Set authenticated state
+        setUser(data);
         // Handle successful login, e.g., redirect to dashboard
         console.log("Login successful:", res.data);
       }
