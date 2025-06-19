@@ -1,7 +1,6 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
 import DataTable from "./(data-table)/data-table";
-import { ListProduct, tShirt, ListPo } from "@/data/dummyData"; // หรือ fetch API
 import { getUserAll } from "@/lib/api/user";
 import { User } from "@/types/datatype";
 import LoadingCircleSpinner from "@/components/ui/LoadingCircleSpinner";
