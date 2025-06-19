@@ -27,6 +27,7 @@ export interface PO_Status {
   PONo: string;
   Supreceive: boolean;
   downloadDate: string;
+  approveDate: Date;
 }
 
 export interface Supplier {

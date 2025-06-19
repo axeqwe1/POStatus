@@ -117,6 +117,28 @@ export const getColumns = (
     // (optional) enableFacetedValues: true,
   },
   {
+    accessorKey: "approvedate",
+    header: ({ column }) => (
+      <div className="flex items-center gap-2">
+        Approve Date
+        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
+      </div>
+    ),
+    cell: ({ row }) => {
+      const date = row.original.approveDate;
+      return (
+        <span className="pl-1">
+          {new Date(row.original.approveDate).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}
+          {/* {date ? new Date(date).toLocaleDateString() : "Not downloaded"} */}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "downloaddate",
     header: ({ column }) => (
       <div className="flex items-center gap-2">
