@@ -23,6 +23,7 @@ import {
 import { Drawer } from "vaul";
 import { json } from "stream/consumers";
 import { UserForm } from "./edit-dialog";
+import { deleteUser } from "@/lib/api/user";
 
 interface DataTableProps {
   data: User[];
@@ -31,18 +32,24 @@ interface DataTableProps {
 export default function DataTable({ data, onSuccess }: DataTableProps) {
   const [datas, setDatas] = useState<User[]>([]);
   const [isEdit, setIsEdit] = useState(false);
-
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [editItem, setEditItem] = useState<User | null>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const handleDelete = (id: number) => {
-    setDatas((prev) => prev.filter((u) => u.userId !== id));
+  const RefreshonSuccess = () => {
+    onSuccess?.();
   };
-  const handleEdit = (id: boolean) => {
-    setIsEdit(id);
+  const handleDelete = async (id: number) => {
+    const res = await deleteUser(id);
+    if (res.status === 200) {
+      RefreshonSuccess();
+    }
   };
-  useEffect(() => {
-    setDatas(data);
-  }, [data]);
+
+  const setOpenModal = (isOpen: boolean) => {
+    console.log(isOpen);
+    setIsOpenModal(isOpen);
+  };
+
   const columns = getColumns(
     handleDelete,
     isEdit,
@@ -51,9 +58,15 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
     setEditItem,
     isDesktop
   );
-  const RefreshonSuccess = () => {
-    onSuccess?.();
-  };
+
+  useEffect(() => {
+    if (!isEdit) {
+      setEditItem(null);
+    }
+  }, [isEdit]);
+  useEffect(() => {
+    setDatas(data);
+  }, [data]);
   return (
     <>
       <div className="max-w-[1200px] mx-auto">
@@ -62,49 +75,64 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
           data={datas}
           columns={columns}
           collapse={false}
+          setOpenModal={setOpenModal}
         />
         {/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
       </div>
       {isDesktop ? (
         <Dialog
           // shorthand !! is convert to boolean in condition: true if has data, false if not has data
-          open={!!editItem}
-          onOpenChange={(open) =>
-            !open && setEditItem ? setEditItem(null) : {}
-          }
+          open={isOpenModal || isEdit}
+          onOpenChange={(open) => {
+            // !open && setEditItem ? setEditItem(null) : {};
+            // !open ? setOpenModal(false) : {};
+            if (!open) {
+              setOpenModal(false);
+              setIsEdit(false);
+            }
+          }}
         >
           <DialogContent className="z-50">
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>{!!isEdit ? "Edit User" : "Add User"}</DialogTitle>
               <DialogDescription>Edit your user below.</DialogDescription>
             </DialogHeader>
             <UserForm
               onSuccess={() => {
                 setEditItem(null);
+                setIsOpenModal(false);
+                setIsEdit(false);
                 console.log("trigger userform");
                 RefreshonSuccess();
               }} // ✅ เพิ่มตรงนี้
-              user={editItem ? editItem : undefined}
+              data={editItem ? editItem : undefined}
+              isEdit={isEdit}
             />
           </DialogContent>
         </Dialog>
       ) : (
         <Drawer.Root
-          open={!!editItem}
-          onOpenChange={(open) =>
-            !open && setEditItem ? setEditItem(null) : {}
-          }
+          open={isOpenModal || isEdit}
+          onOpenChange={(open) => {
+            if (!open) {
+              setOpenModal(false);
+              setIsEdit(false);
+            }
+          }}
         >
           <DrawerContent>
             <DrawerHeader>
-              <DrawerTitle>Edit User</DrawerTitle>
+              <DrawerTitle>{isEdit ? "Edit User" : "Add User"}</DrawerTitle>
               <DrawerDescription>Edit your user below.</DrawerDescription>
             </DrawerHeader>
-            {editItem ? (
+            {isOpenModal || isEdit ? (
               <UserForm
-                user={editItem ? editItem : undefined}
+                data={editItem ? editItem : undefined}
+                isEdit={isEdit}
                 onSuccess={() => {
                   setEditItem(null);
+                  setIsOpenModal(false);
+                  setIsEdit(false);
                   console.log("trigger userform");
                   RefreshonSuccess();
                 }} // ✅ เพิ่มตรงนี้

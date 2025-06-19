@@ -37,27 +37,17 @@ import { toast } from "sonner";
 import supplier, { getSuppliers } from "@/lib/api/supplier";
 import { useEffect, useState } from "react";
 import { getRoleAll } from "@/lib/api/role";
-import { updateUser } from "@/lib/api/user";
+import { changePassword, registerUser, updateUser } from "@/lib/api/user";
 interface UserFormProps extends React.ComponentProps<"form"> {
-  user?: User;
+  data?: User;
   onSuccess?: () => void; // ✅ เพิ่ม
+  isEdit?: boolean;
 }
-
-// await toast.promise(
-//   axios.post("/api/save", data).then((res) => res.data),
-//   {
-//     loading: "Saving...",
-//     success: (response) => `Saved: ${response.message}`,
-//     error: (err) => {
-//       const message = err.response?.data?.message || err.message;
-//       return `Error: ${message}`;
-//     },
-//   }
-// );
 
 export function UserForm({
   className,
-  user,
+  isEdit,
+  data,
   onSuccess, // ✅ รับ callback
 }: UserFormProps) {
   const [valueSupplier, setValueSupplier] = useState("");
@@ -71,7 +61,7 @@ export function UserForm({
     console.log("Form submitted");
     const formData = new FormData(formRef.current!);
     const password = formData.get("password");
-    const updatePayload: any = {
+    const dataPayload: any = {
       Username: formData.get("username"),
       FirstName: formData.get("firstName"),
       LastName: formData.get("lastName"),
@@ -81,29 +71,49 @@ export function UserForm({
     };
 
     if (password) {
-      updatePayload.Password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
+      dataPayload.Password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
     }
 
-    console.log(updatePayload);
+    console.log(dataPayload);
 
     let errormessage = "";
     const result = await toast.promise(
       new Promise((resolve, reject) => {
-        if (user != null) {
-          const updateRequest = { updatePayload };
-          updateUser(user?.userId, updatePayload)
-            .then((res) => {
-              console.log(res);
-              onSuccess?.();
-              resolve("Update Success");
-            })
-            .catch((error) => {
-              onSuccess?.();
-              reject(new Error(error));
-            });
+        if (data != null) {
+          const doUpdate = () =>
+            updateUser(data?.userId, dataPayload)
+              .then((res) => {
+                onSuccess?.();
+                resolve("Update Success");
+              })
+              .catch((error) => {
+                onSuccess?.();
+                reject(new Error(error.response.data));
+              });
+          if (dataPayload.Password != undefined) {
+            changePassword(data?.userId, dataPayload.Password)
+              .then(doUpdate)
+              .catch((error) => {
+                reject(new Error(error.response.data));
+              });
+          } else {
+            doUpdate();
+          }
         } else {
-          onSuccess?.();
-          reject(new Error("Not Found UserId"));
+          if (isEdit) {
+            onSuccess?.();
+            reject(new Error("Not Found UserId"));
+          } else {
+            registerUser(dataPayload)
+              .then((res) => {
+                onSuccess?.();
+                resolve("Register Success");
+              })
+              .catch((error) => {
+                onSuccess?.();
+                reject(new Error(error.response.data));
+              });
+          }
         }
       }),
       {
@@ -132,11 +142,11 @@ export function UserForm({
         setSuppliers(
           res.data.data.map((supplier: any) => supplier.supplierCode)
         ); // Assuming the API returns an array of suppliers with a 'name' property
-        if (user?.supplierCode) {
+        if (data?.supplierCode) {
           console.log(supplierData);
           setValueSupplier(
             supplierData.find(
-              (supplier: any) => supplier === user.supplierCode
+              (supplier: any) => supplier === data.supplierCode
             ) || ""
           );
         }
@@ -155,9 +165,9 @@ export function UserForm({
         const res = await getRoleAll();
         // console.log(res.data.map((role: any) => role.name));
         setRoles(res.data.map((role: any) => role.roleName)); // Assuming the API returns an array of roles with a 'name' property
-        if (user?.roleId) {
+        if (data?.roleId) {
           setValueRole(
-            res.data.find((role: any) => role.roleId === user.roleId)
+            res.data.find((role: any) => role.roleId === data.roleId)
               ?.roleName || ""
           );
         }
@@ -172,7 +182,8 @@ export function UserForm({
     };
     fetchSupplier();
     fetchRole();
-  }, [user]);
+  }, [data]);
+
   return (
     <>
       <form
@@ -190,7 +201,8 @@ export function UserForm({
                 id="firstName"
                 name="firstName"
                 type="text"
-                defaultValue={user?.firstName ?? 0}
+                placeholder="Firstname"
+                defaultValue={data?.firstName ?? ""}
               />
             </div>
             <div>
@@ -201,7 +213,8 @@ export function UserForm({
                 id="lastName"
                 name="lastName"
                 type="text"
-                defaultValue={user?.lastName ?? 0}
+                placeholder="Lastname"
+                defaultValue={data?.lastName ?? ""}
               />
             </div>
           </div>
@@ -215,7 +228,8 @@ export function UserForm({
               id="email"
               name="email"
               type="text"
-              defaultValue={user?.email ?? ""}
+              placeholder="Email"
+              defaultValue={data?.email ?? ""}
             />
           </div>
         </div>
@@ -244,7 +258,7 @@ export function UserForm({
                 options={suppliers}
                 value={valueSupplier}
                 onChange={setValueSupplier}
-                placeholder="Select Supplier"
+                placeholder="Select Supplier (Optional)"
                 className="max-w-sm"
                 inputClassName="p-3"
                 dropdownClassName=" border-blue-400"
@@ -261,7 +275,8 @@ export function UserForm({
             id="username"
             name="username"
             type="text"
-            defaultValue={user?.username ?? ""}
+            placeholder="Enter Username"
+            defaultValue={data?.username ?? ""}
           />
         </div>
         <div className="grid gap-1">
@@ -272,7 +287,9 @@ export function UserForm({
             id="password"
             name="password"
             type="password"
-            placeholder="Leave blank to keep current password"
+            placeholder={`${
+              isEdit ? "Leave blank to keep current password" : "Enter Password"
+            }`}
           />
         </div>
       </form>
@@ -284,11 +301,14 @@ export function UserForm({
         <AlertDialogContent className="sm:max-w-[425px]">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Are you absolutely sure to update?
+              {isEdit
+                ? "Are you absolutely sure to update?"
+                : "Are you absolutely sure to save?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently update your
-              product and update your data from our servers.
+              {isEdit
+                ? "This action cannot be undone. This will permanently update youruser and update your data from our servers."
+                : "This action is add new uset to server"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

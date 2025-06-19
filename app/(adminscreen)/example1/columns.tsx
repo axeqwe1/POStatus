@@ -6,7 +6,7 @@ import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
 import { ArrowUpDown } from "lucide-react";
 
 export const getColumns = (
-  onDelete?: (id: string) => void
+  onDelete?: (id: number) => void
 ): ColumnDef<User>[] => [
   {
     id: "id",
@@ -22,7 +22,7 @@ export const getColumns = (
         </Button>
       );
     },
-    cell: ({ row }) => <span>{row.original.id}</span>,
+    cell: ({ row }) => <span>{row.original.userId}</span>,
   },
   {
     id: "name",
@@ -35,7 +35,7 @@ export const getColumns = (
       </div>
     ),
 
-    cell: ({ row }) => <span>{row.original.name}</span>,
+    cell: ({ row }) => <span>{row.original.firstName}</span>,
     // (optional) enableFacetedValues: true,
   },
   {
@@ -52,7 +52,7 @@ export const getColumns = (
         <Button
           size="sm"
           variant="destructive"
-          onClick={() => onDelete(row.original.id)}
+          onClick={() => onDelete(row.original.userId)}
         >
           Delete
         </Button>

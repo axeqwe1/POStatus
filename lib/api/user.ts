@@ -10,12 +10,45 @@ export const getUserAll = async () => {
     throw ex; // Re-throw the error for further handling if needed
   }
 };
-
+export const registerUser = async (data: any) => {
+  try {
+    const res = await apiService.post("/api/User/Register", data);
+    console.log(res);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 export const updateUser = async (userId: number, data: any) => {
   try {
     const res = await apiService.put("/api/User/UpdateUser/" + userId, data);
     console.log(res);
     return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const changePassword = async (userId: number, NewPassword: string) => {
+  try {
+    const res = await apiService.put(`/api/User/${userId}/change-password`, {
+      NewPassword,
+    });
+    console.log(res);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (userId: number) => {
+  try {
+    const res = await apiService._delete(`/api/User/Delete/${userId}`);
+    console.log(res);
+    return res;
   } catch (error) {
     console.error(error);
     throw error;

@@ -39,6 +39,19 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { ArrowUpDown } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const dowloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -54,10 +67,14 @@ export const getColumns = (
     id: "Id",
     accessorKey: "userId",
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
+      <Button
+        className="hover:cursor-pointer"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
         ID
-        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-      </div>
+        <ArrowUpDown />
+      </Button>
     ),
     cell: ({ row }) => <span className="pl-1">{row.original.userId}</span>,
   },
@@ -112,7 +129,15 @@ export const getColumns = (
       return filterValue.includes(row.getValue(columnId));
     },
     cell: ({ row }) => {
-      return <Badge className="text-xs text-white">{row.original.role}</Badge>;
+      return (
+        <Badge
+          className={`text-xs text-white w-15 ${
+            row.original.role == "Admin" ? "bg-secondary" : "bg-primary"
+          }`}
+        >
+          {row.original.role}
+        </Badge>
+      );
     },
   },
   {
@@ -170,22 +195,53 @@ export const getColumns = (
             >
               <DropdownMenuItem
                 className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer"
-                onClick={
-                  () =>
-                    setEditItem?.(
-                      row.original
-                    ) /* เปิด Dialog/Drawer เพื่อแก้ไข */
-                }
+                onClick={() => {
+                  setIsEdit?.(true);
+                  setEditItem?.(
+                    row.original
+                  ); /* เปิด Dialog/Drawer เพื่อแก้ไข */
+                }}
               >
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600 hover:bg-red-50 hover:text-red-700 hover:cursor-pointer p-1 rounded-md"
-                onClick={() => onDelete?.(row.original.userId)}
-              >
-                Delete
-              </DropdownMenuItem>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-red-600 hover:bg-red-50 hover:text-red-700 p-1 rounded-md hover:cursor-pointer"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogPortal>
+                  <AlertDialogContent className="sm:max-w-[425px]">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure to delete?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        Delete yourdata and delete your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="hover:cursor-pointer">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction asChild>
+                        <Button
+                          type="button"
+                          className="hover:cursor-pointer text-white"
+                          onClick={() => onDelete?.(row.original.userId)}
+                        >
+                          Submit
+                        </Button>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialogPortal>
+              </AlertDialog>
             </DropdownMenuContent>
           </DropdownMenuPortal>
         </DropdownMenu>

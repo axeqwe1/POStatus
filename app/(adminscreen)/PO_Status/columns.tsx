@@ -40,7 +40,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
-const dowloadUrl = process.env.NEXT_PUBLIC_PO_URL;
+const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
 export const getColumns = (
   onDelete?: (id: string) => void,
@@ -61,7 +61,7 @@ export const getColumns = (
     ),
     cell: ({ row }) => (
       <a
-        href={`${dowloadUrl}pono=${row.original.PONo}&Company=POMatr`}
+        href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
         target="_blank"
         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
       >
@@ -144,13 +144,17 @@ export const getColumns = (
               side="bottom"
               className="z-50 p-4 border-1 rounded-2xl bg-slate-50"
             >
-              <DropdownMenuItem className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer">
-                <a
-                  href={`${dowloadUrl}pono=${row.original.PONo}&Company=POMatr`}
-                  target="_blank"
-                >
-                  Dowload
-                </a>
+              <DropdownMenuItem
+                onClick={() => {
+                  window.open(
+                    `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+                className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer"
+              >
+                Dowload
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenuPortal>

@@ -33,6 +33,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { Input } from "./ui/input";
 import { ColumnFilter } from "./ColumnFilter";
+import { Button } from "./ui/button";
 
 interface CustomDataTableProps<TData, TSubData = TData> {
   data: TData[];
@@ -41,6 +42,8 @@ interface CustomDataTableProps<TData, TSubData = TData> {
   initialPageSize?: number;
   className?: string;
   collapse?: boolean;
+  openModal?: boolean;
+  setOpenModal?: (isOpen: boolean) => void;
   subtableData?: TSubData[] | any[];
   findSubtableData?: (rowId: string) => void;
   showSubFooter?: boolean; // Optional prop to control footer visibility
@@ -56,6 +59,8 @@ export function CustomDataTable<TData, TSubData>({
   collapse = true,
   subtableData = [], // Default to empty array if not provided
   showSubFooter = true,
+  openModal = false,
+  setOpenModal = (isOpen: boolean) => {},
   findSubtableData = (rowId: string) => {},
 }: CustomDataTableProps<TData, TSubData>) {
   const [openRow, setOpenRow] = React.useState<string | null>(null);
@@ -104,7 +109,17 @@ export function CustomDataTable<TData, TSubData>({
     <div className={className}>
       <div className="flex flex-row justify-between my-3 px-3">
         <ColumnFilter table={table} />
-        <CustomFilterDropdown table={table} />
+        <div className="flex flex-col-reverse md:flex-row sm:justify-center md:items-center gap-2">
+          <CustomFilterDropdown table={table} />
+          <Button
+            onClick={() => {
+              setOpenModal(true);
+            }}
+            className="text-white hover:cursor-pointer"
+          >
+            Add Data
+          </Button>
+        </div>
       </div>
       <div className="w-full overflow-x-auto">
         <Table className="min-w-[700px]">
