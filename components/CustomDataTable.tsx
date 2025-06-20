@@ -127,6 +127,15 @@ export function CustomDataTable<TData, TSubData>({
           )}
         </div>
       </div>
+      <div className="flex flex-row justify-between my-3 px-3">
+        {table.getAllColumns().map((column) =>
+          column.columnDef.meta?.filterElement ? (
+            <div key={column.id}>
+              <column.columnDef.meta.filterElement column={column} />
+            </div>
+          ) : null
+        )}
+      </div>
       <div className="w-full overflow-x-auto">
         <Table className="min-w-[700px]">
           <TableHeader className="bg-muted">

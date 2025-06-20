@@ -48,6 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             name: res.data.firstname + " " + res.data.lastname,
             email: res.data.email,
             supplierId: res.data.supplierId,
+            supplierName: res.data.supplierName,
             username: res.data.username,
             role: res.data.roleName, // สมมติว่า API ส่ง role มาด้วย
           };

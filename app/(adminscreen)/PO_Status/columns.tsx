@@ -39,7 +39,8 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Target } from "lucide-react";
+import { ArrowUpDown, Target } from "lucide-react";
+import { DateRangeFilter } from "@/components/CustomDateFilter";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -117,12 +118,16 @@ export const getColumns = (
     // (optional) enableFacetedValues: true,
   },
   {
-    accessorKey: "approvedate",
+    accessorKey: "approveDate",
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
+      <Button
+        className="hover:cursor-pointer !p-0"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
         Approve Date
-        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-      </div>
+        <ArrowUpDown />
+      </Button>
     ),
     cell: ({ row }) => {
       const date = row.original.approveDate;
@@ -137,14 +142,30 @@ export const getColumns = (
         </span>
       );
     },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue?.from) return true;
+
+      const rowDate = new Date(row.getValue(columnId));
+      const from = filterValue.from;
+      const to = filterValue.to ?? from; // กรณีเลือกวันเดียว
+
+      return rowDate >= from && rowDate <= to;
+    },
+    meta: {
+      filterElement: DateRangeFilter, // custom meta key สำหรับ filter
+    },
   },
   {
-    accessorKey: "downloaddate",
+    accessorKey: "downloadDate",
     header: ({ column }) => (
-      <div className="flex items-center gap-2">
+      <Button
+        className="hover:cursor-pointer !p-0"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
         Download Date
-        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-      </div>
+        <ArrowUpDown />
+      </Button>
     ),
     cell: ({ row }) => {
       const date = row.original.downloadDate;

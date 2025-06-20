@@ -86,7 +86,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [fillterNav, setFilterNav] = React.useState<any[]>([]);
   const { user } = useAuth();
   console.log(user);
-
   React.useEffect(() => {
     const filteredNavMain = data.navMain.filter((item) => {
       // ถ้าไม่ใช่ Admin → ซ่อนเมนู "User"

@@ -68,7 +68,7 @@ export default function Page() {
       <Tabs
         onValueChange={handleChangeTab}
         defaultValue="notdownload"
-        className="w-[400px]"
+        className="w-[400px] mb-1"
       >
         <TabsList>
           <TabsTrigger value="notdownload">

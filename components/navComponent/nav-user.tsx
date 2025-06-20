@@ -56,8 +56,8 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                 </span>
                 <span className="text-muted-foreground truncate text-xs">
                   {user
-                    ? user.supplierId
-                      ? user.supplierId
+                    ? user.supplierName
+                      ? user.supplierName
                       : "NO Supplier"
                     : "No Data"}
                 </span>
@@ -83,8 +83,8 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user
-                      ? user.supplierId
-                        ? user.supplierId
+                      ? user.supplierName
+                        ? user.supplierName
                         : "NO Supplier"
                       : "No Data"}
                   </span>
