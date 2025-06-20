@@ -30,8 +30,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NDS Coporate",
-  description: "NDS Coporate B2B",
+  title: "PO Status Tracking",
+  description: "PO Status Tracking",
 };
 
 export default function RootLayout({
