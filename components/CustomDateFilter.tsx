@@ -32,7 +32,7 @@ export function DateRangeFilter({ column }: { column: any }) {
                 dateRange?.to ?? dateRange.from,
                 "dd/MM/yyyy"
               )}`
-            : "เลือกช่วงวันที่"}
+            : "Chose Date Range"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
