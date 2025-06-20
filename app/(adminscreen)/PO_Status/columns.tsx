@@ -161,7 +161,7 @@ export const getColumns = (
       <Button
         className="hover:cursor-pointer !p-0"
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
       >
         Download Date
         <ArrowUpDown />
