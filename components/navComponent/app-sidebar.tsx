@@ -85,7 +85,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // );
   const [fillterNav, setFilterNav] = React.useState<any[]>([]);
   const { user } = useAuth();
-  console.log(user);
+  const isProd = process.env.NODE_ENV === "production";
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   React.useEffect(() => {
     const filteredNavMain = data.navMain.filter((item) => {
       // ถ้าไม่ใช่ Admin → ซ่อนเมนู "User"
@@ -107,7 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <img
-                  src="/PO_Logo.png"
+                  src={`${basePath}/PO_Logo.png`}
                   alt="Image"
                   className="dark:brightness-[0.2] dark:grayscale h-[60px]"
                 />

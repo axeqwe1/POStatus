@@ -27,7 +27,7 @@ export default function Page() {
         approveDate: item.poInfo?.items[0].approveDate ?? "",
       }));
       setMasterData(list);
-      console.log(list);
+
       const notDownloaded = list.filter((item) => !item.Supreceive);
       const downloaded = list.filter((item) => item.Supreceive);
 

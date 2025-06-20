@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const res = await me(); // 🔁 เรียก API /auth/me
         if (res.status === 200) {
-          console.log("User data:", res);
+          // console.log("User data:", res);
           const data: UserDTO = {
             id: res.data.userId,
             name: res.data.firstname + " " + res.data.lastname,
@@ -82,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           name: res.data.firstname + " " + res.data.lastname,
           email: res.data.email,
           supplierId: res.data.supplierId,
+          supplierName: res.data.supplierName,
           username: res.data.username,
           role: res.data.roleName, // สมมติว่า API ส่ง role มาด้วย
         };

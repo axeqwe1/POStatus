@@ -171,7 +171,13 @@ export const getColumns = (
       const date = row.original.downloadDate;
       return (
         <span className="pl-1">
-          {date ? new Date(date).toLocaleDateString() : "Not downloaded"}
+          {date
+            ? new Date(date).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })
+            : "Not downloaded"}
         </span>
       );
     },
@@ -198,11 +204,13 @@ export const getColumns = (
               className="z-50 p-4 border-1 rounded-2xl bg-slate-50"
             >
               <DropdownMenuItem
-                onClick={() => {
+                onMouseDown={() => {
+                  if (!row.original.Supreceive) {
+                    setEditItem?.(row.original.PONo);
+                  }
                   window.open(
                     `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
-                    "_blank",
-                    "noopener,noreferrer"
+                    "_blank"
                   );
                 }}
                 className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer"

@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function NavMain({
   items,
@@ -24,7 +25,15 @@ export function NavMain({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [path, setPath] = useState<string>("");
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
+  useEffect(() => {
+    const cleanedPath = pathname.replace(new RegExp(`^${basePath}`), "");
+    setPath(cleanedPath);
+    console.log(path);
+    console.log(items);
+  }, [pathname]);
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
