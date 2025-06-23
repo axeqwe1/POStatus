@@ -89,9 +89,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           role: res.data.roleName, // สมมติว่า API ส่ง role มาด้วย
         };
         localStorage.setItem("user", JSON.stringify(data)); // Save user data to localStorage
-
-        setIsAuthenticated(true); // Set authenticated state
         setUser(data);
+        setIsAuthenticated(true); // Set authenticated state
+
         // Handle successful login, e.g., redirect to dashboard
         console.log("Login successful:", res.data);
       }
