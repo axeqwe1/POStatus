@@ -15,7 +15,7 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !isLoading && pathname !== "/login") {
       console.log("Trigger ");
       router.push("/login");
     }
@@ -27,6 +27,7 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
     const user = JSON.parse(userData);
     setUser(user);
   }, []);
+
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">

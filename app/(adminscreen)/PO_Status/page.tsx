@@ -12,13 +12,18 @@ export default function Page() {
   const [countNotDownload, setCountNotDownload] = useState(0);
   const [countDownload, setCountDownload] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const userData = localStorage.getItem("user");
-  if (!userData) return;
-  const { supplierId } = JSON.parse(userData);
+  const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      console.log("store", storedUser);
+      setUserData(JSON.parse(storedUser));
+    }
+  }, []);
 
-  const fetchPO = async (suppCode: string) => {
+  const fetchPO = useCallback(async (supplierId: string) => {
     setIsLoading(true);
-    const res = await GetPO(suppCode);
+    const res = await GetPO(supplierId);
     if (res.status === 200) {
       const list: PO_Status[] = res.data.map((item: any) => ({
         PONo: item.poInfo.poNo,
@@ -35,9 +40,14 @@ export default function Page() {
       setCountDownload(downloaded.length);
 
       setPoData(notDownloaded); // default view
-      setIsLoading(false);
     }
-  };
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    console.log(userData);
+    if (userData != null) fetchPO(userData.supplierId);
+  }, [userData]);
   const filterByTab = useCallback((value: string, data: PO_Status[]) => {
     if (value === "notdownload") {
       return data.filter((item) => !item.Supreceive);
@@ -55,13 +65,16 @@ export default function Page() {
     },
     [filterByTab, masterData]
   );
+
   const handleRefreshData = async () => {
-    await fetchPO(supplierId);
+    if (userData?.supplierId) {
+      await fetchPO(userData.supplierId);
+    }
   };
 
-  useEffect(() => {
-    fetchPO(supplierId);
-  }, []);
+  // useEffect(() => {
+  //   fetchPO(userData.supplierId);
+  // }, [userData]);
 
   return (
     <div className="max-w-[1200px] mx-auto w-full">
