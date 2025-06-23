@@ -15,10 +15,12 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
+      console.log("Trigger ");
       router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
+
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (!userData) return;

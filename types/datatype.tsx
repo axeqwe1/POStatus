@@ -23,6 +23,7 @@ export interface PoData {
   suppContact: string;
   closePO: boolean;
 }
+
 export interface PO_Status {
   PONo: string;
   Supreceive: boolean;

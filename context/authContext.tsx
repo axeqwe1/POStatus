@@ -35,12 +35,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const fetchMe = async () => {
       try {
         if (!document.cookie.includes("auth_status")) {
+          console.log("not auth");
           setUser(null); // ถ้าไม่มี refreshToken ใน cookie ให้ user เป็น null
           setIsAuthenticated(false); // และสถานะการล็อกอินเป็น false
           return;
         }
 
         const res = await me(); // 🔁 เรียก API /auth/me
+        console.log(res);
         if (res.status === 200) {
           // console.log("User data:", res);
           const data: UserDTO = {
