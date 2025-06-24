@@ -11,6 +11,7 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import { Button } from "./ui/button";
+import { useEffect } from "react";
 
 export default function CustomFilterDropdown({ table }: any) {
   return (

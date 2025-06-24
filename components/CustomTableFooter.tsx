@@ -63,7 +63,7 @@ export default function CustomTableFooter<TData>({
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <Button
             variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
+            className="hidden h-8 w-8 p-0 lg:flex hover:cursor-pointer"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
@@ -72,7 +72,7 @@ export default function CustomTableFooter<TData>({
           </Button>
           <Button
             variant="outline"
-            className="size-8"
+            className="size-8 hover:cursor-pointer"
             size="icon"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
@@ -82,7 +82,7 @@ export default function CustomTableFooter<TData>({
           </Button>
           <Button
             variant="outline"
-            className="size-8"
+            className="size-8 hover:cursor-pointer"
             size="icon"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
@@ -92,7 +92,7 @@ export default function CustomTableFooter<TData>({
           </Button>
           <Button
             variant="outline"
-            className="hidden size-8 lg:flex"
+            className="hidden size-8 lg:flex hover:cursor-pointer"
             size="icon"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}

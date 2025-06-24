@@ -9,8 +9,10 @@ import { SkeletonTable } from "@/components/SkeletonTable";
 export default function Page() {
   const [masterData, setMasterData] = useState<PO_Status[]>([]);
   const [poData, setPoData] = useState<PO_Status[]>([]);
-  const [countNotDownload, setCountNotDownload] = useState(0);
-  const [countDownload, setCountDownload] = useState(0);
+  const [countPending, setCountPending] = useState(0);
+  const [countConfirm, setCountConfirm] = useState(0);
+  const [countCancel, setCountCancel] = useState(0);
+  const [countAll, setCountAll] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
   useEffect(() => {
@@ -25,20 +27,22 @@ export default function Page() {
     setIsLoading(true);
     const res = await GetPO(supplierId);
     if (res.status === 200) {
+      console.log(res.data);
       const list: PO_Status[] = res.data.map((item: any) => ({
         PONo: item.poInfo.poNo,
         Supreceive: item.receiveInfo?.suppRcvPO ?? false,
-        downloadDate: item.receiveInfo?.suppRcvDate ?? "",
-        approveDate: item.poInfo?.items[0].approveDate ?? "",
+        confirmDate: item.receiveInfo?.suppRcvDate ?? "",
+        sendDate: item.poInfo?.approveDate ?? "",
       }));
       setMasterData(list);
 
       const notDownloaded = list.filter((item) => !item.Supreceive);
       const downloaded = list.filter((item) => item.Supreceive);
 
-      setCountNotDownload(notDownloaded.length);
-      setCountDownload(downloaded.length);
-
+      setCountPending(notDownloaded.length);
+      setCountConfirm(downloaded.length);
+      setCountAll(list.length);
+      setCountCancel(0);
       setPoData(notDownloaded); // default view
     }
     setIsLoading(false);
@@ -49,10 +53,10 @@ export default function Page() {
     if (userData != null) fetchPO(userData.supplierId);
   }, [userData]);
   const filterByTab = useCallback((value: string, data: PO_Status[]) => {
-    if (value === "notdownload") {
+    if (value === "pending") {
       return data.filter((item) => !item.Supreceive);
     }
-    if (value === "download") {
+    if (value === "confirm") {
       return data.filter((item) => item.Supreceive);
     }
     return data;
@@ -80,15 +84,21 @@ export default function Page() {
     <div className="max-w-[1200px] mx-auto w-full">
       <Tabs
         onValueChange={handleChangeTab}
-        defaultValue="notdownload"
+        defaultValue="all"
         className="w-[400px] mb-1"
       >
         <TabsList>
-          <TabsTrigger value="notdownload">
-            <p>{`NotDownload (${countNotDownload})`}</p>
+          <TabsTrigger value="all">
+            <p>{`ALL (${countAll})`}</p>
           </TabsTrigger>
-          <TabsTrigger value="download">
-            <p>{`Downloaded (${countDownload})`}</p>
+          <TabsTrigger value="pending">
+            <p>{`Pending (${countPending})`}</p>
+          </TabsTrigger>
+          <TabsTrigger value="confirm">
+            <p>{`Confirm (${countConfirm})`}</p>
+          </TabsTrigger>
+          <TabsTrigger value="cancel">
+            <p>{`Cancel (${countCancel})`}</p>
           </TabsTrigger>
         </TabsList>
       </Tabs>

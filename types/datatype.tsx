@@ -27,8 +27,19 @@ export interface PoData {
 export interface PO_Status {
   PONo: string;
   Supreceive: boolean;
-  downloadDate: string;
-  approveDate: Date;
+  confirmDate: string;
+  sendDate: Date;
+  finalETADate?: Date;
+}
+
+export interface PO_Details {
+  poNo: string;
+  matrClass: string;
+  matrCode: string;
+  description: string;
+  color?: string;
+  size?: string;
+  finalETADate?: Date;
 }
 
 export interface Supplier {

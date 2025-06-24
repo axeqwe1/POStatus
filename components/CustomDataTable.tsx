@@ -174,13 +174,13 @@ export function CustomDataTable<TData, TSubData>({
             ) : (
               <React.Fragment>
                 {table.getRowModel().rows.map((row, index) => (
-                  <React.Fragment key={index}>
+                  <React.Fragment key={(row.id, index)}>
                     <TableRow>
                       <TableCell>
                         <button
                           onClick={() => {
                             setOpenRow(openRow === row.id ? null : row.id);
-                            findSubtableData(row.id);
+                            findSubtableData(row.original);
                             console.log(openRow, row.id, subtableData);
                           }}
                           className="bg-transparent border-0"

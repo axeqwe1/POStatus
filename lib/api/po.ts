@@ -13,6 +13,7 @@ export const GetPO = async (suppCode: string) => {
 export const SaveStatusDownload = async (PONo: string) => {
   try {
     const res = await apiService.post(`/api/PO/SaveDownloadStatus/${PONo}`);
+    return res;
   } catch (error) {
     console.error(error);
     throw error;
