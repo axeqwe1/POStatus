@@ -29,6 +29,7 @@ export interface PO_Status {
   Supreceive: boolean;
   confirmDate: string;
   sendDate: Date;
+  PODetails: PO_Details[];
   finalETADate?: Date;
 }
 

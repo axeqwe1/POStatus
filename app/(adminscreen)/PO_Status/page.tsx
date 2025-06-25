@@ -2,13 +2,14 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import DataTable from "./data-table";
 import { GetPO } from "@/lib/api/po";
-import { PO_Status } from "@/types/datatype";
+import { PO_Details, PO_Status } from "@/types/datatype";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonTable } from "@/components/SkeletonTable";
 
 export default function Page() {
   const [masterData, setMasterData] = useState<PO_Status[]>([]);
   const [poData, setPoData] = useState<PO_Status[]>([]);
+  const [poDetailData, setPoDetailData] = useState<PO_Details[]>([]);
   const [countPending, setCountPending] = useState(0);
   const [countConfirm, setCountConfirm] = useState(0);
   const [countCancel, setCountCancel] = useState(0);
@@ -33,9 +34,13 @@ export default function Page() {
         Supreceive: item.receiveInfo?.suppRcvPO ?? false,
         confirmDate: item.receiveInfo?.suppRcvDate ?? "",
         sendDate: item.poInfo?.approveDate ?? "",
+        PODetails: item.details,
+        finalETADate: item.poInfo?.finalETADate,
       }));
+      console.log(list);
+      // console.log(`Detail : ${detailList}`);
       setMasterData(list);
-
+      // setPoDetailData(detailList);
       const notDownloaded = list.filter((item) => !item.Supreceive);
       const downloaded = list.filter((item) => item.Supreceive);
 
@@ -43,7 +48,7 @@ export default function Page() {
       setCountConfirm(downloaded.length);
       setCountAll(list.length);
       setCountCancel(0);
-      setPoData(notDownloaded); // default view
+      setPoData(list); // default view
     }
     setIsLoading(false);
   }, []);

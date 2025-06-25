@@ -331,20 +331,56 @@ export const getSubColumns = (
   setOriginalFInalETA?: (date: Date) => void
 ): ColumnDef<PO_Details>[] => [
   {
-    id: "id",
-    accessorKey: "id",
-    header: ({ column }) => (
+    accessorKey: "Delivery", // ยังคงไว้เพื่อกรณีอื่นใช้
+    accessorFn: (row) => {
+      const finalEta = originalFinalETA
+        ? new Date(originalFinalETA).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : "Not Found Delivery Date";
+
+      return row.finalETADate
+        ? new Date(row.finalETADate).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : finalEta;
+    },
+
+    header: ({ column, table }) => {
+      return (
+        <>
+          <div>
+            Delivery
+            <ColumnCheckboxFilter column={column} table={table} />
+          </div>
+        </>
+      );
+    },
+    cell: ({ getValue }) => {
+      const value = getValue() as string;
+
+      return (
+        <>
+          <div>{value}</div>
+        </>
+      );
+    },
+  },
+  {
+    id: "MatrClass",
+    accessorKey: "matrClass",
+    header: ({ column, table }) => (
       <div className="flex items-center gap-2">
         {/* PONo */}
         {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-        <Button
-          className="hover:cursor-pointer !p-0"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          PO Number
-          <ArrowUpDown />
-        </Button>
+        <div>
+          MatrClass
+          <ColumnCheckboxFilter column={column} table={table} />
+        </div>
       </div>
     ),
     cell: ({ row }) => (
@@ -354,12 +390,15 @@ export const getSubColumns = (
     ),
   },
   {
-    id: "matrCode",
-    accessorKey: "MatrCode",
-    header: ({ column }) => {
+    id: "MatrCode",
+    accessorKey: "matrCode",
+    header: ({ column, table }) => {
       return (
         <>
-          <div>MatrCode</div>
+          <div>
+            MatrCode
+            <ColumnCheckboxFilter column={column} table={table} />
+          </div>
         </>
       );
     },
@@ -372,30 +411,15 @@ export const getSubColumns = (
     },
   },
   {
-    id: "description",
-    accessorKey: "description",
-    header: ({ column }) => {
-      return (
-        <>
-          <div>Description</div>
-        </>
-      );
-    },
-    cell: ({ row }) => {
-      return (
-        <>
-          <div>{row.original.description}</div>
-        </>
-      );
-    },
-  },
-  {
-    id: "color",
+    id: "Color",
     accessorKey: "color",
-    header: ({ column }) => {
+    header: ({ column, table }) => {
       return (
         <>
-          <div>Color</div>
+          <div>
+            Color
+            <ColumnCheckboxFilter column={column} table={table} />
+          </div>
         </>
       );
     },
@@ -408,12 +432,15 @@ export const getSubColumns = (
     },
   },
   {
-    id: "size",
+    id: "Size",
     accessorKey: "size",
-    header: ({ column }) => {
+    header: ({ column, table }) => {
       return (
         <>
-          <div>Size</div>
+          <div>
+            Size
+            <ColumnCheckboxFilter column={column} table={table} />
+          </div>
         </>
       );
     },
@@ -426,26 +453,19 @@ export const getSubColumns = (
     },
   },
   {
-    accessorKey: "Delivery",
+    // id: "description",
+    accessorKey: "description",
     header: ({ column }) => {
       return (
         <>
-          <div>Delivery</div>
+          <div>Description</div>
         </>
       );
     },
     cell: ({ row }) => {
-      const finalEta = originalFinalETA
-        ? `${originalFinalETA}`
-        : "Not Found Delivery Date";
-
       return (
         <>
-          <div>
-            {row.original.finalETADate
-              ? `${row.original.finalETADate}`
-              : `${finalEta}`}
-          </div>
+          <div>{row.original.description}</div>
         </>
       );
     },

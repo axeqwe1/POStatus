@@ -77,16 +77,21 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
     handleEdit,
     isDesktop
   );
-
   const subColumns = getSubColumns(
     originalFinalETA ? originalFinalETA : new Date(),
     setOriginalFInalETA
   );
-  const findSubtableData = (rowId: string) => {
+
+  const findSubtableData = (rowId: any) => {
     console.log("findSubtableData", rowId);
+
     // datas.find((item) => item.id === rowId);
     datas.find((item) => {
+      console.log(item.PONo, rowId);
       if (item.PONo === rowId) {
+        setSubDatas(item.PODetails);
+        setOriginalFInalETA(item.finalETADate ? item.finalETADate : new Date());
+        console.log("Found Data", item.PODetails);
         // setSubDatas(item.PONo);
         return true;
       }
@@ -101,6 +106,7 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
           data={datas}
           columns={columns}
           collapse={true}
+          subtableData={subDatas}
           subColumns={subColumns}
           findSubtableData={findSubtableData}
         />

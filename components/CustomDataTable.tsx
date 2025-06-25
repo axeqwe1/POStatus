@@ -49,6 +49,8 @@ interface CustomDataTableProps<TData, TSubData = TData> {
   showSubFooter?: boolean; // Optional prop to control footer visibility
   setSubShowFooter?: (show: boolean) => void; // Optional prop to control footer visibility from parent'
   showAddBtn?: boolean;
+  Key?: string;
+  setKey?: (key: string) => void;
 }
 
 export function CustomDataTable<TData, TSubData>({
@@ -64,6 +66,8 @@ export function CustomDataTable<TData, TSubData>({
   showAddBtn = false,
   setOpenModal = (isOpen: boolean) => {},
   findSubtableData = (rowId: string) => {},
+  Key = "",
+  setKey = (key: string) => {},
 }: CustomDataTableProps<TData, TSubData>) {
   const [openRow, setOpenRow] = React.useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -143,7 +147,7 @@ export function CustomDataTable<TData, TSubData>({
               <TableRow key={headerGroup.id}>
                 {collapse && <TableHead></TableHead>}
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="pl-6">
+                  <TableHead key={header.id} className="">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -158,43 +162,13 @@ export function CustomDataTable<TData, TSubData>({
           <TableBody>
             {!collapse ? (
               <>
-                {table.getRowModel().rows.map((row, index) => (
-                  <TableRow key={index}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="pl-6">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </>
-            ) : (
-              <React.Fragment>
-                {table.getRowModel().rows.map((row, index) => (
-                  <React.Fragment key={(row.id, index)}>
-                    <TableRow>
-                      <TableCell>
-                        <button
-                          onClick={() => {
-                            setOpenRow(openRow === row.id ? null : row.id);
-                            findSubtableData(row.original);
-                            console.log(openRow, row.id, subtableData);
-                          }}
-                          className="bg-transparent border-0"
-                        >
-                          <ChevronDown
-                            className={`transition-transform ${
-                              openRow === row.id ? "rotate-180" : ""
-                            }`}
-                            size={18}
-                          />
-                        </button>
-                      </TableCell>
+                {table.getRowModel().rows.map((row, index) => {
+                  let key: string[] = Object.keys(row.original);
+                  let value: string[] = Object.values(row.original);
+                  return (
+                    <TableRow key={`!collapse-${value[0]}-${index}`}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                        <TableCell key={cell.id} className="pl-6">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
@@ -202,22 +176,62 @@ export function CustomDataTable<TData, TSubData>({
                         </TableCell>
                       ))}
                     </TableRow>
-                    {openRow === row.id && (
-                      <TableRow className="bg-muted">
-                        <TableCell colSpan={row.getVisibleCells().length + 1}>
-                          {/* Sub Table หรือเนื้อหาเพิ่มเติม */}
-                          <CustomDataTable
-                            className="rounded-lg border"
-                            data={subtableData}
-                            columns={subColumns} // หรือจะส่ง columns ใหม่ก็ได้ถ้า subtable ต่างจาก main table
-                            collapse={false}
-                            showSubFooter={true}
-                          />
+                  );
+                })}
+              </>
+            ) : (
+              <React.Fragment>
+                {table.getRowModel().rows.map((row, index) => {
+                  let key: string[] = Object.keys(row.original);
+                  let value: string[] = Object.values(row.original);
+                  return (
+                    <React.Fragment key={`collapse-${value[0]}-${index}`}>
+                      <TableRow>
+                        <TableCell>
+                          <button
+                            onClick={() => {
+                              setOpenRow(
+                                openRow === value[0] ? null : value[0]
+                              );
+                              findSubtableData(value[0]);
+                              console.log(row);
+                            }}
+                            className="bg-transparent border-0"
+                          >
+                            <ChevronDown
+                              className={`transition-transform ${
+                                openRow === value[0] ? "rotate-180" : ""
+                              }`}
+                              size={18}
+                            />
+                          </button>
                         </TableCell>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
                       </TableRow>
-                    )}
-                  </React.Fragment>
-                ))}
+                      {openRow === value[0] && (
+                        <TableRow className="bg-muted">
+                          <TableCell colSpan={row.getVisibleCells().length + 1}>
+                            {/* Sub Table หรือเนื้อหาเพิ่มเติม */}
+                            <CustomDataTable
+                              className="rounded-lg border"
+                              data={subtableData}
+                              columns={subColumns} // หรือจะส่ง columns ใหม่ก็ได้ถ้า subtable ต่างจาก main table
+                              collapse={false}
+                              showSubFooter={true}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </React.Fragment>
             )}
           </TableBody>
