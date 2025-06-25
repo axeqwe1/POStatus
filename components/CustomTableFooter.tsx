@@ -17,6 +17,8 @@ import type { Table } from "@tanstack/react-table";
 
 interface CustomTableFooterProps<TData> {
   table: Table<TData>;
+  totalCount?: number; // 👈 เพิ่ม optional
+  manualPagination?: boolean;
 }
 
 export default function CustomTableFooter<TData>({

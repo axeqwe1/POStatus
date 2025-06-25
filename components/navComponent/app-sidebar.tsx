@@ -44,9 +44,7 @@ import {
 } from "lucide-react";
 import {
   masterDataSidebar,
-  stockDataSideBar,
-  userDataSideBar,
-  organizeDataSideBar,
+  purchasingOfficerSideBar,
 } from "@/data/sidebar-menu";
 import { useAuth } from "@/context/authContext";
 const data = {
@@ -102,34 +100,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <img
-                  src={`${basePath}/PO_Logo.png`}
-                  alt="Image"
-                  className="dark:brightness-[0.2] dark:grayscale h-[60px]"
-                />
+            <div className="flex flex-row  items-center gap-3">
+              <img
+                src={`${basePath}/PO_Logo.png`}
+                alt="Image"
+                className="dark:brightness-[0.2] dark:grayscale h-[60px]"
+              />
+              <div className="">
                 <span className="text-base font-semibold">
                   <span className="text-secondary">P</span>
                   <span>O Purchase Order.</span>
                 </span>
-              </a>
-            </SidebarMenuButton>
+                <p className="text-xs">{user?.supplierName}</p>
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="">
-        <NavMain items={fillterNav} />
+        {/* <NavMain items={fillterNav} /> */}
+        <NavSidebar items={fillterNav} LabelName={"Supplier Menu"} />
+        <NavSidebar
+          items={purchasingOfficerSideBar}
+          LabelName={"Purchasing Officer Menu"}
+        />
         {/* <NavSidebar items={userDataSideBar} LabelName={"User"} /> */}
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSidebar items={masterDataSidebar} LabelName={"Master Data"} />
         <NavSidebar items={organizeDataSideBar} LabelName={"Organization"} />
         <NavSidebar items={stockDataSideBar} LabelName={"Stock"} />
         <NavSidebar items={userDataSideBar} LabelName={"User"} /> */}
-
         {/* <NavSecondary items={data.navSecondary} className="" /> */}
       </SidebarContent>
       <SidebarFooter>

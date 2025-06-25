@@ -10,6 +10,18 @@ export const GetPO = async (suppCode: string) => {
   }
 };
 
+export const GetAllPO = async (page: number, pageSize: number) => {
+  try {
+    const res = await apiService.get(
+      `/api/PO/GetAllPO?page=${page + 1}&pageSize=${pageSize}`
+    );
+    return res;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const SaveStatusDownload = async (PONo: string) => {
   try {
     const res = await apiService.post(`/api/PO/SaveDownloadStatus/${PONo}`);
@@ -19,4 +31,5 @@ export const SaveStatusDownload = async (PONo: string) => {
     throw error;
   }
 };
+
 export default { GetPO };

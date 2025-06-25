@@ -31,6 +31,7 @@ export interface PO_Status {
   sendDate: Date;
   PODetails: PO_Details[];
   finalETADate?: Date;
+  supplierName?: string;
 }
 
 export interface PO_Details {

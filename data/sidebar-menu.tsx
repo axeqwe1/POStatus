@@ -1,9 +1,12 @@
 import { SidebarData, SidebarItem } from "@/types/sidebar";
 import {
+  IconBasketCog,
   IconBox,
   IconBrandProducthunt,
   IconBuilding,
   IconCategory,
+  IconDeviceTabletCancel,
+  IconReceipt,
   IconShirt,
   IconShirtFilled,
   IconTower,
@@ -85,37 +88,50 @@ export const masterDataSidebar: SidebarItem[] = [
   },
 ];
 
-export const stockDataSideBar: SidebarItem[] = [
+// export const stockDataSideBar: SidebarItem[] = [
+//   {
+//     title: "Stock Management",
+//     url: "/stock",
+//     icon: IconBox,
+//     items: [
+//       { title: "Stock", url: "/stock/stock" },
+//       { title: "Stock Take", url: "/stock/stockTake" },
+//     ],
+//   },
+// ];
+// export const organizeDataSideBar: SidebarItem[] = [
+//   {
+//     title: "Organization Management",
+//     url: "/orgranization",
+//     icon: IconBuilding,
+//     items: [
+//       { title: "Department", url: "/orgranization/department" },
+//       { title: "Company", url: "/orgranization/company" },
+//     ],
+//   },
+// ];
+// export const userDataSideBar: SidebarItem[] = [
+//   {
+//     title: "User Management",
+//     url: "/users",
+//     icon: IconUser,
+//     items: [
+//       { title: "User", url: "/users/user" },
+//       { title: "Role", url: "/users/role" },
+//       { title: "Supplier", url: "/users/supplier" },
+//     ],
+//   },
+// ];
+
+export const purchasingOfficerSideBar: SidebarItem[] = [
   {
-    title: "Stock Management",
-    url: "/stock",
-    icon: IconBox,
-    items: [
-      { title: "Stock", url: "/stock/stock" },
-      { title: "Stock Take", url: "/stock/stockTake" },
-    ],
+    title: "View PO Approve List",
+    url: "/purchaseOffice/ViewPOApproveList",
+    icon: IconReceipt,
   },
-];
-export const organizeDataSideBar: SidebarItem[] = [
   {
-    title: "Organization Management",
-    url: "/orgranization",
-    icon: IconBuilding,
-    items: [
-      { title: "Department", url: "/orgranization/department" },
-      { title: "Company", url: "/orgranization/company" },
-    ],
-  },
-];
-export const userDataSideBar: SidebarItem[] = [
-  {
-    title: "User Management",
-    url: "/users",
-    icon: IconUser,
-    items: [
-      { title: "User", url: "/users/user" },
-      { title: "Role", url: "/users/role" },
-      { title: "Supplier", url: "/users/supplier" },
-    ],
+    title: "Request Cancel List",
+    url: "/purchaseOffice/RequestCancelList",
+    icon: IconDeviceTabletCancel,
   },
 ];

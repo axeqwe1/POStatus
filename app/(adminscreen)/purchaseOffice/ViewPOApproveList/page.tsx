@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import DataTable from "./data-table";
-import { GetPO } from "@/lib/api/po";
+import { GetAllPO, GetPO } from "@/lib/api/po";
 import { PO_Details, PO_Status } from "@/types/datatype";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonTable } from "@/components/SkeletonTable";
@@ -16,6 +16,9 @@ export default function Page() {
   const [countAll, setCountAll] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
+
+  const [pageCount, setPageCount] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -24,9 +27,9 @@ export default function Page() {
     }
   }, []);
 
-  const fetchPO = useCallback(async (supplierId: string) => {
+  const fetchPO = useCallback(async (page: number, pageSize: number) => {
     setIsLoading(true);
-    const res = await GetPO(supplierId);
+    const res = await GetAllPO(page, pageSize);
     if (res.status === 200) {
       console.log(res.data);
       const list: PO_Status[] = res.data.items.map((item: any) => ({
@@ -36,6 +39,7 @@ export default function Page() {
         sendDate: item?.approveDate ?? "",
         PODetails: item.details,
         finalETADate: item?.finalETADate,
+        supplierName: item?.supplierName,
       }));
       console.log(list);
       // console.log(`Detail : ${detailList}`);
@@ -53,10 +57,11 @@ export default function Page() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    console.log(userData);
-    if (userData != null) fetchPO(userData.supplierId);
-  }, [userData]);
+  // useEffect(() => {
+  //   console.log(userData);
+  //   if (userData != null) fetchPO(userData.supplierId);
+  // }, [userData]);
+
   const filterByTab = useCallback((value: string, data: PO_Status[]) => {
     if (value === "pending") {
       return data.filter((item) => !item.Supreceive);
@@ -75,11 +80,24 @@ export default function Page() {
     [filterByTab, masterData]
   );
 
-  const handleRefreshData = async () => {
-    if (userData?.supplierId) {
-      await fetchPO(userData.supplierId);
-    }
+  const handdlerSetPageCount = (pageIndex: number, pageSize: number) => {
+    setPageCount(pageIndex);
+    setPageSize(pageSize);
   };
+
+  const handleRefreshData = async () => {
+    // if (userData?.supplierId) {
+    //   await fetchPO(userData.supplierId);
+    // }
+  };
+
+  useEffect(() => {
+    console.log("Change Page : ", pageCount);
+  }, [pageCount]);
+
+  useEffect(() => {
+    fetchPO(pageCount, pageSize);
+  }, [pageCount, pageSize]);
 
   // useEffect(() => {
   //   fetchPO(userData.supplierId);

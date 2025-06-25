@@ -105,6 +105,27 @@ export const getColumns = (
     ),
   },
   {
+    accessorKey: "supplierName",
+    // ใส่ filter header dropdown!
+    header: ({ column, table }) => (
+      <div className="flex items-center gap-2">
+        SupplierName
+        <ColumnCheckboxFilter column={column} table={table} />
+      </div>
+    ),
+    // รองรับ filter แบบ multi-checkbox
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      // ในกรณีที่ filterValue เป็น array
+      return filterValue.includes(row.getValue(columnId));
+    },
+    cell: ({ row }) => {
+      return <div>{row.original.supplierName}</div>;
+    },
+
+    // (optional) enableFacetedValues: true,
+  },
+  {
     accessorKey: "Status",
     accessorFn: (row) => (row.Supreceive ? "Confirm" : "Pending"),
     // ใส่ filter header dropdown!
@@ -143,15 +164,17 @@ export const getColumns = (
 
     // (optional) enableFacetedValues: true,
   },
+
   {
-    accessorKey: "sendDate",
+    accessorKey: "ApproveDate",
+    accessorFn: (row) => row.sendDate,
     header: ({ column }) => (
       <Button
         className="hover:cursor-pointer !p-0"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Send Date
+        Approve Date
         <ArrowUpDown />
       </Button>
     ),
@@ -211,11 +234,7 @@ export const getColumns = (
   {
     id: "actions",
     header: ({ column, table }) => {
-      return (
-        <>
-          <div>Confirm/Cancel</div>
-        </>
-      );
+      return <div>Confirm/Cancel</div>;
     },
     cell: ({ row }) => (
       <>

@@ -37,6 +37,10 @@ import { Button } from "./ui/button";
 
 interface CustomDataTableProps<TData, TSubData = TData> {
   data: TData[];
+  pageCount?: number;
+  totalCount?: number; // ✅ ใช้คำนวณจำนวนหน้า
+  manualPagination?: boolean; // ✅ เพิ่ม flag
+  // pageCount?: number; // ✅ ใช้เฉพาะตอน manual
   columns: ColumnDef<TData, any>[];
   subColumns?: ColumnDef<TSubData, any>[];
   initialPageSize?: number;
@@ -51,10 +55,14 @@ interface CustomDataTableProps<TData, TSubData = TData> {
   showAddBtn?: boolean;
   Key?: string;
   setKey?: (key: string) => void;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
 export function CustomDataTable<TData, TSubData>({
   data,
+  pageCount = 0,
+  totalCount = 0, // ✅ ใช้คำนวณจำนวนหน้า
+  manualPagination = false, // ✅ เพิ่ม flag
   columns,
   subColumns = [],
   initialPageSize = 10,
@@ -66,10 +74,9 @@ export function CustomDataTable<TData, TSubData>({
   showAddBtn = false,
   setOpenModal = (isOpen: boolean) => {},
   findSubtableData = (rowId: string) => {},
-  Key = "",
-  setKey = (key: string) => {},
+  onPaginationChange = (pageIndex: number, pageSize: number) => {},
 }: CustomDataTableProps<TData, TSubData>) {
-  const [openRow, setOpenRow] = React.useState<string | null>(null);
+  const [openRow, setOpenRow] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -78,10 +85,16 @@ export function CustomDataTable<TData, TSubData>({
     pageIndex: 0,
     pageSize: initialPageSize,
   });
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const table = useReactTable({
     data,
     columns,
+    manualPagination: manualPagination, // ✅ สำคัญ
+    pageCount: manualPagination
+      ? Math.ceil(totalCount / pagination.pageSize)
+      : undefined,
     state: {
       sorting,
       columnVisibility,
@@ -98,10 +111,14 @@ export function CustomDataTable<TData, TSubData>({
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    ...(manualPagination
+      ? {}
+      : {
+          getPaginationRowModel: getPaginationRowModel(), // 👈 client-side เท่านั้น
+        }),
   });
 
   // useEffect(() => {
@@ -147,7 +164,7 @@ export function CustomDataTable<TData, TSubData>({
               <TableRow key={headerGroup.id}>
                 {collapse && <TableHead></TableHead>}
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="">
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -237,7 +254,13 @@ export function CustomDataTable<TData, TSubData>({
           </TableBody>
         </Table>
       </div>
-      {showSubFooter && <CustomTableFooter table={table} />}
+      {showSubFooter && (
+        <CustomTableFooter
+          table={table}
+          manualPagination={manualPagination}
+          totalCount={totalCount}
+        />
+      )}
     </div>
   );
 }
