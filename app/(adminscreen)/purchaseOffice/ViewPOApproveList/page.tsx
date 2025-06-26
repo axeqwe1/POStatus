@@ -13,6 +13,7 @@ export default function Page() {
   const [countPending, setCountPending] = useState(0);
   const [countConfirm, setCountConfirm] = useState(0);
   const [countCancel, setCountCancel] = useState(0);
+  const [countProcess, setCountProcess] = useState(0);
   const [countAll, setCountAll] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
@@ -29,29 +30,39 @@ export default function Page() {
 
   const fetchPO = useCallback(async (page: number, pageSize: number) => {
     setIsLoading(true);
-    const res = await GetAllPO(page, pageSize);
+    const res = await GetAllPO();
     if (res.status === 200) {
       console.log(res.data);
       const list: PO_Status[] = res.data.items.map((item: any) => ({
         PONo: item.poNo,
         Supreceive: item.receiveInfo?.suppRcvPO ?? false,
         confirmDate: item.receiveInfo?.suppRcvDate ?? "",
+        cancelStatus: item.receiveInfo?.suppCancelPO ?? 0,
         sendDate: item?.approveDate ?? "",
-        PODetails: item.details,
         finalETADate: item?.finalETADate,
         supplierName: item?.supplierName,
+        POReady: item?.poReady,
+        ClosePO: item?.closePO,
       }));
       console.log(list);
       // console.log(`Detail : ${detailList}`);
       setMasterData(list);
       // setPoDetailData(detailList);
-      const notDownloaded = list.filter((item) => !item.Supreceive);
-      const downloaded = list.filter((item) => item.Supreceive);
-
-      setCountPending(notDownloaded.length);
-      setCountConfirm(downloaded.length);
+      const pendding = list.filter(
+        (item) => !item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
+      const confirm = list.filter(
+        (item) => item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
+      const process = list.filter(
+        (item) => !item.ClosePO && item.cancelStatus === 0
+      );
+      const cancel = list.filter((item) => item.cancelStatus === 1);
+      setCountPending(pendding.length);
+      setCountConfirm(confirm.length);
       setCountAll(list.length);
-      setCountCancel(0);
+      setCountCancel(cancel.length);
+      setCountProcess(process.length);
       setPoData(list); // default view
     }
     setIsLoading(false);
@@ -64,10 +75,20 @@ export default function Page() {
 
   const filterByTab = useCallback((value: string, data: PO_Status[]) => {
     if (value === "pending") {
-      return data.filter((item) => !item.Supreceive);
+      return data.filter(
+        (item) => !item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
     }
     if (value === "confirm") {
-      return data.filter((item) => item.Supreceive);
+      return data.filter(
+        (item) => item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
+    }
+    if (value === "cancel") {
+      return data.filter((item) => item.cancelStatus === 1);
+    }
+    if (value === "process") {
+      return data.filter((item) => !item.ClosePO && item.cancelStatus === 0);
     }
     return data;
   }, []);
@@ -113,6 +134,9 @@ export default function Page() {
         <TabsList>
           <TabsTrigger value="all">
             <p>{`ALL (${countAll})`}</p>
+          </TabsTrigger>
+          <TabsTrigger value="process">
+            <p>{`Process (${countProcess})`}</p>
           </TabsTrigger>
           <TabsTrigger value="pending">
             <p>{`Pending (${countPending})`}</p>

@@ -34,6 +34,7 @@ import { ChevronDown } from "lucide-react";
 import { Input } from "./ui/input";
 import { ColumnFilter } from "./ColumnFilter";
 import { Button } from "./ui/button";
+import { SkeletonTable } from "./SkeletonTable";
 
 interface CustomDataTableProps<TData, TSubData = TData> {
   data: TData[];
@@ -87,7 +88,7 @@ export function CustomDataTable<TData, TSubData>({
   });
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-
+  const [isLoading, setIsLoading] = useState(true);
   const table = useReactTable({
     data,
     columns,
@@ -121,12 +122,13 @@ export function CustomDataTable<TData, TSubData>({
         }),
   });
 
-  // useEffect(() => {
-  //   if (subColumns.length > 0) {
-  //     // If subColumns are provided, set the subtableData to an empty array initially
-  //     setOpenRow(null);
-  //   }
-  // }, [subtableData, subColumns]);
+  useEffect(() => {
+    if (subtableData.length > 0) {
+      // If subColumns are provided, set the subtableData to an empty array initially
+      setIsLoading(false);
+      console.log("Subtable columns provided, initializing subtable data.");
+    }
+  }, [subtableData, subColumns]);
 
   return (
     <div className={className}>
@@ -210,7 +212,12 @@ export function CustomDataTable<TData, TSubData>({
                               setOpenRow(
                                 openRow === value[0] ? null : value[0]
                               );
+
                               findSubtableData(value[0]);
+                              if (openRow === null) {
+                                subColumns = [];
+                                setIsLoading(true);
+                              }
                               console.log(row);
                             }}
                             className="bg-transparent border-0"
@@ -236,13 +243,19 @@ export function CustomDataTable<TData, TSubData>({
                         <TableRow className="bg-muted">
                           <TableCell colSpan={row.getVisibleCells().length + 1}>
                             {/* Sub Table หรือเนื้อหาเพิ่มเติม */}
-                            <CustomDataTable
-                              className="rounded-lg border"
-                              data={subtableData}
-                              columns={subColumns} // หรือจะส่ง columns ใหม่ก็ได้ถ้า subtable ต่างจาก main table
-                              collapse={false}
-                              showSubFooter={true}
-                            />
+                            {isLoading ? (
+                              <div className=" flex justify-center items-center">
+                                <SkeletonTable cols={3} rows={5} />
+                              </div>
+                            ) : (
+                              <CustomDataTable
+                                className="rounded-lg border"
+                                data={subtableData}
+                                columns={subColumns} // หรือจะส่ง columns ใหม่ก็ได้ถ้า subtable ต่างจาก main table
+                                collapse={false}
+                                showSubFooter={true}
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       )}

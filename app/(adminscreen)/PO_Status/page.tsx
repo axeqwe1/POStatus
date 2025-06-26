@@ -33,21 +33,27 @@ export default function Page() {
         PONo: item.poNo,
         Supreceive: item.receiveInfo?.suppRcvPO ?? false,
         confirmDate: item.receiveInfo?.suppRcvDate ?? "",
+        cancelStatus: item.receiveInfo?.suppCancelPO ?? 0,
         sendDate: item?.approveDate ?? "",
         PODetails: item.details,
         finalETADate: item?.finalETADate,
+        supplierName: item?.supplierName,
       }));
       console.log(list);
       // console.log(`Detail : ${detailList}`);
       setMasterData(list);
       // setPoDetailData(detailList);
-      const notDownloaded = list.filter((item) => !item.Supreceive);
-      const downloaded = list.filter((item) => item.Supreceive);
-
-      setCountPending(notDownloaded.length);
-      setCountConfirm(downloaded.length);
+      const notConfirm = list.filter(
+        (item) => !item.Supreceive && item.cancelStatus === 0
+      );
+      const confirm = list.filter(
+        (item) => item.Supreceive && item.cancelStatus === 0
+      );
+      const cancel = list.filter((item) => item.cancelStatus === 1);
+      setCountPending(notConfirm.length);
+      setCountConfirm(confirm.length);
       setCountAll(list.length);
-      setCountCancel(0);
+      setCountCancel(cancel.length);
       setPoData(list); // default view
     }
     setIsLoading(false);
@@ -57,12 +63,16 @@ export default function Page() {
     console.log(userData);
     if (userData != null) fetchPO(userData.supplierId);
   }, [userData]);
+
   const filterByTab = useCallback((value: string, data: PO_Status[]) => {
     if (value === "pending") {
-      return data.filter((item) => !item.Supreceive);
+      return data.filter((item) => !item.Supreceive && item.cancelStatus === 0);
     }
     if (value === "confirm") {
-      return data.filter((item) => item.Supreceive);
+      return data.filter((item) => item.Supreceive && item.cancelStatus === 0);
+    }
+    if (value === "cancel") {
+      return data.filter((item) => item.cancelStatus === 1);
     }
     return data;
   }, []);

@@ -23,7 +23,7 @@ import {
 import { Drawer } from "vaul";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { TabsTrigger } from "@radix-ui/react-tabs";
-import { SaveStatusDownload } from "@/lib/api/po";
+import { GetPODetail, SaveStatusDownload } from "@/lib/api/po";
 import { toast } from "sonner";
 import { CustomServerTable } from "@/components/CustomServerTable";
 
@@ -104,21 +104,25 @@ export default function DataTable({
     setOriginalFInalETA
   );
 
-  const findSubtableData = (rowId: any) => {
+  const findSubtableData = async (rowId: any) => {
     console.log("findSubtableData", rowId);
-
+    setSubDatas([]);
     // datas.find((item) => item.id === rowId);
-    datas.find((item) => {
-      console.log(item.PONo, rowId);
-      if (item.PONo === rowId) {
-        setSubDatas(item.PODetails);
-        setOriginalFInalETA(item.finalETADate ? item.finalETADate : new Date());
-        console.log("Found Data", item.PODetails);
-        // setSubDatas(item.PONo);
-        return true;
-      }
-      return false;
+    const res = await GetPODetail(rowId);
+    const item = res.data;
+    console.log(res.data);
+
+    const newItem = item.details.map((detail: PO_Details) => {
+      const originalFinalETA = datas.find((rowId) => {
+        return rowId.PONo === detail.poNo;
+      })?.finalETADate;
+      detail.finalETADate == null
+        ? (detail.finalETADate = originalFinalETA)
+        : detail.finalETADate;
+      return { ...detail };
     });
+    console.log(newItem);
+    setSubDatas(newItem);
   };
   return (
     <>

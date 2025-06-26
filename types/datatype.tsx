@@ -27,7 +27,9 @@ export interface PoData {
 export interface PO_Status {
   PONo: string;
   Supreceive: boolean;
+  POReady: boolean;
   confirmDate: string;
+  cancelStatus?: number; // true ถ้า PO ถูกยกเลิก
   sendDate: Date;
   PODetails: PO_Details[];
   finalETADate?: Date;
