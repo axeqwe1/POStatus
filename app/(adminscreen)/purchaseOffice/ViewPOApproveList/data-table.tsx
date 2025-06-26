@@ -32,13 +32,14 @@ interface DataTableProps {
   totalCount: number;
   isLoading: boolean;
   onSuccess: () => void;
-  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
+  onPaginChange?: (pageIndex: number, pageSize: number) => void;
 }
 export default function DataTable({
   data,
   totalCount,
   isLoading,
   onSuccess,
+  onPaginChange,
 }: DataTableProps) {
   const [datas, setDatas] = useState(data);
   const [subDatas, setSubDatas] = useState<PO_Details[]>([]);
@@ -147,6 +148,7 @@ export default function DataTable({
           onPaginationChange={({ pageIndex, pageSize }) => {
             setPageIndex(pageIndex);
             setPageSize(pageSize);
+            onPaginChange?.(pageIndex, pageSize);
           }}
           isLoading={isLoading}
         />

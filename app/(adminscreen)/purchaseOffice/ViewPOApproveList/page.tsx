@@ -19,6 +19,7 @@ export default function Page() {
 
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+  const [tab, SetTab] = useState<string>("all");
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -27,37 +28,41 @@ export default function Page() {
     }
   }, []);
 
-  const fetchPO = useCallback(async () => {
-    setIsLoading(true);
-    const res = await GetAllPO("all", page, pageSize);
-    if (res.status === 200) {
-      console.log(res.data);
-      const list: PO_Status[] = res.data.items.map((item: any) => ({
-        PONo: item.poNo,
-        Supreceive: item.receiveInfo?.suppRcvPO ?? false,
-        cancelStatus: item.receiveInfo?.suppCancelPO ?? 0, // 0 = pending, 1 = cancel, 2 = confirm
-        confirmDate: item.receiveInfo?.suppRcvDate ?? "",
-        sendDate: item?.approveDate ?? "",
-        PODetails: item.details,
-        finalETADate: item?.finalETADate,
-        supplierName: item?.supplierName,
-      }));
-      // console.log(list);
-      // console.log(`Detail : ${detailList}`);
-      setMasterData(list);
-      // setPoDetailData(detailList);
-      const notConfirm = list.filter((item) => !item.Supreceive);
-      // const cancel = list.filter((item) => item.cancelStatus === 1);
-      const Confirm = list.filter((item) => item.Supreceive);
+  const fetchPO = useCallback(
+    async (tab: string, page: number, pageSize: number) => {
+      setIsLoading(true);
+      const res = await GetAllPO(tab, page, pageSize);
+      if (res.status === 200) {
+        console.log(res.data);
+        const resData = res.data;
+        const list: PO_Status[] = resData.data.map((item: any) => ({
+          PONo: item.poNo,
+          Supreceive: item.receiveInfo?.suppRcvPO ?? false,
+          cancelStatus: item.receiveInfo?.suppCancelPO ?? 0, // 0 = pending, 1 = cancel, 2 = confirm
+          confirmDate: item.receiveInfo?.suppRcvDate ?? "",
+          sendDate: item?.approveDate ?? "",
+          PODetails: item.details,
+          finalETADate: item?.finalETADate,
+          supplierName: item?.supplierName,
+        }));
+        // console.log(list);
+        // console.log(`Detail : ${detailList}`);
+        setMasterData(list);
+        // setPoDetailData(detailList);
+        const notConfirm = list.filter((item) => !item.Supreceive);
+        // const cancel = list.filter((item) => item.cancelStatus === 1);
+        const Confirm = list.filter((item) => item.Supreceive);
 
-      setCountPending(notConfirm.length);
-      setCountConfirm(Confirm.length);
-      setCountAll(list.length);
-      setCountCancel(0);
-      setPoData(list); // default view
-    }
-    setIsLoading(false);
-  }, []);
+        setCountPending(resData.counts.pending);
+        setCountConfirm(resData.counts.confirm);
+        setCountAll(resData.counts.all);
+        setCountCancel(resData.counts.cancel);
+        setPoData(list); // default view
+      }
+      setIsLoading(false);
+    },
+    []
+  );
 
   // useEffect(() => {
   //   console.log(userData);
@@ -76,33 +81,43 @@ export default function Page() {
 
   const handleChangeTab = useCallback(
     (value: string) => {
-      const filtered = filterByTab(value, masterData);
-      setPoData(filtered);
+      // const filtered = filterByTab(value, masterData);
+      // setPoData(filtered);
+      SetTab(value);
     },
-    [filterByTab, masterData]
+    [filterByTab, masterData, tab]
   );
 
   const handdlerSetPageCount = (pageIndex: number, pageSize: number) => {
+    console.log("Page Index : ", pageIndex);
     setPage(pageIndex);
     setPageSize(pageSize);
   };
 
   const handleRefreshData = async () => {
     // if (userData?.supplierId) {
-    await fetchPO();
+    await fetchPO(tab, page, pageSize);
     // }
   };
 
   useEffect(() => {
-    console.log("Change Page : ", page);
-  }, [page]);
+    console.log(
+      "Change Page : ",
+      page,
+      " Page Size : ",
+      pageSize,
+      " Tab : ",
+      tab
+    );
+    fetchPO(tab, page, pageSize); // เรียกใช้ฟังก์ชัน fetchPO เมื่อ page, tab หรือ pageSize เปลี่ยนแปลง
+  }, [page, tab, pageSize]);
 
   // useEffect(() => {
   //   fetchPO();
   // }, [pageCount, pageSize]);
 
   useEffect(() => {
-    fetchPO();
+    fetchPO("all", 1, 10); // เริ่มต้นโหลดข้อมูลเมื่อ component mount
   }, []);
 
   return (
@@ -136,7 +151,7 @@ export default function Page() {
           <DataTable
             data={poData}
             onSuccess={handleRefreshData}
-            onPaginationChange={handdlerSetPageCount}
+            onPaginChange={handdlerSetPageCount}
             isLoading={isLoading}
             totalCount={countAll}
           />
