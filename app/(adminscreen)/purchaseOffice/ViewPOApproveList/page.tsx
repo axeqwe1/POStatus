@@ -17,7 +17,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
 
-  const [pageCount, setPageCount] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -27,29 +27,31 @@ export default function Page() {
     }
   }, []);
 
-  const fetchPO = useCallback(async (page: number, pageSize: number) => {
+  const fetchPO = useCallback(async () => {
     setIsLoading(true);
-    const res = await GetAllPO(page, pageSize);
+    const res = await GetAllPO("all", page, pageSize);
     if (res.status === 200) {
       console.log(res.data);
       const list: PO_Status[] = res.data.items.map((item: any) => ({
         PONo: item.poNo,
         Supreceive: item.receiveInfo?.suppRcvPO ?? false,
+        cancelStatus: item.receiveInfo?.suppCancelPO ?? 0, // 0 = pending, 1 = cancel, 2 = confirm
         confirmDate: item.receiveInfo?.suppRcvDate ?? "",
         sendDate: item?.approveDate ?? "",
         PODetails: item.details,
         finalETADate: item?.finalETADate,
         supplierName: item?.supplierName,
       }));
-      console.log(list);
+      // console.log(list);
       // console.log(`Detail : ${detailList}`);
       setMasterData(list);
       // setPoDetailData(detailList);
-      const notDownloaded = list.filter((item) => !item.Supreceive);
-      const downloaded = list.filter((item) => item.Supreceive);
+      const notConfirm = list.filter((item) => !item.Supreceive);
+      // const cancel = list.filter((item) => item.cancelStatus === 1);
+      const Confirm = list.filter((item) => item.Supreceive);
 
-      setCountPending(notDownloaded.length);
-      setCountConfirm(downloaded.length);
+      setCountPending(notConfirm.length);
+      setCountConfirm(Confirm.length);
       setCountAll(list.length);
       setCountCancel(0);
       setPoData(list); // default view
@@ -81,27 +83,27 @@ export default function Page() {
   );
 
   const handdlerSetPageCount = (pageIndex: number, pageSize: number) => {
-    setPageCount(pageIndex);
+    setPage(pageIndex);
     setPageSize(pageSize);
   };
 
   const handleRefreshData = async () => {
     // if (userData?.supplierId) {
-    //   await fetchPO(userData.supplierId);
+    await fetchPO();
     // }
   };
 
   useEffect(() => {
-    console.log("Change Page : ", pageCount);
-  }, [pageCount]);
-
-  useEffect(() => {
-    fetchPO(pageCount, pageSize);
-  }, [pageCount, pageSize]);
+    console.log("Change Page : ", page);
+  }, [page]);
 
   // useEffect(() => {
-  //   fetchPO(userData.supplierId);
-  // }, [userData]);
+  //   fetchPO();
+  // }, [pageCount, pageSize]);
+
+  useEffect(() => {
+    fetchPO();
+  }, []);
 
   return (
     <div className="max-w-[1200px] mx-auto w-full">
@@ -131,7 +133,13 @@ export default function Page() {
         </div>
       ) : (
         <Suspense fallback={<div>Loading Table...</div>}>
-          <DataTable data={poData} onSuccess={handleRefreshData} />
+          <DataTable
+            data={poData}
+            onSuccess={handleRefreshData}
+            onPaginationChange={handdlerSetPageCount}
+            isLoading={isLoading}
+            totalCount={countAll}
+          />
         </Suspense>
       )}
     </div>

@@ -238,8 +238,8 @@ export const getColumns = (
     },
     cell: ({ row }) => (
       <>
-        {!row.original.Supreceive ? (
-          <div className="flex gap-3 pl-4">
+        <div className="flex gap-3 pl-4">
+          {!row.original.Supreceive && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button className="w-[30px] h-[30px] bg-neutral-200 hover:bg-neutral-300/70 hover:cursor-pointer">
@@ -274,81 +274,46 @@ export const getColumns = (
                 </AlertDialogContent>
               </AlertDialogPortal>
             </AlertDialog>
+          )}
 
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant={"destructive"}
-                  className="w-[30px] h-[30px] hover:cursor-pointer"
-                >
-                  <IconX />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogPortal>
-                <AlertDialogContent className="sm:max-w-[425px]">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you want to Cancel PO?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently Cancel
-                      yourdata and Cancel your data from our servers.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="hover:cursor-pointer">
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction asChild>
-                      <Button
-                        type="button"
-                        className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
-                        onClick={() => onCancel?.(row.original.PONo)}
-                      >
-                        Confirm
-                      </Button>
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialogPortal>
-            </AlertDialog>
-          </div>
-        ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <Button
-                variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                size="icon"
+                variant={"destructive"}
+                className="w-[30px] h-[30px] hover:cursor-pointer"
               >
-                <IconDotsVertical />
-                <span className="sr-only">Open menu</span>
+                <IconX />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuContent
-                align="end"
-                side="bottom"
-                className="z-50 p-4 border-1 rounded-2xl bg-slate-50"
-              >
-                <DropdownMenuItem
-                  onMouseDown={() => {
-                    if (!row.original.Supreceive) {
-                      setEditItem?.(row.original.PONo);
-                    }
-                    window.open(
-                      `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
-                      "_blank"
-                    );
-                  }}
-                  className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer"
-                >
-                  Dowload
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenuPortal>
-          </DropdownMenu>
-        )}
+            </AlertDialogTrigger>
+            <AlertDialogPortal>
+              <AlertDialogContent className="sm:max-w-[425px]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Are you want to Cancel PO?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently Cancel
+                    yourdata and Cancel your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="hover:cursor-pointer">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <Button
+                      type="button"
+                      className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
+                      onClick={() => onCancel?.(row.original.PONo)}
+                    >
+                      Confirm
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogPortal>
+          </AlertDialog>
+        </div>
 
         {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
       </>

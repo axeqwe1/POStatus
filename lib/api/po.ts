@@ -10,10 +10,10 @@ export const GetPO = async (suppCode: string) => {
   }
 };
 
-export const GetAllPO = async (page: number, pageSize: number) => {
+export const GetAllPO = async (tab: string, page: number, pageSize: number) => {
   try {
     const res = await apiService.get(
-      `/api/PO/GetAllPO?page=${page + 1}&pageSize=${pageSize}`
+      `/api/PO/GetAllPO?tab=${tab}&page=${page}&pageSize=${pageSize}`
     );
     return res;
   } catch (err) {

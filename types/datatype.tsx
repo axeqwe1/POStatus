@@ -27,6 +27,7 @@ export interface PoData {
 export interface PO_Status {
   PONo: string;
   Supreceive: boolean;
+  cancelStatus?: number;
   confirmDate: string;
   sendDate: Date;
   PODetails: PO_Details[];

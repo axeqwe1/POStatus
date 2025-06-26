@@ -25,26 +25,31 @@ import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { TabsTrigger } from "@radix-ui/react-tabs";
 import { SaveStatusDownload } from "@/lib/api/po";
 import { toast } from "sonner";
-import { CustomServerTable } from "@/components/CustomServerTable";
+import { ServerSideDataTable } from "@/components/CustomServerTable";
 
 interface DataTableProps {
   data: PO_Status[];
-
+  totalCount: number;
+  isLoading: boolean;
   onSuccess: () => void;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 export default function DataTable({
   data,
-
+  totalCount,
+  isLoading,
   onSuccess,
 }: DataTableProps) {
   const [datas, setDatas] = useState(data);
   const [subDatas, setSubDatas] = useState<PO_Details[]>([]);
   const [isEdit, setIsEdit] = useState(false);
   const [originalFinalETA, setOriginalFInalETA] = useState<Date | null>(null);
-
   const [editItem, setEditItem] = useState<string>("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
+  // pagin
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const handleDelete = (id: string) => {
     setDatas((prev) => prev.filter((u) => u.PONo !== id));
   };
@@ -123,7 +128,7 @@ export default function DataTable({
   return (
     <>
       <div className="">
-        <CustomDataTable<PO_Status, PO_Details>
+        {/* <CustomDataTable<PO_Status, PO_Details>
           className="rounded-lg border "
           data={datas}
           columns={columns}
@@ -131,18 +136,21 @@ export default function DataTable({
           subtableData={subDatas}
           subColumns={subColumns}
           findSubtableData={findSubtableData}
-          // manualPagination={true}
-          // onPaginationChange={(pageIndex, pageSize) => {
-          //   setPagination(pageIndex, pageSize);
-          // }}
-        />
-        {/* <CustomServerTable
-          data={data}
-          totalCount={totalCount}
-          columns={columns}
-          onQueryChange={handleQueryChange}
+
         /> */}
-        {/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
+        <ServerSideDataTable
+          data={data}
+          columns={columns}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPaginationChange={({ pageIndex, pageSize }) => {
+            setPageIndex(pageIndex);
+            setPageSize(pageSize);
+          }}
+          isLoading={isLoading}
+        />
+        ;{/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
       </div>
     </>
   );
