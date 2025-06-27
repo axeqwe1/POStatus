@@ -29,7 +29,7 @@ export default function Page() {
     }
   }, []);
 
-  const fetchPO = useCallback(async (page: number, pageSize: number) => {
+  const fetchPO = useCallback(async () => {
     setIsLoading(true);
     const res = await GetAllPO();
     if (res.status === 200) {
@@ -115,9 +115,9 @@ export default function Page() {
     // }
   };
 
-  // useEffect(() => {
-  //   fetchPO();
-  // }, [pageCount, pageSize]);
+  useEffect(() => {
+    fetchPO();
+  }, []);
 
   return (
     <div className="max-w-[1200px] mx-auto w-full">

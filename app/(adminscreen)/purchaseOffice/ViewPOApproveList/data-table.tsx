@@ -49,8 +49,6 @@ export default function DataTable({
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   // pagin
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const handleDelete = (id: string) => {
     setDatas((prev) => prev.filter((u) => u.PONo !== id));
   };
@@ -133,7 +131,7 @@ export default function DataTable({
   return (
     <>
       <div className="">
-        {/* <CustomDataTable<PO_Status, PO_Details>
+        <CustomDataTable<PO_Status, PO_Details>
           className="rounded-lg border "
           data={datas}
           columns={columns}
@@ -141,9 +139,8 @@ export default function DataTable({
           subtableData={subDatas}
           subColumns={subColumns}
           findSubtableData={findSubtableData}
-
-        /> */}
-        <ServerSideDataTable
+        />
+        {/* <ServerSideDataTable
           data={data}
           columns={columns}
           pageIndex={pageIndex}
@@ -155,7 +152,8 @@ export default function DataTable({
             onPaginChange?.(pageIndex, pageSize);
           }}
           isLoading={isLoading}
-        />
+          
+        /> */}
         ;{/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
       </div>
     </>
