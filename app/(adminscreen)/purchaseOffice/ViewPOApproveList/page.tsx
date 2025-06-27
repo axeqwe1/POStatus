@@ -18,8 +18,9 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
 
-  const [pageCount, setPageCount] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+  const [tab, SetTab] = useState<string>("all");
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -95,34 +96,28 @@ export default function Page() {
 
   const handleChangeTab = useCallback(
     (value: string) => {
-      const filtered = filterByTab(value, masterData);
-      setPoData(filtered);
+      // const filtered = filterByTab(value, masterData);
+      // setPoData(filtered);
+      SetTab(value);
     },
-    [filterByTab, masterData]
+    [filterByTab, masterData, tab]
   );
 
   const handdlerSetPageCount = (pageIndex: number, pageSize: number) => {
-    setPageCount(pageIndex);
+    console.log("Page Index : ", pageIndex);
+    setPage(pageIndex);
     setPageSize(pageSize);
   };
 
   const handleRefreshData = async () => {
     // if (userData?.supplierId) {
-    //   await fetchPO(userData.supplierId);
+    // await fetchPO();
     // }
   };
 
-  useEffect(() => {
-    console.log("Change Page : ", pageCount);
-  }, [pageCount]);
-
-  useEffect(() => {
-    fetchPO(pageCount, pageSize);
-  }, [pageCount, pageSize]);
-
   // useEffect(() => {
-  //   fetchPO(userData.supplierId);
-  // }, [userData]);
+  //   fetchPO();
+  // }, [pageCount, pageSize]);
 
   return (
     <div className="max-w-[1200px] mx-auto w-full">
@@ -155,7 +150,13 @@ export default function Page() {
         </div>
       ) : (
         <Suspense fallback={<div>Loading Table...</div>}>
-          <DataTable data={poData} onSuccess={handleRefreshData} />
+          <DataTable
+            data={poData}
+            onSuccess={handleRefreshData}
+            onPaginChange={handdlerSetPageCount}
+            isLoading={isLoading}
+            totalCount={countAll}
+          />
         </Suspense>
       )}
     </div>

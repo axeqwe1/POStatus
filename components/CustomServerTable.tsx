@@ -1,102 +1,100 @@
-import React, { useEffect, useState } from "react";
+// ✅ SERVER-SIDE VERSION OF CustomDataTable
+// แตกต่างหลักๆ: ใช้ manualPagination และ onPaginationChange trigger API
+
+"use client";
+
+import React, { SetStateAction, useEffect, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
   type ColumnDef,
   type PaginationState,
-  type SortingState,
-  type ColumnFiltersState,
-  type VisibilityState,
-  type RowSelectionState,
   flexRender,
 } from "@tanstack/react-table";
+
 import {
   Table,
+  TableHeader,
   TableBody,
+  TableRow,
   TableCell,
   TableHead,
-  TableHeader,
-  TableRow,
 } from "@/components/ui/table";
-import CustomTableFooter from "@/components/CustomTableFooter";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import {
+  ChevronFirst as IconChevronsLeft,
+  ChevronLeft as IconChevronLeft,
+  ChevronRight as IconChevronRight,
+  ChevronLast as IconChevronsRight,
+} from "lucide-react";
 
-interface ServerTableProps<TData, TSubData = TData> {
+interface ServerSideDataTableProps<TData> {
   data: TData[];
-  subData?: TSubData[] | any[];
-  totalCount: number;
   columns: ColumnDef<TData, any>[];
-  subColumns?: ColumnDef<TSubData, any>[];
-  initialPageSize?: number;
-  onQueryChange: (params: {
-    pageIndex: number;
-    pageSize: number;
-    sorting: SortingState;
-    columnFilters: ColumnFiltersState;
-  }) => void;
+  totalCount: number;
+  pageSize: number;
+  pageIndex: number;
+  onPaginationChange: (pagination: PaginationState) => void;
+  isLoading?: boolean;
 }
 
-export function CustomServerTable<TData, TSubData>({
+export function ServerSideDataTable<TData>({
   data,
-  subData = [],
-  totalCount,
   columns,
-  subColumns = [],
-  initialPageSize = 10,
-  onQueryChange,
-}: ServerTableProps<TData, TSubData>) {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: initialPageSize,
-  });
-
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-
-  // 🔁 trigger API call when params change
-  useEffect(() => {
-    onQueryChange({
-      pageIndex: pagination.pageIndex,
-      pageSize: pagination.pageSize,
-      sorting,
-      columnFilters,
-    });
-  }, [pagination, sorting, columnFilters]);
-
+  totalCount,
+  pageSize,
+  pageIndex,
+  onPaginationChange,
+  isLoading = false,
+}: ServerSideDataTableProps<TData>) {
+  const handlePaginChange = (
+    updaterOrValue: SetStateAction<PaginationState>
+  ) => {
+    if (typeof updaterOrValue === "function") {
+      const newPagination = (
+        updaterOrValue as (old: PaginationState) => PaginationState
+      )({
+        pageIndex,
+        pageSize,
+      });
+      onPaginationChange(newPagination);
+    } else {
+      // direct value
+      onPaginationChange(updaterOrValue);
+    }
+  };
   const table = useReactTable({
     data,
     columns,
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
-    pageCount: Math.ceil(totalCount / pagination.pageSize),
+    pageCount: Math.ceil(totalCount / pageSize),
     state: {
-      pagination,
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
     },
-    onPaginationChange: setPagination,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    getRowId: (row) => (row as any).id?.toString() ?? "",
+    manualPagination: true,
+    onPaginationChange: handlePaginChange,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const canPreviousPage = table.getCanPreviousPage();
+  const canNextPage = table.getCanNextPage();
+
   return (
-    <div>
-      <Table>
-        <TableHeader>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-[700px]">
+        <TableHeader className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -113,23 +111,108 @@ export function CustomServerTable<TData, TSubData>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center">
+                Loading...
+              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
 
-      <CustomTableFooter
-        table={table}
-        manualPagination
-        totalCount={totalCount}
-      />
+      <div className="flex items-center justify-between px-4 py-2 border-t">
+        <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+          Showing page {pageIndex + 1} of {table.getPageCount()}
+        </div>
+        <div className="flex w-full items-center gap-8 lg:w-fit">
+          <div className="hidden items-center gap-2 lg:flex">
+            <Label htmlFor="rows-per-page" className="text-sm font-medium">
+              Rows per page
+            </Label>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) =>
+                onPaginationChange({ pageIndex: 0, pageSize: Number(value) })
+              }
+            >
+              <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                <SelectValue placeholder={String(pageSize)} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 40, 50].map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex w-fit items-center justify-center text-sm font-medium">
+            Page {pageIndex + 1} of {table.getPageCount()}
+          </div>
+          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex hover:cursor-pointer"
+              onClick={() => onPaginationChange({ pageIndex: 0, pageSize })}
+              disabled={!canPreviousPage}
+            >
+              <span className="sr-only">Go to first page</span>
+              <IconChevronsLeft />
+            </Button>
+            <Button
+              variant="outline"
+              className="size-8 hover:cursor-pointer"
+              size="icon"
+              onClick={() =>
+                onPaginationChange({ pageIndex: pageIndex - 1, pageSize })
+              }
+              disabled={!canPreviousPage}
+            >
+              <span className="sr-only">Go to previous page</span>
+              <IconChevronLeft />
+            </Button>
+            <Button
+              variant="outline"
+              className="size-8 hover:cursor-pointer"
+              size="icon"
+              onClick={() =>
+                onPaginationChange({ pageIndex: pageIndex + 1, pageSize })
+              }
+              disabled={!canNextPage}
+            >
+              <span className="sr-only">Go to next page</span>
+              <IconChevronRight />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden size-8 lg:flex hover:cursor-pointer"
+              size="icon"
+              onClick={() =>
+                onPaginationChange({
+                  pageIndex: table.getPageCount() - 1,
+                  pageSize,
+                })
+              }
+              disabled={!canNextPage}
+            >
+              <span className="sr-only">Go to last page</span>
+              <IconChevronsRight />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
