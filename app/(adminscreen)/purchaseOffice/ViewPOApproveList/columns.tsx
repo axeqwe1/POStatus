@@ -73,7 +73,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, Target } from "lucide-react";
 import { DateRangeFilter } from "@/components/CustomDateFilter";
@@ -86,6 +86,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  deleteFile,
+  DownloadFile,
+  getFilePo,
+  uploadFile,
+} from "@/lib/api/uploadFile";
+import { formatDate, formatFileSize } from "@/utils/utilFunction";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -457,30 +464,37 @@ export const getColumns = (
       );
       const [showFileList, setShowFileList] = useState(false);
 
+      useEffect(() => {
+        console.log(uploadedFiles);
+      }, [uploadedFiles]);
       // Handle file upload
       const handleFileUpload = async (files: FileList) => {
         setIsUploading(true);
         try {
           const newFiles: FileItem[] = [];
 
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            // Upload logic here
-            const uploadedFile = await uploadFile(file, row.original.PONo);
-            newFiles.push({
-              id: uploadedFile.id,
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              uploadDate: new Date(),
-              url: uploadedFile.url,
-            });
-          }
+          // for (let i = 0; i < files.length; i++) {
+          //   const file = files[i];
+          //   console.log(file);
+          //   // Upload logic here
 
+          //   // newFiles.push({
+          //   //   id: uploadedFile.id,
+          //   //   name: file.name,
+          //   //   size: file.size,
+          //   //   type: file.type,
+          //   //   uploadDate: new Date(),
+          //   //   url: uploadedFile.url,
+          //   // });
+          //   console.log(uploadedFile);
+          // }
+          const res = await uploadFile(files, 1, row.original.PONo);
+          console.log(res);
+          const message = res.message;
           setUploadedFiles((prev) => [...prev, ...newFiles]);
-          toast.success(`Uploaded ${newFiles.length} file(s) successfully`);
-        } catch (error) {
-          toast.error("Failed to upload files");
+          toast.success(message);
+        } catch (error: any) {
+          toast.error(error.response.data.message || "File upload failed");
         } finally {
           setIsUploading(false);
         }
@@ -494,6 +508,47 @@ export const getColumns = (
           toast.success("File deleted successfully");
         } catch (error) {
           toast.error("Failed to delete file");
+        }
+      };
+
+      const handleDownloadFile = async (
+        fileId: string,
+        filenameData: string
+      ) => {
+        try {
+          const res = await DownloadFile(fileId);
+          console.log(res);
+          // ดึงชื่อไฟล์จาก header
+          const disposition = res.headers["content-disposition"] || "";
+          const filenameMatch = disposition.match(/filename="?(.+)"?/);
+          console.log(disposition, filenameMatch);
+          const filename = filenameData;
+
+          // ดึง content-type จาก header
+          const contentType =
+            res.headers["content-type"] || "application/octet-stream";
+
+          // สร้าง Blob โดยใส่ MIME type ให้ถูกต้อง
+          const blob = new Blob([res.data], { type: contentType });
+
+          // สร้าง URL จาก Blob
+          const url = window.URL.createObjectURL(blob);
+
+          // สร้างลิงก์ดาวน์โหลด
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", filename);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          // ล้าง URL object
+          window.URL.revokeObjectURL(url);
+
+          toast.success("File downloaded successfully");
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to download file");
         }
       };
 
@@ -519,6 +574,9 @@ export const getColumns = (
                 size="sm"
                 className="h-8 w-8 p-0"
                 disabled={isUploading}
+                // onClick={(e) => {
+                //   fetchFiles(row.original.PONo); // Fetch files when button is clicked
+                // }}
               >
                 {isUploading ? (
                   <IconLoader2 size={16} className="animate-spin" />
@@ -527,7 +585,7 @@ export const getColumns = (
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
+            <PopoverContent align="center" className="w-80 p-4">
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">
                   Upload Files for PO: {row.original.PONo}
@@ -588,7 +646,14 @@ export const getColumns = (
                               </div>
                               <div className="text-gray-500">
                                 {formatFileSize(file.size)} •{" "}
-                                {formatDate(file.uploadDate)}
+                                {new Date(file.uploadDate).toLocaleDateString(
+                                  "th-TH",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  }
+                                )}
                               </div>
                             </div>
                           </div>
@@ -597,7 +662,9 @@ export const getColumns = (
                               variant="ghost"
                               size="sm"
                               className="h-6 w-6 p-0"
-                              onClick={() => window.open(file.url, "_blank")}
+                              onClick={() =>
+                                handleDownloadFile(file.id, file.name)
+                              }
                             >
                               <IconDownload size={12} />
                             </Button>

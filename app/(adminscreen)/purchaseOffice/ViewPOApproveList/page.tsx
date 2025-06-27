@@ -2,9 +2,10 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import DataTable from "./data-table";
 import { GetAllPO, GetPO } from "@/lib/api/po";
-import { PO_Details, PO_Status } from "@/types/datatype";
+import { FileItem, PO_Details, PO_Status } from "@/types/datatype";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonTable } from "@/components/SkeletonTable";
+import { getFilePo } from "@/lib/api/uploadFile";
 
 export default function Page() {
   const [masterData, setMasterData] = useState<PO_Status[]>([]);
@@ -33,7 +34,9 @@ export default function Page() {
     setIsLoading(true);
     const res = await GetAllPO();
     if (res.status === 200) {
-      console.log(res.data);
+      console.log(
+        res.data.items.find((item: any) => item.poNo === "YPTPO-25-02108")
+      );
       const list: PO_Status[] = res.data.items.map((item: any) => ({
         PONo: item.poNo,
         Supreceive: item.receiveInfo?.suppRcvPO ?? false,
@@ -44,8 +47,21 @@ export default function Page() {
         supplierName: item?.supplierName,
         POReady: item?.poReady,
         ClosePO: item?.closePO,
+        attachedFiles:
+          item?.files.map((item: any) => {
+            return {
+              id: item.id,
+              name: item.originalName,
+              size: item.fileSize,
+              type: item.type,
+              uploadDate: new Date(item.uploadDate),
+              url: `/api/FileUpload/Download?pono=${item.poNo}&Company=POMatr&fileId=${item.id}`,
+            } as FileItem;
+          }) ?? [],
       }));
-      console.log(list);
+      console.log(
+        list.find((item: PO_Status) => item.PONo === "YPTPO-25-02108")
+      );
       // console.log(`Detail : ${detailList}`);
       setMasterData(list);
       // setPoDetailData(detailList);
@@ -69,6 +85,23 @@ export default function Page() {
     setIsLoading(false);
   }, []);
 
+  const fetchFiles = async (PONo: string) => {
+    console.log(PONo);
+    const res = await getFilePo(PONo, 1);
+    console.log(res.data);
+    const fileData = res.data.files;
+    const fileItems = fileData.map(
+      (file: any): FileItem => ({
+        id: file.id,
+        name: file.originalName,
+        size: file.fileSize,
+        type: file.type,
+        uploadDate: new Date(file.uploadDate),
+        url: `/api/FileUpload/Download?pono=${PONo}&Company=POMatr&fileId=${file.id}`,
+      })
+    );
+    return fileItems;
+  };
   // useEffect(() => {
   //   console.log(userData);
   //   if (userData != null) fetchPO(userData.supplierId);

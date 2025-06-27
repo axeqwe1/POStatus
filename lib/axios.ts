@@ -86,12 +86,13 @@ Axios.interceptors.response.use(
 
 const get = (
   url: string,
-  data = {},
+  params: any = {},
   config: AxiosRequestConfig = {}
 ): Promise<AxiosResponse> => {
   return Axios({
     method: "get",
     url,
+    params,
     ...config,
   });
 };
