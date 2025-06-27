@@ -139,7 +139,7 @@ export const getColumns = (
           </TooltipTrigger>
           <TooltipContent className="bg-neutral-800 text-white ">
             <span className="text-white ">
-              กรุณา Confirm PO เพื่อเปิดลิงค์ Download PO
+              Please Confirm PO before download.
             </span>
           </TooltipContent>
         </Tooltip>

@@ -96,9 +96,8 @@ export default function Page() {
 
   const handleChangeTab = useCallback(
     (value: string) => {
-      // const filtered = filterByTab(value, masterData);
-      // setPoData(filtered);
-      SetTab(value);
+      const filtered = filterByTab(value, masterData);
+      setPoData(filtered);
     },
     [filterByTab, masterData, tab]
   );
