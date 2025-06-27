@@ -1,7 +1,13 @@
 import { ColumnDef, RowExpanding } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PO_Details, PO_Status, Product, Variant } from "@/types/datatype"; // สมมุติ
+import {
+  FileItem,
+  PO_Details,
+  PO_Status,
+  Product,
+  Variant,
+} from "@/types/datatype"; // สมมุติ
 import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
 
 import {
@@ -19,9 +25,15 @@ import {
   IconCheck,
   IconCircleCheckFilled,
   IconClock,
+  IconCloudUpload,
   IconCross,
   IconDotsVertical,
+  IconDownload,
   IconLoader,
+  IconLoader2,
+  IconPaperclip,
+  IconPlus,
+  IconTrash,
   IconX,
   IconXPowerY,
 } from "@tabler/icons-react";
@@ -55,7 +67,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +79,13 @@ import { ArrowUpDown, Target } from "lucide-react";
 import { DateRangeFilter } from "@/components/CustomDateFilter";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+
+import { FileIcon } from "@/utils/fileIcon";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -91,24 +114,37 @@ export const getColumns = (
         </Button>
       </div>
     ),
-    cell: ({ row }) => (
-      <a
-        href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
-        // onMouseDown={() => {
-        //   if (!row.original.Supreceive) {
-        //     setEditItem?.(row.original.PONo);
-        //   }
-        //   window.open(
-        //     `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
-        //     "_blank"
-        //   );
-        // }}
-        target="_blank"
-        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
-      >
-        {row.original.PONo}
-      </a>
-    ),
+    cell: ({ row }) => {
+      return row.original.Supreceive ? (
+        <a
+          href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
+          // onMouseDown={() => {
+          //   if (!row.original.Supreceive) {
+          //     setEditItem?.(row.original.PONo);
+          //   }
+          //   window.open(
+          //     `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
+          //     "_blank"
+          //   );
+          // }}
+          target="_blank"
+          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+        >
+          {row.original.PONo}
+        </a>
+      ) : (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="hover:cursor-default">{row.original.PONo}</span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-neutral-800 text-white ">
+            <span className="text-white ">
+              กรุณา Confirm PO เพื่อเปิดลิงค์ Download PO
+            </span>
+          </TooltipContent>
+        </Tooltip>
+      );
+    },
   },
   {
     accessorKey: "supplierName",
@@ -199,14 +235,24 @@ export const getColumns = (
 
   {
     accessorKey: "ApproveDate",
-    accessorFn: (row) => row.sendDate,
+    accessorFn: (row) => {
+      return !row.ClosePO
+        ? "Not Approved"
+        : row.sendDate
+        ? new Date(row.sendDate).toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : "Not Approved";
+    },
     header: ({ column }) => (
       <Button
         className="hover:cursor-pointer !p-0"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Approve Date
+        Lastest Approve Date
         <ArrowUpDown />
       </Button>
     ),
@@ -214,7 +260,9 @@ export const getColumns = (
       const date = row.original.sendDate;
       return (
         <span className="pl-1">
-          {row.original.sendDate
+          {!row.original.ClosePO
+            ? "Not Approved"
+            : row.original.sendDate
             ? new Date(row.original.sendDate).toLocaleDateString("th-TH", {
                 day: "2-digit",
                 month: "2-digit",
@@ -295,91 +343,282 @@ export const getColumns = (
       return (
         <>
           <div className="flex gap-3 pl-4">
-            {!row.original.Supreceive && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button className="w-[30px] h-[30px] bg-neutral-200 hover:bg-neutral-300/70 hover:cursor-pointer">
-                    <IconCheck className="text-green-500 font-bold" size={40} />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogPortal>
-                  <AlertDialogContent className="sm:max-w-[425px]">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you want to Confirm PO?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        Confirm yourdata and Confirm your data from our servers.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="hover:cursor-pointer">
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction asChild>
+            {row.original.ClosePO ? (
+              <>
+                {/* Confirm PO Button */}
+                {!row.original.Supreceive && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button className="w-[25px] h-[25px] bg-neutral-200 hover:bg-neutral-300/70 hover:cursor-pointer">
+                        <IconCheck
+                          className="text-green-500 font-bold"
+                          size={40}
+                        />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogPortal>
+                      <AlertDialogContent className="sm:max-w-[425px]">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you want to Confirm PO?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            confirm your data.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="hover:cursor-pointer">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction asChild>
+                            <Button
+                              type="button"
+                              className="hover:cursor-pointer text-white"
+                              onClick={() => setEditItem?.(row.original.PONo)}
+                            >
+                              Confirm
+                            </Button>
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialogPortal>
+                  </AlertDialog>
+                )}
+
+                {/* Cancel PO Button */}
+                <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="w-[25px] h-[25px] hover:cursor-pointer"
+                    >
+                      <IconX />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogPortal>
+                    <AlertDialogContent className="sm:max-w-[425px] z-50">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you want to Cancel PO?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          cancel your data.
+                          <Label className="mt-3">Reason</Label>
+                          <Textarea
+                            className="mt-2"
+                            placeholder="Enter reason for cancel"
+                            onChange={(e) => {
+                              setRemark?.(e.target.value);
+                            }}
+                          />
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="hover:cursor-pointer">
+                          Cancel
+                        </AlertDialogCancel>
                         <Button
                           type="button"
-                          className="hover:cursor-pointer text-white"
-                          onClick={() => setEditItem?.(row.original.PONo)}
+                          className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
+                          onClick={handleSubmit}
                         >
                           Confirm
                         </Button>
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialogPortal>
-              </AlertDialog>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialogPortal>
+                </AlertDialog>
+              </>
+            ) : (
+              <span>Not Available</span>
             )}
-            <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant={"destructive"}
-                  className="w-[30px] h-[30px] hover:cursor-pointer"
-                >
-                  <IconX />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogPortal>
-                <AlertDialogContent className={`sm:max-w-[425px] z-50`}>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you want to Cancel PO?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently Cancel
-                      yourdata and Cancel your data from our servers.
-                      <Label className="mt-3">Reason</Label>
-                      <Textarea
-                        className="mt-2"
-                        placeholder="Enter reason for cancel"
-                        onChange={(e) => {
-                          setRemark?.(e.target.value);
-                        }}
-                      />
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="hover:cursor-pointer">
-                      Cancel
-                    </AlertDialogCancel>
-                    {/* <AlertDialogAction></AlertDialogAction> */}
-                    <Button
-                      type="button"
-                      className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
-                      onClick={handleSubmit}
-                    >
-                      Confirm
-                    </Button>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialogPortal>
-            </AlertDialog>
           </div>
 
           {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
         </>
+      );
+    },
+  },
+  {
+    id: "attachedFiles",
+    accessorKey: "attachedFiles",
+    header: () => (
+      <div className="flex items-center gap-2">
+        <IconPaperclip size={16} />
+        Attached Files
+      </div>
+    ),
+    cell: ({ row }) => {
+      const [isUploading, setIsUploading] = useState(false);
+      const [uploadedFiles, setUploadedFiles] = useState<FileItem[]>(
+        row.original.attachedFiles || []
+      );
+      const [showFileList, setShowFileList] = useState(false);
+
+      // Handle file upload
+      const handleFileUpload = async (files: FileList) => {
+        setIsUploading(true);
+        try {
+          const newFiles: FileItem[] = [];
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            // Upload logic here
+            const uploadedFile = await uploadFile(file, row.original.PONo);
+            newFiles.push({
+              id: uploadedFile.id,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              uploadDate: new Date(),
+              url: uploadedFile.url,
+            });
+          }
+
+          setUploadedFiles((prev) => [...prev, ...newFiles]);
+          toast.success(`Uploaded ${newFiles.length} file(s) successfully`);
+        } catch (error) {
+          toast.error("Failed to upload files");
+        } finally {
+          setIsUploading(false);
+        }
+      };
+
+      // Handle file delete
+      const handleFileDelete = async (fileId: string) => {
+        try {
+          await deleteFile(fileId, row.original.PONo);
+          setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
+          toast.success("File deleted successfully");
+        } catch (error) {
+          toast.error("Failed to delete file");
+        }
+      };
+
+      return (
+        <div className="flex items-center gap-2">
+          {/* File Count Badge */}
+          {uploadedFiles.length > 0 && (
+            <Badge
+              variant="secondary"
+              className="text-xs cursor-pointer"
+              onClick={() => setShowFileList(!showFileList)}
+            >
+              <IconPaperclip size={12} className="mr-1" />
+              {uploadedFiles.length}
+            </Badge>
+          )}
+
+          {/* Upload Button */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <IconLoader2 size={16} className="animate-spin" />
+                ) : (
+                  <IconPlus size={16} />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">
+                  Upload Files for PO: {row.original.PONo}
+                </h4>
+
+                {/* File Drop Zone */}
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                      handleFileUpload(files);
+                    }
+                  }}
+                  onClick={() => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.multiple = true;
+                    input.accept = ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png";
+                    input.onchange = (e) => {
+                      const files = (e.target as HTMLInputElement).files;
+                      if (files) handleFileUpload(files);
+                    };
+                    input.click();
+                  }}
+                >
+                  <IconCloudUpload
+                    size={32}
+                    className="mx-auto mb-2 text-gray-400"
+                  />
+                  <p className="text-sm text-gray-600">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    PDF, DOC, XLS, Images (Max 10MB each)
+                  </p>
+                </div>
+
+                {/* Current Files List */}
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-medium text-gray-700">
+                      Uploaded Files ({uploadedFiles.length})
+                    </h5>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {uploadedFiles.map((file) => (
+                        <div
+                          key={file.id}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                        >
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <FileIcon fileType={file.type} />
+                            <div className="flex-1 min-w-0">
+                              <div className="truncate font-medium">
+                                {file.name}
+                              </div>
+                              <div className="text-gray-500">
+                                {formatFileSize(file.size)} •{" "}
+                                {formatDate(file.uploadDate)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => window.open(file.url, "_blank")}
+                            >
+                              <IconDownload size={12} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                              onClick={() => handleFileDelete(file.id)}
+                            >
+                              <IconTrash size={12} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       );
     },
   },

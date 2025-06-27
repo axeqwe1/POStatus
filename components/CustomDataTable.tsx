@@ -123,12 +123,13 @@ export function CustomDataTable<TData, TSubData>({
   });
 
   useEffect(() => {
+    console.log(subtableData.length);
     if (subtableData.length > 0) {
       // If subColumns are provided, set the subtableData to an empty array initially
       setIsLoading(false);
       console.log("Subtable columns provided, initializing subtable data.");
     }
-  }, [subtableData, subColumns]);
+  }, [subtableData, subColumns, openRow]);
 
   return (
     <div className={className}>

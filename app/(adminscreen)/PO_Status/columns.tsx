@@ -14,6 +14,7 @@ import {
 } from "@radix-ui/react-dropdown-menu";
 import { Label } from "@/components/ui/label";
 import {
+  IconAutomation,
   IconCancel,
   IconCheck,
   IconCircleCheckFilled,
@@ -53,16 +54,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, Target } from "lucide-react";
 import { DateRangeFilter } from "@/components/CustomDateFilter";
+import { Textarea } from "@/components/ui/textarea";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
 export const getColumns = (
-  onCancel?: (id: string) => void,
+  onCancel?: (id: string, remark: string) => void,
   isEdit?: boolean,
   setIsEdit?: (isEdit: boolean) => void,
   editItem?: string,
@@ -86,24 +93,37 @@ export const getColumns = (
         </Button>
       </div>
     ),
-    cell: ({ row }) => (
-      <a
-        href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
-        // onMouseDown={() => {
-        //   if (!row.original.Supreceive) {
-        //     setEditItem?.(row.original.PONo);
-        //   }
-        //   window.open(
-        //     `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
-        //     "_blank"
-        //   );
-        // }}
-        target="_blank"
-        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
-      >
-        {row.original.PONo}
-      </a>
-    ),
+    cell: ({ row }) => {
+      return row.original.Supreceive ? (
+        <a
+          href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
+          // onMouseDown={() => {
+          //   if (!row.original.Supreceive) {
+          //     setEditItem?.(row.original.PONo);
+          //   }
+          //   window.open(
+          //     `${downloadUrl}pono=${row.original.PONo}&Company=POMatr`,
+          //     "_blank"
+          //   );
+          // }}
+          target="_blank"
+          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+        >
+          {row.original.PONo}
+        </a>
+      ) : (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="hover:cursor-default">{row.original.PONo}</span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-neutral-800 text-white ">
+            <span className="text-white ">
+              กรุณา Confirm PO เพื่อเปิดลิงค์ Download PO
+            </span>
+          </TooltipContent>
+        </Tooltip>
+      );
+    },
   },
   {
     accessorKey: "Status",
@@ -114,6 +134,8 @@ export const getColumns = (
         ? "Cancel"
         : row.Supreceive
         ? "Confirm"
+        : !row.ClosePO
+        ? "Process.. "
         : "Pending",
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
@@ -139,15 +161,19 @@ export const getColumns = (
               ? "bg-red-200 dark:bg-red-900"
               : isConfirmed
               ? "bg-green-200 dark:bg-green-900"
-              : "bg-yellow-200 dark:bg-yellow-900"
+              : row.original.ClosePO
+              ? "bg-yellow-200 dark:bg-yellow-900"
+              : "bg-blue-200 dark:bg-blue-900"
           }`}
         >
           {isCancel ? (
             <IconCancel className="fill-red-500 dark:fill-red-400" />
           ) : isConfirmed ? (
             <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          ) : (
+          ) : row.original.ClosePO ? (
             <IconClock className="fill-yellow-500 dark:fill-yellow-400" />
+          ) : (
+            <IconAutomation className="fill-blue-500 dark:fill-blue-400" />
           )}
           {isCancel === 1
             ? "RequestCancel"
@@ -155,7 +181,9 @@ export const getColumns = (
             ? "Cancel"
             : isConfirmed
             ? "Confirm"
-            : "Pending"}
+            : row.original.ClosePO
+            ? "Pending"
+            : "Process.. "}
         </Badge>
       );
     },
@@ -236,87 +264,128 @@ export const getColumns = (
         </>
       );
     },
-    cell: ({ row }) => (
-      <>
-        <div className="flex gap-3 pl-4">
-          {!row.original.Supreceive && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="w-[30px] h-[30px] bg-neutral-200 hover:bg-neutral-300/70 hover:cursor-pointer">
-                  <IconCheck className="text-green-500 font-bold" size={40} />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogPortal>
-                <AlertDialogContent className="sm:max-w-[425px]">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you want to Confirm PO?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently
-                      Confirm yourdata and Confirm your data from our servers.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="hover:cursor-pointer">
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction asChild>
-                      <Button
-                        type="button"
-                        className="hover:cursor-pointer text-white"
-                        onClick={() => setEditItem?.(row.original.PONo)}
-                      >
-                        Confirm
-                      </Button>
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialogPortal>
-            </AlertDialog>
-          )}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant={"destructive"}
-                className="w-[30px] h-[30px] hover:cursor-pointer"
-              >
-                <IconX />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogPortal>
-              <AlertDialogContent className="sm:max-w-[425px]">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Are you want to Cancel PO?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently Cancel
-                    yourdata and Cancel your data from our servers.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="hover:cursor-pointer">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction asChild>
-                    <Button
-                      type="button"
-                      className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
-                      onClick={() => onCancel?.(row.original.PONo)}
-                    >
-                      Confirm
-                    </Button>
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialogPortal>
-          </AlertDialog>
-        </div>
+    cell: ({ row }) => {
+      const [remark, setRemark] = useState("");
+      const [isOpen, setIsOpen] = useState(false);
+      const [shouldClose, setShouldClose] = useState(false);
 
-        {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
-      </>
-    ),
+      const handleSubmit = (e: any) => {
+        if (remark.trim() === "") {
+          toast.error("Please enter a reason for cancellation.");
+          return;
+        }
+
+        toast.success("Send request success.");
+        onCancel?.(row.original.PONo, remark);
+
+        setShouldClose(true);
+        setTimeout(() => {
+          setIsOpen(false);
+          setShouldClose(false);
+        }, 1000); // ตรงกับ duration
+        e.preventDefault();
+      };
+
+      return (
+        <>
+          <div className="flex gap-3 pl-4">
+            {row.original.ClosePO ? (
+              <>
+                {/* Confirm PO Button */}
+                {!row.original.Supreceive && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button className="w-[25px] h-[25px] bg-neutral-200 hover:bg-neutral-300/70 hover:cursor-pointer">
+                        <IconCheck
+                          className="text-green-500 font-bold"
+                          size={40}
+                        />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogPortal>
+                      <AlertDialogContent className="sm:max-w-[425px]">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you want to Confirm PO?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            confirm your data.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="hover:cursor-pointer">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction asChild>
+                            <Button
+                              type="button"
+                              className="hover:cursor-pointer text-white"
+                              onClick={() => setEditItem?.(row.original.PONo)}
+                            >
+                              Confirm
+                            </Button>
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialogPortal>
+                  </AlertDialog>
+                )}
+
+                {/* Cancel PO Button */}
+                <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="w-[25px] h-[25px] hover:cursor-pointer"
+                    >
+                      <IconX />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogPortal>
+                    <AlertDialogContent className="sm:max-w-[425px] z-50">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you want to Cancel PO?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          cancel your data.
+                          <Label className="mt-3">Reason</Label>
+                          <Textarea
+                            className="mt-2"
+                            placeholder="Enter reason for cancel"
+                            onChange={(e) => {
+                              setRemark?.(e.target.value);
+                            }}
+                          />
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="hover:cursor-pointer">
+                          Cancel
+                        </AlertDialogCancel>
+                        <Button
+                          type="button"
+                          className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
+                          onClick={handleSubmit}
+                        >
+                          Confirm
+                        </Button>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialogPortal>
+                </AlertDialog>
+              </>
+            ) : (
+              <span>Not Available</span>
+            )}
+          </div>
+
+          {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
+        </>
+      );
+    },
   },
 ];
 

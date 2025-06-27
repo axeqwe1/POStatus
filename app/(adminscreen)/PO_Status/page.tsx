@@ -13,6 +13,7 @@ export default function Page() {
   const [countPending, setCountPending] = useState(0);
   const [countConfirm, setCountConfirm] = useState(0);
   const [countCancel, setCountCancel] = useState(0);
+  const [countProcess, setCountProcess] = useState(0);
   const [countAll, setCountAll] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
@@ -35,25 +36,31 @@ export default function Page() {
         confirmDate: item.receiveInfo?.suppRcvDate ?? "",
         cancelStatus: item.receiveInfo?.suppCancelPO ?? 0,
         sendDate: item?.approveDate ?? "",
-        PODetails: item.details,
         finalETADate: item?.finalETADate,
         supplierName: item?.supplierName,
+        PODetails: item?.details ?? [],
+        POReady: item?.poReady,
+        ClosePO: item?.closePO,
       }));
       console.log(list);
       // console.log(`Detail : ${detailList}`);
       setMasterData(list);
       // setPoDetailData(detailList);
-      const notConfirm = list.filter(
-        (item) => !item.Supreceive && item.cancelStatus === 0
+      const pendding = list.filter(
+        (item) => !item.Supreceive && item.ClosePO && item.cancelStatus === 0
       );
       const confirm = list.filter(
-        (item) => item.Supreceive && item.cancelStatus === 0
+        (item) => item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
+      const process = list.filter(
+        (item) => !item.ClosePO && item.cancelStatus === 0
       );
       const cancel = list.filter((item) => item.cancelStatus === 1);
-      setCountPending(notConfirm.length);
+      setCountPending(pendding.length);
       setCountConfirm(confirm.length);
       setCountAll(list.length);
       setCountCancel(cancel.length);
+      setCountProcess(process.length);
       setPoData(list); // default view
     }
     setIsLoading(false);
@@ -73,6 +80,9 @@ export default function Page() {
     }
     if (value === "cancel") {
       return data.filter((item) => item.cancelStatus === 1);
+    }
+    if (value === "process") {
+      return data.filter((item) => !item.ClosePO && item.cancelStatus === 0);
     }
     return data;
   }, []);
@@ -105,6 +115,9 @@ export default function Page() {
         <TabsList>
           <TabsTrigger value="all">
             <p>{`ALL (${countAll})`}</p>
+          </TabsTrigger>
+          <TabsTrigger value="process">
+            <p>{`Process (${countProcess})`}</p>
           </TabsTrigger>
           <TabsTrigger value="pending">
             <p>{`Pending (${countPending})`}</p>

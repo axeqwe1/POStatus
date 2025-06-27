@@ -45,6 +45,7 @@ import {
 import {
   masterDataSidebar,
   purchasingOfficerSideBar,
+  UserManagement,
 } from "@/data/sidebar-menu";
 import { useAuth } from "@/context/authContext";
 const data = {
@@ -64,11 +65,11 @@ const data = {
     //   url: "/payments",
     //   icon: IconListDetails,
     // },
-    {
-      title: "User",
-      url: "/users",
-      icon: IconUsers,
-    },
+    // {
+    //   title: "User",
+    //   url: "/users",
+    //   icon: IconUsers,
+    // },
     // {
     //   title: "Supplier",
     //   url: "/Supplier",
@@ -120,10 +121,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="">
         {/* <NavMain items={fillterNav} /> */}
         <NavSidebar items={fillterNav} LabelName={"Supplier Menu"} />
-        <NavSidebar
-          items={purchasingOfficerSideBar}
-          LabelName={"Purchasing Officer Menu"}
-        />
+        {(user?.role === "Admin" ||
+          user?.role === "PurchaseOfficer" ||
+          user?.role === "SupperAdmin") && (
+          <NavSidebar
+            items={purchasingOfficerSideBar}
+            LabelName={"Purchasing Officer Menu"}
+          />
+        )}
+
+        {(user?.role === "Admin" || user?.role === "SupperAdmin") && (
+          <NavSidebar items={UserManagement} LabelName={"User Management"} />
+        )}
+
         {/* <NavSidebar items={userDataSideBar} LabelName={"User"} /> */}
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSidebar items={masterDataSidebar} LabelName={"Master Data"} />

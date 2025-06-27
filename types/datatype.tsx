@@ -27,13 +27,15 @@ export interface PoData {
 export interface PO_Status {
   PONo: string;
   Supreceive: boolean;
-  POReady: boolean;
+  POReady?: boolean;
+  ClosePO?: boolean; // true ถ้า PO ถูกปิดแล้ว
   confirmDate: string;
   cancelStatus?: number; // true ถ้า PO ถูกยกเลิก
   sendDate: Date;
   PODetails: PO_Details[];
   finalETADate?: Date;
   supplierName?: string;
+  attachedFiles?: FileItem[]; // เพิ่ม field นี้
 }
 
 export interface PO_Details {
@@ -68,4 +70,13 @@ export interface User {
   roleId: number;
   supplierCode?: string; // optional, ถ้าเป็นผู้ใช้ที่เป็น supplier
   supplierName?: string;
+}
+
+export interface FileItem {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  uploadDate: Date;
+  url: string;
 }

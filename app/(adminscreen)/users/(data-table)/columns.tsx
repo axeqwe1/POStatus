@@ -132,10 +132,20 @@ export const getColumns = (
       return (
         <Badge
           className={`text-xs text-white w-15 ${
-            row.original.role == "Admin" ? "bg-secondary" : "bg-primary"
+            row.original.role == "Admin"
+              ? "bg-secondary"
+              : row.original.role == "SupperAdmin"
+              ? "bg-amber-500"
+              : row.original.role == "PurchaseOfficer"
+              ? "bg-blue-500"
+              : "bg-primary"
           }`}
         >
-          {row.original.role}
+          {row.original.role == "SupperAdmin"
+            ? "SupAdmin"
+            : row.original.role == "PurchaseOfficer"
+            ? "Purchase"
+            : row.original.role}
         </Badge>
       );
     },

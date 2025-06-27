@@ -11,6 +11,7 @@ import {
   IconShirtFilled,
   IconTower,
   IconUser,
+  IconUsers,
 } from "@tabler/icons-react";
 import { BookAIcon, Bot, Settings2, SquareActivityIcon } from "lucide-react";
 
@@ -133,5 +134,13 @@ export const purchasingOfficerSideBar: SidebarItem[] = [
     title: "Request Cancel List",
     url: "/purchaseOffice/RequestCancelList",
     icon: IconDeviceTabletCancel,
+  },
+];
+
+export const UserManagement: SidebarItem[] = [
+  {
+    title: "User Management",
+    url: "/users",
+    icon: IconUsers,
   },
 ];
