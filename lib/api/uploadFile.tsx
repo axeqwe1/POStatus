@@ -1,3 +1,4 @@
+import { AxiosDefaults, AxiosHeaders } from "axios";
 import { apiService } from "../axios";
 
 // API Functions (ตัวอย่าง)
@@ -27,19 +28,20 @@ export const uploadFile = async (
   }
 };
 
-export const deleteFile = async (
-  fileId: string,
-  poNo: string
-): Promise<void> => {
-  const response = await fetch(`/api/delete-file/${fileId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ poNo }),
-  });
-
-  if (!response.ok) throw new Error("Delete failed");
+export const deleteFile = async (fileId: string) => {
+  try {
+    const response = await apiService._delete(
+      `api/FileUpload/delete/${fileId}`
+    );
+    if (response.status !== 200) {
+      throw new Error("Failed to delete file");
+    }
+    console.log("File deleted successfully:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    throw new Error("File deletion failed");
+  }
 };
 
 export const DownloadFile = async (fileId: string) => {
@@ -67,5 +69,21 @@ export const getFilePo = async (PONo: string, uploadType: number) => {
   } catch (error) {
     console.error("Error fetching file PO:", error);
     throw new Error("Failed to fetch file PO");
+  }
+};
+
+export const UpdateDescription = async (
+  fileId: string,
+  description: string
+) => {
+  try {
+    const response = await apiService.put(
+      `api/FileUpload/update-description/${fileId}`,
+      { description } // ส่ง description เป็น object
+    );
+    return response;
+  } catch (error) {
+    console.error("Error updating file description:", error);
+    throw new Error("Failed to update file description");
   }
 };

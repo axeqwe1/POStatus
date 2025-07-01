@@ -1,10 +1,16 @@
 "use client";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import DataTable from "./data-table";
-import { GetPO } from "@/lib/api/po";
-import { PO_Details, PO_Status } from "@/types/datatype";
+import { GetPO, GetPOByPONo } from "@/lib/api/po";
+import { FileItem, PO_Details, PO_Status } from "@/types/datatype";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonTable } from "@/components/SkeletonTable";
+import { toast } from "sonner";
+import {
+  deleteFile,
+  UpdateDescription,
+  uploadFile,
+} from "@/lib/api/uploadFile";
 
 export default function Page() {
   const [masterData, setMasterData] = useState<PO_Status[]>([]);
@@ -17,6 +23,12 @@ export default function Page() {
   const [countAll, setCountAll] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null); // เพิ่ม state สำหรับ user
+
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [tab, SetTab] = useState<string>("all");
+
+  const masterDataRef = useRef<PO_Status[]>([]);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -38,13 +50,25 @@ export default function Page() {
         sendDate: item?.approveDate ?? "",
         finalETADate: item?.finalETADate,
         supplierName: item?.supplierName,
-        PODetails: item?.details ?? [],
         POReady: item?.poReady,
         ClosePO: item?.closePO,
+        attachedFiles:
+          item?.files.map((item: any) => {
+            return {
+              id: item.id,
+              name: item.originalName,
+              size: item.fileSize,
+              type: item.type,
+              uploadDate: new Date(item.uploadDate),
+              url: item.url,
+              remark: item.remark || "", // เพิ่ม remark ถ้ามี
+              uploadType: item.uploadByType, // เพิ่ม uploadType ถ้ามี
+            } as FileItem;
+          }) ?? [],
       }));
-      console.log(list);
       // console.log(`Detail : ${detailList}`);
-      setMasterData(list);
+      masterDataRef.current = [...list]; // เก็บข้อมูล masterData ใน ref เพื่อไม่ให้เกิดการ re-render ทุกครั้งที่เปลี่ยนแปลง
+      setMasterData([...list]);
       // setPoDetailData(detailList);
       const pendding = list.filter(
         (item) => !item.Supreceive && item.ClosePO && item.cancelStatus === 0
@@ -61,7 +85,7 @@ export default function Page() {
       setCountAll(list.length);
       setCountCancel(cancel.length);
       setCountProcess(process.length);
-      setPoData(list); // default view
+      setPoData([...list]); // <-- เปลี่ยน reference → React รู้ว่าต้อง re-render
     }
     setIsLoading(false);
   }, []);
@@ -98,12 +122,178 @@ export default function Page() {
   const handleRefreshData = async () => {
     if (userData?.supplierId) {
       await fetchPO(userData.supplierId);
+      await handleChangeTab(tab);
     }
   };
 
   // useEffect(() => {
   //   fetchPO(userData.supplierId);
   // }, [userData]);
+
+  const handdlerSetPageCount = (pageIndex: number, pageSize: number) => {
+    console.log("Page Index : ", pageIndex);
+    setPage(pageIndex);
+    setPageSize(pageSize);
+  };
+
+  const uploadFiles = async (
+    files: FileList,
+    PONo: string,
+    uploadType: number
+  ) => {
+    await toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          const res = await uploadFile(files, uploadType, PONo);
+          const resFiles = await GetPOByPONo(PONo);
+          console.log(resFiles);
+          const newFiles = resFiles.data.items.files.map((item: any) => ({
+            id: item.id,
+            name: item.originalName,
+            size: item.fileSize,
+            type: item.type,
+            uploadDate: new Date(item.uploadDate),
+            url: item.url,
+            uploadType: item.uploadByType, // เพิ่ม uploadType ถ้ามี
+          }));
+
+          // อัปเดต masterData (ref และ state)
+          masterDataRef.current = masterDataRef.current.map((po: any) =>
+            po.PONo === PONo ? { ...po, attachedFiles: newFiles } : po
+          );
+          setMasterData((prev: any) =>
+            prev.map((po: any) =>
+              po.PONo === PONo ? { ...po, attachedFiles: newFiles } : po
+            )
+          );
+          setPoData((prev) =>
+            prev.map((po) => {
+              if (po.PONo !== PONo) return po;
+              // เปลี่ยนเฉพาะค่าใน field `attachedFiles` แต่ไม่สร้าง object ใหม่ (หรือให้น้อยที่สุด)
+              return {
+                ...po,
+                attachedFiles: newFiles,
+              };
+            })
+          );
+          resolve();
+        } catch (error: any) {
+          reject(error);
+        }
+      }),
+      {
+        loading: "Uploading...",
+        success: "Upload Success",
+        error: (err: any) =>
+          err?.response?.data?.message || err?.message || "File upload failed",
+      }
+    );
+  };
+
+  const updateDescription = async (
+    fileId: string,
+    description: string,
+    PONo: string
+  ) => {
+    try {
+      toast.promise(
+        new Promise((resolve, reject) => {
+          UpdateDescription(fileId, description).then(async (res) => {
+            if (res.status === 200) {
+              const resFiles = await GetPOByPONo(PONo);
+              console.log(resFiles);
+              const newFiles = resFiles.data.items.files.map((item: any) => ({
+                id: item.id,
+                name: item.originalName,
+                size: item.fileSize,
+                type: item.type,
+                uploadDate: new Date(item.uploadDate),
+                url: item.url,
+                remark: item.remark, // ✅ ใส่ description ใหม่ถ้ามี
+                uploadType: item.uploadByType, // เพิ่ม uploadType ถ้ามี
+              }));
+
+              // update masterDataRef
+              // อัปเดตทั้ง masterDataRef และ poData
+              masterDataRef.current = masterDataRef.current.map((po: any) =>
+                po.PONo === PONo ? { ...po, attachedFiles: newFiles } : po
+              );
+
+              setPoData((prev: any) =>
+                prev.map((po: any) =>
+                  po.PONo === PONo ? { ...po, attachedFiles: newFiles } : po
+                )
+              );
+
+              resolve("Description updated successfully");
+            } else {
+              reject(new Error("Failed to update description"));
+            }
+          });
+        }),
+        {
+          loading: "Updating description...",
+          success: "Description updated successfully",
+          error: (err: any) => `Error: ${err.message}`,
+        }
+      );
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to update description"
+      );
+    }
+  };
+  const deleteFiles = async (fileId: string) => {
+    await toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          const res = await deleteFile(fileId);
+          if (res.status === 200) {
+            // อัปเดต masterData (ref และ state)
+            masterDataRef.current = masterDataRef.current.map((po: any) => ({
+              ...po,
+              attachedFiles: po.attachedFiles.filter(
+                (file: FileItem) => file.id !== fileId
+              ),
+            }));
+            setMasterData((prev: any) =>
+              prev.map((po: any) => ({
+                ...po,
+                attachedFiles: po.attachedFiles.filter(
+                  (file: FileItem) => file.id !== fileId
+                ),
+              }))
+            );
+            setPoData((prev: any) =>
+              prev.map((po: any) => ({
+                ...po,
+                attachedFiles: po.attachedFiles.filter(
+                  (file: FileItem) => file.id !== fileId
+                ),
+              }))
+            );
+            resolve();
+          } else {
+            reject(new Error(res?.data.response || "Failed to delete file"));
+          }
+        } catch (err: any) {
+          reject(
+            err?.response?.data?.message ||
+              err?.message ||
+              "Failed to delete file"
+          );
+        }
+      }),
+      {
+        loading: "Deleting file...",
+        success: "File deleted successfully",
+        error: (msg) => msg,
+      }
+    );
+  };
 
   return (
     <div className="max-w-[1200px] mx-auto w-full">
@@ -136,7 +326,16 @@ export default function Page() {
         </div>
       ) : (
         <Suspense fallback={<div>Loading Table...</div>}>
-          <DataTable data={poData} onSuccess={handleRefreshData} />
+          <DataTable
+            data={poData}
+            onSuccess={handleRefreshData}
+            onPaginChange={handdlerSetPageCount}
+            isLoading={isLoading}
+            totalCount={countAll}
+            uploadFiles={uploadFiles}
+            deleteFile={deleteFiles}
+            updateDescriptionFile={updateDescription}
+          />
         </Suspense>
       )}
     </div>

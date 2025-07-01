@@ -19,9 +19,14 @@ import {
   IconCheck,
   IconCircleCheckFilled,
   IconClock,
+  IconCloudUpload,
   IconCross,
   IconDotsVertical,
+  IconDownload,
   IconLoader,
+  IconPaperclip,
+  IconPencil,
+  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import { DialogHeader } from "@/components/ui/dialog";
@@ -60,11 +65,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, Target } from "lucide-react";
 import { DateRangeFilter } from "@/components/CustomDateFilter";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { formatFileSize } from "@/utils/utilFunction";
+import { FileIcon } from "@/utils/fileIcon";
+import { DownloadFile } from "@/lib/api/uploadFile";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -74,7 +87,20 @@ export const getColumns = (
   setIsEdit?: (isEdit: boolean) => void,
   editItem?: string,
   setEditItem?: (item: string) => void,
-  isDesktop?: boolean
+  isDesktop?: boolean,
+  openPopoverPONo?: string | null,
+  setOpenPopoverPONo?: (PONo: string | null) => void,
+  responseUpload?: (
+    files: FileList,
+    PONo: string,
+    uploadType: number
+  ) => Promise<void>,
+  deleteFiles?: (fileId: string) => void,
+  updateDesc?: (
+    fileId: string,
+    description: string,
+    PONo: string
+  ) => Promise<void>
 ): ColumnDef<PO_Status>[] => [
   {
     id: "PONo",
@@ -206,11 +232,15 @@ export const getColumns = (
       const date = row.original.sendDate;
       return (
         <span className="pl-1">
-          {new Date(row.original.sendDate).toLocaleDateString("th-TH", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })}
+          {!row.original.ClosePO
+            ? "Not Approved"
+            : row.original.sendDate
+            ? new Date(row.original.sendDate).toLocaleDateString("th-TH", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })
+            : "Not Approved"}
           {/* {date ? new Date(date).toLocaleDateString() : "Not downloaded"} */}
         </span>
       );
@@ -384,6 +414,324 @@ export const getColumns = (
 
           {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
         </>
+      );
+    },
+  },
+  {
+    id: "attachedFiles",
+    accessorKey: "attachedFiles",
+    header: () => (
+      <div className="flex items-center justify-center gap-2">
+        <IconPaperclip size={16} />
+        Attached Files
+      </div>
+    ),
+    cell: ({ row }) => {
+      const [isUploading, setIsUploading] = useState(false);
+      const [desc, setDesc] = useState<string>(""); // ใช้ Remark เป็นค่าเริ่มต้น
+      const [showFileList, setShowFileList] = useState(false);
+      const [descriptionOpen, setDescriptionOpen] = useState(false);
+      const [selectFileId, setSelectFileId] = useState<string>("");
+      const POData = row.original.attachedFiles!.filter(
+        (item) => item.uploadType == 2
+      );
+      // Handle file upload
+      useEffect(() => {
+        POData?.find((file: any) => {
+          console.log(file, selectFileId, file.id);
+          if (selectFileId == file.id && file.remark) {
+            setDesc(file.remark);
+          } else {
+            setDesc(""); // ถ้าไม่มี remark ให้ล้างค่า description
+          }
+          return file.remark;
+        });
+      }, [selectFileId]);
+      const handleFileUpload = async (
+        files: FileList,
+        PONo: string,
+        uploadType: number
+      ) => {
+        setIsUploading(true);
+        await responseUpload?.(files, PONo, uploadType);
+        setIsUploading(false);
+      };
+      // Handle file delete
+      const handleFileDelete = async (fileId: string) => {
+        setIsUploading(true);
+        await deleteFiles?.(fileId);
+        setIsUploading(false);
+      };
+      const handleUpdateDescription = async (
+        fileId: string,
+        description: string,
+        PONo: string
+      ) => {
+        await updateDesc?.(fileId, description, PONo);
+        setDesc(""); // ล้างค่า description หลังจากอัพเดต
+      };
+
+      const handleDownloadFile = async (
+        fileId: string,
+        filenameData: string
+      ) => {
+        try {
+          const res = await DownloadFile(fileId);
+          console.log(res);
+          // ดึงชื่อไฟล์จาก header
+          const disposition = res.headers["content-disposition"] || "";
+          const filenameMatch = disposition.match(/filename="?(.+)"?/);
+          console.log(disposition, filenameMatch);
+          const filename = filenameData;
+
+          // ดึง content-type จาก header
+          const contentType =
+            res.headers["content-type"] || "application/octet-stream";
+
+          // สร้าง Blob โดยใส่ MIME type ให้ถูกต้อง
+          const blob = new Blob([res.data], { type: contentType });
+
+          // สร้าง URL จาก Blob
+          const url = window.URL.createObjectURL(blob);
+
+          // สร้างลิงก์ดาวน์โหลด
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", filename);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          // ล้าง URL object
+          window.URL.revokeObjectURL(url);
+
+          toast.success("File downloaded successfully");
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to download file");
+        }
+      };
+
+      return (
+        <div className="flex justify-center items-center gap-2">
+          {/* File Count Badge */}
+
+          {/* Upload Button */}
+          <Popover
+            key={`${row.original.PONo}-type-2`} // ใช้ PONo เป็น key เพื่อแยก popover แต่ละรายการ
+            modal={false}
+            open={openPopoverPONo === `${row.original.PONo}-type-2`}
+            onOpenChange={(open) => {
+              if (open) {
+                setOpenPopoverPONo?.(`${row.original.PONo}-type-2`);
+              } else {
+                setOpenPopoverPONo?.(null);
+              }
+            }}
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-12 p-0 hover:cursor-pointer"
+              >
+                <Badge
+                  variant="secondary"
+                  className="text-xs cursor-pointer pointer-events-none"
+                  onClick={() => {
+                    if (openPopoverPONo !== row.original.PONo)
+                      setOpenPopoverPONo?.(row.original.PONo);
+                    else setOpenPopoverPONo?.(null);
+                  }}
+                >
+                  <IconPaperclip size={12} className="mr-1" />
+                  {POData!.length}
+                </Badge>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              key={`${row.original.PONo}-type-2`}
+              side="left"
+              align="center"
+              className="w-100 p-4"
+            >
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">
+                  Upload Files for PO: {row.original.PONo}
+                </h4>
+
+                {/* File Drop Zone */}
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                      await handleFileUpload(files, row.original.PONo, 2);
+                      // await refreshPO(row.original.PONo); // Refresh PO after upload
+                    }
+                  }}
+                  onClick={() => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.multiple = true;
+                    input.accept = ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png";
+                    input.onchange = async (e) => {
+                      const files = (e.target as HTMLInputElement).files;
+                      if (files) {
+                        await handleFileUpload(files, row.original.PONo, 2);
+                        // await refreshPO(row.original.PONo); // Refresh PO after upload
+                      }
+                    };
+                    input.click();
+                  }}
+                >
+                  <IconCloudUpload
+                    size={32}
+                    className="mx-auto mb-2 text-gray-400"
+                  />
+                  <p className="text-sm text-gray-600">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    PDF, DOC, XLS, Images (Max 5MB each PO)
+                  </p>
+                </div>
+
+                {/* Current Files List */}
+                {POData!.filter((item) => item.uploadType == 2)?.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-medium text-gray-700">
+                      Uploaded Files ({POData!.length})
+                    </h5>
+                    <div className="max-h-64 overflow-y-auto space-y-1">
+                      {POData!.map((file: any) => (
+                        <div
+                          key={file.id}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                        >
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <FileIcon fileType={file.type} />
+                            <div className="flex-1 min-w-0">
+                              <div className="truncate font-medium">
+                                {file.name}
+                              </div>
+                              {/* Desctiption */}
+                              {descriptionOpen && selectFileId == file.id ? (
+                                <div className="flex flex-row relative">
+                                  <form
+                                    onSubmit={(e) => {
+                                      e.preventDefault(); // ป้องกัน reload หน้า
+                                      handleUpdateDescription(
+                                        file.id,
+                                        desc,
+                                        row.original.PONo
+                                      );
+                                    }}
+                                  >
+                                    <Input
+                                      className="mt-1"
+                                      placeholder="Enter file description"
+                                      value={desc}
+                                      onChange={(e) => setDesc(e.target.value)}
+                                      // onKeyDown={(e) => {
+                                      //   if (e.key === "Escape") {
+                                      //     e.preventDefault();
+                                      //     setDescriptionOpen(false); // ปิดถ้ากด ESC
+                                      //   }
+                                      // }}
+                                    />
+                                  </form>
+
+                                  <span className="absolute right-1 top-3 text-gray-500 p-0.5 cursor-pointer rounded-full hover:bg-neutral-300">
+                                    <IconX
+                                      className="text-red-500"
+                                      size={16}
+                                      onClick={() =>
+                                        setDescriptionOpen(!descriptionOpen)
+                                      }
+                                    />
+                                  </span>
+                                  <span className="absolute right-7 top-3 text-gray-500 p-0.5 cursor-pointer rounded-full hover:bg-neutral-300">
+                                    <IconCheck
+                                      className="text-green-500"
+                                      size={16}
+                                      onClick={() => {
+                                        handleUpdateDescription(
+                                          file.id,
+                                          desc,
+                                          row.original.PONo
+                                        );
+                                        setDescriptionOpen(false);
+                                      }}
+                                    />
+                                  </span>
+                                </div>
+                              ) : (
+                                <div
+                                  className="text-gray-600 truncate italic flex flex-row"
+                                  onClick={() => {
+                                    setDescriptionOpen(!descriptionOpen);
+                                    setSelectFileId(file.id);
+                                  }}
+                                >
+                                  {file.remark
+                                    ? file.remark
+                                    : "Description here"}
+                                  {"  "}
+                                  <IconPencil
+                                    className="ml-1 hover:cursor-pointer"
+                                    size={14}
+                                  />
+                                </div>
+                              )}
+
+                              <div className="text-gray-500">
+                                {formatFileSize(file.size)} •{" "}
+                                {new Date(file.uploadDate).toLocaleDateString(
+                                  "th-TH",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() =>
+                                handleDownloadFile(file.id, file.name)
+                              }
+                            >
+                              <IconDownload size={12} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                              onClick={async () => {
+                                await handleFileDelete(file.id);
+                                // await refreshPO(row.original.PONo);
+                              }}
+                            >
+                              <IconTrash size={12} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       );
     },
   },

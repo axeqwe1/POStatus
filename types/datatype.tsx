@@ -36,6 +36,7 @@ export interface PO_Status {
   finalETADate?: Date;
   supplierName?: string;
   attachedFiles?: FileItem[]; // เพิ่ม field นี้
+  Remark?: string;
 }
 
 export interface PO_Details {
@@ -79,4 +80,6 @@ export interface FileItem {
   type: string;
   uploadDate: Date;
   url: string;
+  remark?: string; // optional, สำหรับบันทึก remark ของไฟล์
+  uploadType?: number; // 1 = PO, 2 = Supplier
 }

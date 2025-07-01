@@ -30,6 +30,16 @@ export const GetPODetail = async (PONo: string) => {
   }
 };
 
+export const GetPOByPONo = async (PONo: string) => {
+  try {
+    const res = await apiService.get(`api/PO/GetPONo/${PONo}`);
+    return res;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 export const SaveStatusDownload = async (PONo: string) => {
   try {
     const res = await apiService.post(`/api/PO/SaveDownloadStatus/${PONo}`);
