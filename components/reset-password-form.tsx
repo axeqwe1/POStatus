@@ -3,39 +3,43 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { redirect } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { log } from "console";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/context/authContext";
-import Link from "next/link";
 
-export function LoginForm({
+export function ResetPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { setIsAuthenticated, setUser, login } = useAuth();
+  const { setIsAuthenticated, setUser, login, user } = useAuth();
+
+  useEffect(() => {
+    console.log(user);
+  }, []);
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    console.log(e.target.username.value, e.target.password.value);
-    const res = await login(e.target.username.value, e.target.password.value);
-    if (res != null && res.status === 200) {
-      redirect("/PO_Status");
-    } else {
-      // Handle error, e.g., show error message
-      if (res != null && res.status === 401) {
-        setErrorMessage("Invalid username or password. Please try again.");
-        setIsError(true);
-      } else if (res != null && res.status === 500) {
-        setErrorMessage("Server error. Please try again later.");
-        setIsError(true);
-      } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-        setIsError(true);
-      }
-    }
+    redirect("/auth/changepassword?token=1234567890"); // Temporary redirect to change password page
+    // console.log(e.target.username.value, e.target.password.value);
+    // const res = await login(e.target.username.value, e.target.password.value);
+    // if (res != null && res.status === 200) {
+    //   redirect("/PO_Status");
+    // } else {
+    //   // Handle error, e.g., show error message
+    //   if (res != null && res.status === 401) {
+    //     setErrorMessage("Invalid username or password. Please try again.");
+    //     setIsError(true);
+    //   } else if (res != null && res.status === 500) {
+    //     setErrorMessage("Server error. Please try again later.");
+    //     setIsError(true);
+    //   } else {
+    //     setErrorMessage("An unexpected error occurred. Please try again.");
+    //     setIsError(true);
+    //   }
+    // }
   };
 
   return (
@@ -46,10 +50,10 @@ export function LoginForm({
         {...props}
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            Enter your username to login to your account
-          </p>
+          <h1 className="text-2xl font-bold">Reset Password</h1>
+          {/* <p className="text-muted-foreground text-sm text-balance">
+            Change Password
+          </p> */}
         </div>
         {isError && (
           <Alert className="text-red-500 text-sm bg-red-200">
@@ -61,39 +65,31 @@ export function LoginForm({
             </AlertDescription>
           </Alert>
         )}
-        <div className="grid gap-6">
+        <div className="grid gap-3">
           <div className="grid gap-3">
-            <Label htmlFor="username">Account</Label>
+            <Label htmlFor="username">New Password</Label>
             <Input
-              id="username"
-              type="text"
-              placeholder="username or email"
+              id="new-password"
+              type="password"
+              placeholder="New Password"
               required
             />
           </div>
           <div className="grid gap-3">
-            <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="/auth/forgetpassword"
-                className="ml-auto text-xs underline-offset-4 hover:underline"
-              >
-                Forgot your password?
-              </Link>
-            </div>
+            <Label htmlFor="username">Confirm New Password</Label>
             <Input
-              id="password"
+              id="confirm-new-password"
               type="password"
-              placeholder="password"
+              placeholder="Confirm New Password"
               required
             />
           </div>
           <Button
             variant={"default"}
             type="submit"
-            className="w-full hover:cursor-pointer text-white"
+            className="w-full hover:cursor-pointer text-white mt-3  "
           >
-            Login
+            Send
           </Button>
           {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
           <span className="bg-background text-muted-foreground relative z-10 px-2">

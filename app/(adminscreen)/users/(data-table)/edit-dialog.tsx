@@ -75,7 +75,7 @@ export function UserForm({
     }
 
     let errormessage = "";
-    const result = await toast.promise(
+    await toast.promise(
       new Promise((resolve, reject) => {
         if (data != null) {
           const doUpdate = () =>

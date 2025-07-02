@@ -5,6 +5,7 @@ import {
   IconDotsVertical,
   IconLogout,
   IconNotification,
+  IconPasswordUser,
   IconUserCircle,
 } from "@tabler/icons-react";
 
@@ -96,15 +97,17 @@ export function NavUser({ user }: { user: UserDTO | null }) {
               {/* <DropdownMenuItem>
                 <IconUserCircle />
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
+              </DropdownMenuItem> */}
+              <DropdownMenuItem
+                onClick={() => redirect("/auth/changepassword")}
+              >
+                <IconPasswordUser />
+                Change Password
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconNotification />
                 Notifications
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

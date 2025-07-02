@@ -15,11 +15,29 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (!isAuthenticated && !isLoading && pathname !== "/login") {
+    if (
+      !isAuthenticated &&
+      !isLoading &&
+      pathname !== "/auth/login" &&
+      pathname !== "/auth/resetpassword" &&
+      pathname !== "/auth/forgetpassword"
+    ) {
       console.log("Trigger ");
-      router.push("/login");
+      window.location.href = "/auth/login"; // ✅ บังคับโหลดใหม่ เคลียร์ bfcache
     }
   }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    // ตรวจจับจาก bfcache
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        window.location.reload(); // 🔁 บังคับ refresh
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -28,6 +46,22 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
     setUser(user);
   }, []);
 
+  // // ดัก pageshow จาก bfcache
+  // useEffect(() => {
+  //   const handlePageShow = (event: PageTransitionEvent) => {
+  //     if (event.persisted) {
+  //       const isForceLogout = sessionStorage.getItem("force_logout");
+  //       if (isForceLogout === "true") {
+  //         console.log("Restored from bfcache. Redirecting...");
+  //         router.replace("/login");
+  //       }
+  //     }
+  //   };
+
+  //   window.addEventListener("pageshow", handlePageShow);
+  //   return () => window.removeEventListener("pageshow", handlePageShow);
+  // }, []);
+
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
@@ -35,6 +69,11 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
       </div>
     ); // ✅ หรือ Skeleton UI ก็ได้
   }
+
+  // if (!isAuthenticated && !isLoading) {
+  //   router.replace("/login");
+  //   return null; // 🛑 หยุด render
+  // }
 
   // ถ้ายังไม่ล็อกอิน แสดง Loading หรืออะไรชั่วคราวก่อน
   //   if (!isAuthenticated) {

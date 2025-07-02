@@ -135,6 +135,10 @@ export const getColumns = (
           PO Number
           <ArrowUpDown />
         </Button>
+        <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
+          <IconPaperclip size={16} />
+          PO Files
+        </span>
       </div>
     ),
     cell: ({ row }) => {
@@ -144,7 +148,7 @@ export const getColumns = (
       const [descriptionOpen, setDescriptionOpen] = useState(false);
       const [selectFileId, setSelectFileId] = useState<string>("");
       const POData = row.original.attachedFiles!.filter(
-        (item) => item.uploadType == 1
+        (item) => item.uploadType == 2
       );
       // useEffect(() => {
       //   setPOData(row.original.attachedFiles || []);
@@ -292,7 +296,7 @@ export const getColumns = (
                     e.preventDefault();
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
-                      await handleFileUpload(files, row.original.PONo, 1);
+                      await handleFileUpload(files, row.original.PONo, 2);
                       // await refreshPO(row.original.PONo); // Refresh PO after upload
                     }
                   }}
@@ -304,7 +308,7 @@ export const getColumns = (
                     input.onchange = async (e) => {
                       const files = (e.target as HTMLInputElement).files;
                       if (files) {
-                        await handleFileUpload(files, row.original.PONo, 1);
+                        await handleFileUpload(files, row.original.PONo, 2);
                         // await refreshPO(row.original.PONo); // Refresh PO after upload
                       }
                     };
@@ -479,42 +483,24 @@ export const getColumns = (
             }}
           >
             <PopoverTrigger asChild>
-              {POData!.length > 0 ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-12 p-0 hover:cursor-pointer"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-12 p-0 hover:cursor-pointer"
+              >
+                <Badge
+                  variant="outline"
+                  className="text-xs cursor-pointer pointer-events-none"
+                  onClick={() => {
+                    if (openPopoverPONo !== row.original.PONo)
+                      setOpenPopoverPONo?.(row.original.PONo);
+                    else setOpenPopoverPONo?.(null);
+                  }}
                 >
-                  <Badge
-                    variant="secondary"
-                    className="text-xs cursor-pointer pointer-events-none"
-                    onClick={() => {
-                      if (openPopoverPONo !== row.original.PONo)
-                        setOpenPopoverPONo?.(row.original.PONo);
-                      else setOpenPopoverPONo?.(null);
-                    }}
-                  >
-                    <IconPaperclip size={12} className="mr-1" />
-                    {POData!.length}
-                  </Badge>
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  disabled={isUploading}
-                  // onClick={(e) => {
-                  //   fetchFiles(row.original.PONo); // Fetch files when button is clicked
-                  // }}
-                >
-                  {isUploading ? (
-                    <IconLoader2 size={16} className="animate-spin" />
-                  ) : (
-                    <IconPlus size={16} />
-                  )}
-                </Button>
-              )}
+                  <IconPaperclip size={12} className="mr-1" />
+                  {POData!.length}
+                </Badge>
+              </Button>
             </PopoverTrigger>
             <PopoverContent
               key={`${row.original.PONo}-type-1`}
@@ -524,7 +510,7 @@ export const getColumns = (
             >
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">
-                  Upload Files for PO: {row.original.PONo}
+                  Upload Files for Suppiler: {row.original.PONo}
                 </h4>
 
                 {/* File Drop Zone */}
@@ -535,7 +521,7 @@ export const getColumns = (
                     e.preventDefault();
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
-                      await handleFileUpload(files, row.original.PONo, 1);
+                      await handleFileUpload(files, row.original.PONo, 2);
                       // await refreshPO(row.original.PONo); // Refresh PO after upload
                     }
                   }}
@@ -547,7 +533,7 @@ export const getColumns = (
                     input.onchange = async (e) => {
                       const files = (e.target as HTMLInputElement).files;
                       if (files) {
-                        await handleFileUpload(files, row.original.PONo, 1);
+                        await handleFileUpload(files, row.original.PONo, 2);
                         // await refreshPO(row.original.PONo); // Refresh PO after upload
                       }
                     };
@@ -1003,7 +989,7 @@ export const getColumns = (
     header: () => (
       <div className="flex items-center gap-2">
         <IconPaperclip size={16} />
-        Attached Files
+        Supplier Files
       </div>
     ),
     cell: ({ row }) => {
@@ -1013,7 +999,7 @@ export const getColumns = (
       const [descriptionOpen, setDescriptionOpen] = useState(false);
       const [selectFileId, setSelectFileId] = useState<string>("");
       const POData = row.original.attachedFiles!.filter(
-        (item) => item.uploadType == 2
+        (item) => item.uploadType == 1
       );
       // Handle file upload
       useEffect(() => {
@@ -1148,7 +1134,7 @@ export const getColumns = (
                     e.preventDefault();
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
-                      await handleFileUpload(files, row.original.PONo, 2);
+                      await handleFileUpload(files, row.original.PONo, 1);
                       // await refreshPO(row.original.PONo); // Refresh PO after upload
                     }
                   }}
@@ -1160,7 +1146,7 @@ export const getColumns = (
                     input.onchange = async (e) => {
                       const files = (e.target as HTMLInputElement).files;
                       if (files) {
-                        await handleFileUpload(files, row.original.PONo, 2);
+                        await handleFileUpload(files, row.original.PONo, 1);
                         // await refreshPO(row.original.PONo); // Refresh PO after upload
                       }
                     };
@@ -1180,7 +1166,7 @@ export const getColumns = (
                 </div>
 
                 {/* Current Files List */}
-                {POData!.filter((item) => item.uploadType == 2)?.length > 0 && (
+                {POData!.length > 0 && (
                   <div className="space-y-2">
                     <h5 className="text-xs font-medium text-gray-700">
                       Uploaded Files ({POData!.length})

@@ -186,6 +186,7 @@ export default function Page() {
           );
           resolve();
         } catch (error: any) {
+          console.error("Upload error:", error);
           reject(error);
         }
       }),

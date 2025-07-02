@@ -115,7 +115,6 @@ export function CustomDataTable<TData, TSubData>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    autoResetAll: false, // ✅ ไม่ต้องรีเซ็ตทุกอย่าง
     ...(manualPagination
       ? {}
       : {

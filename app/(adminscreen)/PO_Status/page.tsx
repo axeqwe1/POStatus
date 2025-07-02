@@ -97,10 +97,14 @@ export default function Page() {
 
   const filterByTab = useCallback((value: string, data: PO_Status[]) => {
     if (value === "pending") {
-      return data.filter((item) => !item.Supreceive && item.cancelStatus === 0);
+      return data.filter(
+        (item) => !item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
     }
     if (value === "confirm") {
-      return data.filter((item) => item.Supreceive && item.cancelStatus === 0);
+      return data.filter(
+        (item) => item.Supreceive && item.ClosePO && item.cancelStatus === 0
+      );
     }
     if (value === "cancel") {
       return data.filter((item) => item.cancelStatus === 1);

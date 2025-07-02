@@ -10,21 +10,17 @@ export const uploadFile = async (
   try {
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
-      formData.append("Files", files[i]);
+      formData.append(`Files`, files[i]);
     }
     formData.append("PONo", poNo);
     formData.append("UploadType", UploadType.toString());
     console.log(formData.get("Files"));
-    const response = await apiService.post("api/FileUpload/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await apiService.post("api/FileUpload/upload", formData);
 
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error uploading file:", error);
-    throw new Error("File upload failed");
+    throw new Error(error.response?.data?.message || "File upload failed");
   }
 };
 
@@ -38,9 +34,9 @@ export const deleteFile = async (fileId: string) => {
     }
     console.log("File deleted successfully:", response.data);
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting file:", error);
-    throw new Error("File deletion failed");
+    throw new Error("File deletion failed", error);
   }
 };
 

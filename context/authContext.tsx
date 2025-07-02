@@ -108,12 +108,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (res.status === 200) {
         setIsAuthenticated(false);
         setUser(null);
-        localStorage.removeItem("user"); // Clear user data from localStorage
-        console.log("Logout successful");
+        localStorage.removeItem("user");
+
+        // // ✅ ตั้ง flag ว่า logout ไปแล้ว
+        // sessionStorage.setItem("force_logout", "true");
+
+        // ✅ redirect ไปหน้า login
+        window.location.href = "/auth/login";
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Logout error", err);
-      // Handle logout error if needed
     }
   };
   return (
