@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { apiService } from "../axios";
 
 export const getUserAll = async () => {
@@ -40,6 +41,28 @@ export const changePassword = async (userId: number, NewPassword: string) => {
     return res.data;
   } catch (error) {
     console.error(error);
+    throw error;
+  }
+};
+
+export const changePasswordUser = async (
+  userId: number,
+  NewPassword: string,
+  OldPassword: string
+) => {
+  try {
+    const res = await apiService.put(
+      `/api/User/${userId}/change-password-user`,
+      {
+        NewPassword,
+        OldPassword,
+      }
+    );
+    console.log(res);
+    return res;
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error.response?.data || "Failed to change password");
     throw error;
   }
 };

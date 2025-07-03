@@ -8,14 +8,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuth } from "@/context/authContext";
 import { IconArrowAutofitLeft, IconArrowBigLeft } from "@tabler/icons-react";
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function page() {
   const router = useRouter();
+  const { user } = useAuth();
+  useEffect(() => {
+    // console.log(user);
+    if (!user) {
+      router.replace("/auth/login");
+    }
+    console.log(user);
+    // ดักจับการกลับไปยังหน้า login เมื่อไม่มี user
+    // if (user === null) {
+    //   router.push("/auth/login");
+    // }
+  }, []);
   return (
     <div className="h-screen w-screen bg-gradient-to-tr from-violet-200 to-violet-400 ">
       <div className=" p-6 md:p-10 h-full flex flex-col items-center justify-center">
@@ -36,7 +49,7 @@ export default function page() {
               <CardDescription></CardDescription>
             </CardHeader>
             <CardContent>
-              <ChangePasswordForm />
+              <ChangePasswordForm userId={user?.id} />
             </CardContent>
           </Card>
         </div>

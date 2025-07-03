@@ -5,139 +5,248 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { redirect, useRouter } from "next/navigation";
 import { log } from "console";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/context/authContext";
+import { changePasswordUser } from "@/lib/api/user";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+interface ChangePasswordFormProps extends React.ComponentProps<"form"> {
+  className?: string;
+  userId?: string; // Optional userId prop if needed
+}
+const formSchema = z
+  .object({
+    oldpassword: z.string().min(1, "Please enter old password").max(50),
+    newpassword: z.string().min(1, "Please enter new password").max(50),
+    confirmnewpassword: z
+      .string()
+      .min(1, "Please enter confirm new password")
+      .max(50),
+  })
+  .refine((data) => data.newpassword === data.confirmnewpassword, {
+    message: "New password and confirmation do not match.",
+    path: ["confirmnewpassword"], // ชี้ให้ error ไปอยู่ field confirm
+  });
 
 export function ChangePasswordForm({
   className,
+  userId,
   ...props
-}: React.ComponentProps<"form">) {
+}: ChangePasswordFormProps) {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { setIsAuthenticated, setUser, login, user } = useAuth();
+  const [openDialog, setOpenDialog] = useState(false);
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    console.log(user);
-  }, []);
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    // console.log(e.target.username.value, e.target.password.value);
-    redirect("/auth/resetpassword?token=1234567890"); // Temporary redirect to reset password page
-    // const res = await login(e.target.username.value, e.target.password.value);
-    // if (res != null && res.status === 200) {
-    //   redirect("/PO_Status");
-    // } else {
-    //   // Handle error, e.g., show error message
-    //   if (res != null && res.status === 401) {
-    //     setErrorMessage("Invalid username or password. Please try again.");
-    //     setIsError(true);
-    //   } else if (res != null && res.status === 500) {
-    //     setErrorMessage("Server error. Please try again later.");
-    //     setIsError(true);
-    //   } else {
-    //     setErrorMessage("An unexpected error occurred. Please try again.");
-    //     setIsError(true);
-    //   }
-    // }
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      oldpassword: "",
+      newpassword: "",
+      confirmnewpassword: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values);
+    try {
+      const res = await changePasswordUser(
+        userId ? parseInt(userId) : 0, // Ensure userId is a number
+        values.newpassword,
+        values.oldpassword
+      );
+      console.log(res);
+      if (res != null && res.status === 200) {
+        toast.success("Password changed successfully!");
+        router.back();
+        // Handle successful login, e.g., redirect to dashboard or home page
+      } else {
+        // Handle error, e.g., show error message
+        if (res != null && res.status === 401) {
+          setErrorMessage("Invalid username or password. Please try again.");
+          setIsError(true);
+        } else if (res != null && res.status === 500) {
+          setErrorMessage("Server error. Please try again later.");
+          setIsError(true);
+        } else {
+          setErrorMessage("An unexpected error occurred. Please try again.");
+          setIsError(true);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error changing password:", error);
+      setErrorMessage(error.response?.data || "Failed to change password");
+      setIsError(true);
+    }
   };
 
+  useEffect(() => {
+    console.log(userId);
+  }, [userId]);
+
+  const handleDialogOpen = async () => {
+    const isValid = await form.trigger();
+    if (isValid) {
+      console.log("Form is valid, opening dialog");
+      setOpenDialog(true);
+    } else {
+      toast.error("Please fill in all required fields correctly.");
+    }
+  };
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className={cn("flex flex-col gap-6", className)}
-        {...props}
-      >
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Change Password</h1>
-          {/* <p className="text-muted-foreground text-sm text-balance">
+      <Form {...form}>
+        <form
+          ref={formRef}
+          onSubmit={form.handleSubmit(onSubmit)}
+          className={cn("flex flex-col gap-6", className)}
+          {...props}
+        >
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-2xl font-bold">Change Password</h1>
+            {/* <p className="text-muted-foreground text-sm text-balance">
             Change Password
           </p> */}
-        </div>
-        {isError && (
-          <Alert className="text-red-500 text-sm bg-red-200">
-            <AlertTitle>
-              <span className="font-semibold">Login Failed!</span>
-            </AlertTitle>
-            <AlertDescription className="text-red-500 text-sm text-center">
-              {errorMessage}
-            </AlertDescription>
-          </Alert>
-        )}
-        <div className="grid gap-3">
-          <div className="grid gap-3">
-            <Label htmlFor="username">Old Password</Label>
-            <Input
-              id="old-password"
-              type="password"
-              placeholder="Old password"
-              required
-            />
           </div>
+          {isError && (
+            <Alert className="text-red-500 text-sm bg-red-200">
+              <AlertTitle>
+                <span className="font-semibold">Login Failed!</span>
+              </AlertTitle>
+              <AlertDescription className="text-red-500 text-sm text-center">
+                {errorMessage}
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-3">
-            <div className="flex items-center">
-              <Label htmlFor="password">New Password</Label>
-              {/* <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
-            </a> */}
+            <div className="grid gap-3">
+              {/* <Label htmlFor="username">Old Password</Label>
+              <Input
+                id="oldpassword"
+                type="password"
+                placeholder="Old password"
+                required
+              /> */}
+              <FormField
+                control={form.control}
+                name="oldpassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Old Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Old password"
+                        {...field}
+                      />
+                    </FormControl>
+                    {/* <FormDescription></FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <Input
-              id="new-password"
-              type="password"
-              placeholder="New password"
-              required
-            />
-          </div>
-          <div className="grid gap-3">
-            <div className="flex items-center">
-              <Label htmlFor="password">Confirm New Password</Label>
-              {/* <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
-            </a> */}
+            <div className="grid gap-3">
+              <FormField
+                control={form.control}
+                name="newpassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Old Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="New Password"
+                        {...field}
+                      />
+                    </FormControl>
+                    {/* <FormDescription></FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <Input
-              id="confirm-new-password"
-              type="password"
-              placeholder="Confirm new password"
-              required
-            />
+            <div className="grid gap-3">
+              <FormField
+                control={form.control}
+                name="confirmnewpassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm New Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm New Password"
+                        {...field}
+                      />
+                    </FormControl>
+                    {/* <FormDescription></FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-          <Button
-            variant={"default"}
-            type="submit"
-            className="w-full hover:cursor-pointer text-white mt-3  "
-          >
-            Change Password
-          </Button>
-          {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-          <span className="bg-background text-muted-foreground relative z-10 px-2">
-            Or continue with
-          </span>
-        </div>
-        <Button variant="outline" className="w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path
-              d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-              fill="currentColor"
-            />
-          </svg>
-          Login with GitHub
-        </Button> */}
-        </div>
-        {/* <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
-          Sign up
-        </a>
-      </div> */}
-      </form>
+        </form>
+      </Form>
+
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <Button
+          variant={"default"}
+          className="w-full hover:cursor-pointer text-white mt-5"
+          onClick={handleDialogOpen}
+        >
+          Change Password
+        </Button>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently update your
+              account and update your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant={"default"}
+                className="hover:cursor-pointer text-white"
+                onClick={() => formRef.current?.requestSubmit()}
+              >
+                Submit
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

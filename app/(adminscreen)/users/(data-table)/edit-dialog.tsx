@@ -38,6 +38,7 @@ import supplier, { getSuppliers } from "@/lib/api/supplier";
 import { useEffect, useState } from "react";
 import { getRoleAll } from "@/lib/api/role";
 import { changePassword, registerUser, updateUser } from "@/lib/api/user";
+import { useAuth } from "@/context/authContext";
 interface UserFormProps extends React.ComponentProps<"form"> {
   data?: User;
   onSuccess?: () => void; // ✅ เพิ่ม
@@ -55,7 +56,11 @@ export function UserForm({
   const [valueRole, setValueRole] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
   const formRef = React.useRef<HTMLFormElement>(null);
+  const { user } = useAuth();
 
+  useEffect(() => {
+    console.log(user);
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted");
@@ -73,6 +78,8 @@ export function UserForm({
     if (password) {
       dataPayload.Password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
     }
+
+    console.log("Data to submit:", formData.entries().toArray());
 
     let errormessage = "";
     await toast.promise(
@@ -272,8 +279,14 @@ export function UserForm({
           <Input
             id="username"
             name="username"
-            type="text"
+            type="username"
             placeholder="Enter Username"
+            readOnly={user?.role !== "SupperAdmin" && isEdit}
+            className={`${
+              user?.role !== "SupperAdmin" && isEdit
+                ? "cursor-not-allowed opacity-[0.6]"
+                : ""
+            }`}
             defaultValue={data?.username ?? ""}
           />
         </div>
@@ -285,6 +298,12 @@ export function UserForm({
             id="password"
             name="password"
             type="password"
+            readOnly={user?.role !== "SupperAdmin" && isEdit}
+            className={`${
+              user?.role !== "SupperAdmin" && isEdit
+                ? "cursor-not-allowed opacity-[0.6]"
+                : ""
+            }`}
             placeholder={`${
               isEdit ? "Leave blank to keep current password" : "Enter Password"
             }`}

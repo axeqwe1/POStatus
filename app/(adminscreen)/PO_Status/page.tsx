@@ -11,6 +11,7 @@ import {
   UpdateDescription,
   uploadFile,
 } from "@/lib/api/uploadFile";
+import { useAuth } from "@/context/authContext";
 
 export default function Page() {
   const [masterData, setMasterData] = useState<PO_Status[]>([]);
@@ -27,7 +28,7 @@ export default function Page() {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [tab, SetTab] = useState<string>("all");
-
+  const { user } = useAuth();
   const masterDataRef = useRef<PO_Status[]>([]);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -39,6 +40,11 @@ export default function Page() {
 
   const fetchPO = useCallback(async (supplierId: string) => {
     setIsLoading(true);
+    console.log(user);
+    if (user != null && user?.supplierId == "") {
+      setIsLoading(false);
+      return;
+    }
     const res = await GetPO(supplierId);
     if (res.status === 200) {
       console.log(res.data);

@@ -79,6 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const res = await signIn(username, password);
       if (res.status === 200) {
+        console.log(res.data);
         const data: UserDTO = {
           id: res.data.userId,
           name: res.data.firstname + " " + res.data.lastname,
@@ -114,7 +115,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // sessionStorage.setItem("force_logout", "true");
 
         // ✅ redirect ไปหน้า login
-        window.location.href = "/auth/login";
+        const isProd = process.env.NODE_ENV === "production";
+        window.location.href = isProd
+          ? "/PO_Website/auth/login"
+          : "/auth/login";
       }
     } catch (err) {
       console.error("Logout error", err);

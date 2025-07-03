@@ -26,13 +26,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useAuth } from "@/context/authContext";
 import { UserDTO } from "@/data/dataDTO";
 
 export function NavUser({ user }: { user: UserDTO | null }) {
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
+  const router = useRouter();
   const handleLogout = async () => {
     // Call your logout function here, e.g., signOut()
     // await signOut();
@@ -99,7 +100,7 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                 Account
               </DropdownMenuItem> */}
               <DropdownMenuItem
-                onClick={() => redirect("/auth/changepassword")}
+                onClick={() => router.push("/auth/changepassword")}
               >
                 <IconPasswordUser />
                 Change Password

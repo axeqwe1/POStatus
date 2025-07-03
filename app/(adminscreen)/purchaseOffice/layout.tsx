@@ -1,6 +1,6 @@
 "use client";
 import { useAuth } from "@/context/authContext";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
 interface LayoutProps {
@@ -16,6 +16,5 @@ export default function layout({ children }: LayoutProps) {
   }, [user]);
 
   if (user && user.role === "User") return null;
-
   return <>{children}</>;
 }

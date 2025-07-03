@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 import { Suspense } from "react";
 import AuthGuard from "@/components/AuthGuard/AuthGuard";
+import { useAuth } from "@/context/authContext";
+import { redirect } from "next/navigation";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

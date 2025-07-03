@@ -18,11 +18,15 @@ export default function LoginPage() {
   const pathname = usePathname();
   const refAuth = useAuth();
   // Redirect ไป dashboard ถ้า login แล้ว (หลังโหลดเสร็จ)
-  useEffect(() => {
-    if (!refAuth.isLoading && refAuth.isAuthenticated) {
-      router.replace("/PO_Status");
-    }
-  }, [refAuth.isLoading, refAuth.isAuthenticated, pathname]);
+  // useEffect(() => {
+  //   if (!refAuth.isLoading && refAuth.isAuthenticated) {
+  //     if (refAuth.user?.role === "User") {
+  //       router.replace("/PO_Status");
+  //     } else {
+  //       router.replace("/purchaseOffice/ViewPOApproveList");
+  //     }
+  //   }
+  // }, [refAuth.isLoading, refAuth.isAuthenticated, pathname]);
 
   if (refAuth.isLoading || refAuth.isAuthenticated) {
     return (

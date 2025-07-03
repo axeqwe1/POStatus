@@ -11,6 +11,7 @@ interface PrivateRouteProps {
 
 const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading, setUser } = useAuth();
+  const refAuth = useAuth(); // ใช้ hook เพื่อเข้าถึง context
   const router = useRouter();
   const pathname = usePathname();
 
@@ -23,7 +24,18 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
       pathname !== "/auth/forgetpassword"
     ) {
       console.log("Trigger ");
-      window.location.href = "/auth/login"; // ✅ บังคับโหลดใหม่ เคลียร์ bfcache
+      const isProd = process.env.NODE_ENV === "production";
+      window.location.href = isProd ? "/PO_Website/auth/login" : "/auth/login";
+    } else {
+      console.log(refAuth.user);
+      if (!refAuth.isLoading && refAuth.isAuthenticated) {
+        if (refAuth.user?.role === "User") {
+          console.warn("User role detected, redirecting to PO_Status");
+          router.replace("/PO_Status");
+        } else {
+          router.replace("/purchaseOffice/ViewPOApproveList");
+        }
+      }
     }
   }, [isAuthenticated, isLoading, router]);
 

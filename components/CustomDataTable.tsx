@@ -182,57 +182,23 @@ export function CustomDataTable<TData, TSubData>({
           <TableBody>
             {!collapse ? (
               <>
-                {table.getRowModel().rows.map((row, index) => {
-                  let key: string[] = Object.keys(row.original);
-                  let value: string[] = Object.values(row.original);
-                  return (
-                    <TableRow key={`!collapse-${value[0]}-${index}`}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="pl-6">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  );
-                })}
-              </>
-            ) : (
-              <React.Fragment>
-                {table.getRowModel().rows.map((row, index) => {
-                  let key: string[] = Object.keys(row.original);
-                  let value: string[] = Object.values(row.original);
-                  return (
-                    <React.Fragment key={`collapse-${value[0]}-${index}`}>
-                      <TableRow>
-                        <TableCell>
-                          <button
-                            onClick={() => {
-                              setOpenRow(
-                                openRow === value[0] ? null : value[0]
-                              );
-
-                              findSubtableData(value[0]);
-                              if (openRow === null) {
-                                subColumns = [];
-                                setIsLoading(true);
-                              }
-                              console.log(row);
-                            }}
-                            className="bg-transparent border-0"
-                          >
-                            <ChevronDown
-                              className={`transition-transform ${
-                                openRow === value[0] ? "rotate-180" : ""
-                              }`}
-                              size={18}
-                            />
-                          </button>
-                        </TableCell>
+                {table.getRowModel().rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={999}
+                      className="text-center text-muted-foreground py-4"
+                    >
+                      Not have any data
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map((row, index) => {
+                    let key: string[] = Object.keys(row.original);
+                    let value: string[] = Object.values(row.original);
+                    return (
+                      <TableRow key={`!collapse-${value[0]}-${index}`}>
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
+                          <TableCell key={cell.id} className="pl-6">
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()
@@ -240,29 +206,87 @@ export function CustomDataTable<TData, TSubData>({
                           </TableCell>
                         ))}
                       </TableRow>
-                      {openRow === value[0] && (
-                        <TableRow className="bg-muted">
-                          <TableCell colSpan={row.getVisibleCells().length + 1}>
-                            {/* Sub Table หรือเนื้อหาเพิ่มเติม */}
-                            {isLoading ? (
-                              <div className=" flex justify-center items-center">
-                                <SkeletonTable cols={3} rows={5} />
-                              </div>
-                            ) : (
-                              <CustomDataTable
-                                className="rounded-lg border"
-                                data={subtableData}
-                                columns={subColumns} // หรือจะส่ง columns ใหม่ก็ได้ถ้า subtable ต่างจาก main table
-                                collapse={false}
-                                showSubFooter={true}
+                    );
+                  })
+                )}
+              </>
+            ) : (
+              <React.Fragment>
+                {table.getRowModel().rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={999}
+                      className="text-center text-muted-foreground py-4"
+                    >
+                      Not have any data
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map((row, index) => {
+                    const key: string[] = Object.keys(row.original);
+                    const value: string[] = Object.values(row.original);
+                    const isOpen = openRow === value[0];
+
+                    return (
+                      <React.Fragment key={`collapse-${value[0]}-${index}`}>
+                        <TableRow>
+                          <TableCell>
+                            <button
+                              onClick={() => {
+                                setOpenRow(isOpen ? null : value[0]);
+                                findSubtableData(value[0]);
+                                if (openRow === null) {
+                                  subColumns = [];
+                                  setIsLoading(true);
+                                }
+                                console.log(row);
+                              }}
+                              className="bg-transparent border-0"
+                            >
+                              <ChevronDown
+                                className={`transition-transform ${
+                                  isOpen ? "rotate-180" : ""
+                                }`}
+                                size={18}
                               />
-                            )}
+                            </button>
                           </TableCell>
+
+                          {row.getVisibleCells().map((cell: any) => (
+                            <TableCell key={cell.id}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          ))}
                         </TableRow>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+
+                        {isOpen && (
+                          <TableRow className="bg-muted">
+                            <TableCell
+                              colSpan={row.getVisibleCells().length + 1}
+                            >
+                              {isLoading ? (
+                                <div className="flex justify-center items-center">
+                                  <SkeletonTable cols={3} rows={5} />
+                                </div>
+                              ) : (
+                                <CustomDataTable
+                                  className="rounded-lg border"
+                                  data={subtableData}
+                                  columns={subColumns}
+                                  collapse={false}
+                                  showSubFooter={true}
+                                />
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
+                )}
               </React.Fragment>
             )}
           </TableBody>

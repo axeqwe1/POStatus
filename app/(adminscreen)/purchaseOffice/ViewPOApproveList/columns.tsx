@@ -155,17 +155,27 @@ export const getColumns = (
       //   console.log(row.original.attachedFiles);
       // }, [row.original.attachedFiles]);
       // Handle file upload
-      useEffect(() => {
+      // useEffect(() => {
+      //   POData?.find((file: any) => {
+      //     // console.log(file, selectFileId, file.id);
+      //     if (selectFileId == file.id && file.remark) {
+      //       setDesc(file.remark);
+      //     } else {
+      //       setDesc(""); // ถ้าไม่มี remark ให้ล้างค่า description
+      //     }
+      //     return file.remark;
+      //   });
+      // }, [selectFileId]);
+      const handleSelectFile = (fileId: string) => {
         POData?.find((file: any) => {
-          console.log(file, selectFileId, file.id);
-          if (selectFileId == file.id && file.remark) {
+          console.log(file, fileId);
+          if (fileId == file.id && file.remark) {
             setDesc(file.remark);
           } else {
             setDesc(""); // ถ้าไม่มี remark ให้ล้างค่า description
           }
-          return file.remark;
         });
-      }, [selectFileId]);
+      };
       const handleFileUpload = async (
         files: FileList,
         PONo: string,
@@ -198,9 +208,9 @@ export const getColumns = (
           const res = await DownloadFile(fileId);
           console.log(res);
           // ดึงชื่อไฟล์จาก header
-          const disposition = res.headers["content-disposition"] || "";
-          const filenameMatch = disposition.match(/filename="?(.+)"?/);
-          console.log(disposition, filenameMatch);
+          // const disposition = res.headers["content-disposition"] || "";
+          // const filenameMatch = disposition.match(/filename="?(.+)"?/);
+          // console.log(disposition, filenameMatch);
           const filename = filenameData;
 
           // ดึง content-type จาก header
@@ -225,9 +235,9 @@ export const getColumns = (
           window.URL.revokeObjectURL(url);
 
           toast.success("File downloaded successfully");
-        } catch (error) {
+        } catch (error: any) {
           console.error(error);
-          toast.error("Failed to download file");
+          toast.error(error);
         }
       };
       return row.original.Supreceive ? (
@@ -285,7 +295,7 @@ export const getColumns = (
             >
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">
-                  Upload Files for Supplier: {row.original.PONo}
+                  Upload Files for PO: {row.original.PONo}
                 </h4>
 
                 {/* File Drop Zone */}
@@ -304,7 +314,8 @@ export const getColumns = (
                     const input = document.createElement("input");
                     input.type = "file";
                     input.multiple = true;
-                    input.accept = ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png";
+                    input.accept =
+                      ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt";
                     input.onchange = async (e) => {
                       const files = (e.target as HTMLInputElement).files;
                       if (files) {
@@ -402,6 +413,7 @@ export const getColumns = (
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
+                                    handleSelectFile(file.id);
                                   }}
                                 >
                                   {file.remark
@@ -510,7 +522,7 @@ export const getColumns = (
             >
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">
-                  Upload Files for Suppiler: {row.original.PONo}
+                  Upload Files for PO: {row.original.PONo}
                 </h4>
 
                 {/* File Drop Zone */}
@@ -529,7 +541,8 @@ export const getColumns = (
                     const input = document.createElement("input");
                     input.type = "file";
                     input.multiple = true;
-                    input.accept = ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png";
+                    input.accept =
+                      ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt";
                     input.onchange = async (e) => {
                       const files = (e.target as HTMLInputElement).files;
                       if (files) {
@@ -627,6 +640,7 @@ export const getColumns = (
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
+                                    handleSelectFile(file.id);
                                   }}
                                 >
                                   {file.remark
@@ -1002,17 +1016,16 @@ export const getColumns = (
         (item) => item.uploadType == 1
       );
       // Handle file upload
-      useEffect(() => {
+      const handleSelectFile = (fileId: string) => {
         POData?.find((file: any) => {
-          console.log(file, selectFileId, file.id);
-          if (selectFileId == file.id && file.remark) {
+          console.log(file, fileId);
+          if (fileId == file.id && file.remark) {
             setDesc(file.remark);
           } else {
             setDesc(""); // ถ้าไม่มี remark ให้ล้างค่า description
           }
-          return file.remark;
         });
-      }, [selectFileId]);
+      };
       const handleFileUpload = async (
         files: FileList,
         PONo: string,
@@ -1045,9 +1058,9 @@ export const getColumns = (
           const res = await DownloadFile(fileId);
           console.log(res);
           // ดึงชื่อไฟล์จาก header
-          const disposition = res.headers["content-disposition"] || "";
-          const filenameMatch = disposition.match(/filename="?(.+)"?/);
-          console.log(disposition, filenameMatch);
+          // const disposition = res.headers["content-disposition"] || "";
+          // const filenameMatch = disposition.match(/filename="?(.+)"?/);
+          // console.log(disposition, filenameMatch);
           const filename = filenameData;
 
           // ดึง content-type จาก header
@@ -1072,9 +1085,9 @@ export const getColumns = (
           window.URL.revokeObjectURL(url);
 
           toast.success("File downloaded successfully");
-        } catch (error) {
+        } catch (error: any) {
           console.error(error);
-          toast.error("Failed to download file");
+          toast.error(error);
         }
       };
 
@@ -1123,7 +1136,7 @@ export const getColumns = (
             >
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">
-                  Upload Files for PO: {row.original.PONo}
+                  Upload Files for Supplier: {row.original.PONo}
                 </h4>
 
                 {/* File Drop Zone */}
@@ -1142,7 +1155,8 @@ export const getColumns = (
                     const input = document.createElement("input");
                     input.type = "file";
                     input.multiple = true;
-                    input.accept = ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png";
+                    input.accept =
+                      ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt";
                     input.onchange = async (e) => {
                       const files = (e.target as HTMLInputElement).files;
                       if (files) {
@@ -1240,6 +1254,7 @@ export const getColumns = (
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
+                                    handleSelectFile(file.id);
                                   }}
                                 >
                                   {file.remark

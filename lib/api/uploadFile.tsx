@@ -44,15 +44,25 @@ export const DownloadFile = async (fileId: string) => {
   try {
     const response = await apiService.get(
       `api/FileUpload/download/${fileId}`,
-      {}, // ← ไม่มี params
+      {},
       {
-        responseType: "blob", // ← สำคัญ
+        responseType: "blob",
+        validateStatus: () => true, // ✅ ป้องกันไม่ให้ axios throw อัตโนมัติ
       }
     );
+
+    const contentType = response.data.type;
+
+    if (response.status >= 400 && contentType === "application/json") {
+      const errorText = await blobToText(response.data);
+      const errorJson = JSON.parse(errorText);
+      throw errorJson;
+    }
+    console.log(response);
     return response;
-  } catch (error) {
-    console.error("Error downloading file:", error);
-    throw new Error("File download failed");
+  } catch (error: any) {
+    console.error("Error downloading file:", error.message);
+    throw error.message;
   }
 };
 
@@ -82,4 +92,14 @@ export const UpdateDescription = async (
     console.error("Error updating file description:", error);
     throw new Error("Failed to update file description");
   }
+};
+
+// ✅ helper function แปลง Blob เป็น text
+const blobToText = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(blob);
+  });
 };

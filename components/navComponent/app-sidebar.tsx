@@ -95,6 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return true;
     });
     setFilterNav(filteredNavMain);
+    console.log("User Role:", user?.role);
   }, [user]);
   return (
     <Sidebar collapsible="offcanvas" {...props}>
