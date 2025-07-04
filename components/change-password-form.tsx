@@ -179,7 +179,7 @@ export function ChangePasswordForm({
                 name="newpassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Old Password</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"

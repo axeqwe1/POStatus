@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomDataTable } from "@/components/CustomDataTable";
-import { getColumns, getSubColumns } from "./columns";
+import { getColumns } from "./columns";
 import {
   FileItem,
   PO_Details,
@@ -86,64 +86,10 @@ export default function DataTable({
     setDatas((prev) => prev.filter((u) => u.PONo !== fileId));
   };
 
-  const handleEdit = async (id: string) => {
-    await toast.promise(
-      new Promise((resolve, reject) => {
-        SaveStatusDownload(id)
-          .then((res: any) => {
-            if (res.status === 200) {
-              onSuccess?.();
-              resolve("Confirm Success");
-            } else {
-              onSuccess?.();
-              reject(new Error(res.message || "Unknown error"));
-            }
-          })
-          .catch((error) => {
-            onSuccess?.();
-            // ในกรณี error อาจไม่มี response.data.message เสมอ
-            const msg =
-              error?.response?.data?.message ||
-              error?.message ||
-              "Error occurred";
-            reject(new Error(msg));
-          });
-      }),
-      {
-        loading: "Process...",
-        success: "Confirm Complete ำำำำ",
-        error: (err: any) => {
-          // รับ error object จาก reject
-          return `Error: ${err.message}`;
-        },
-      }
-    );
+  const handleEdit = (PONo: string) => {
+    setEditItem(PONo);
+    setIsEdit(true);
   };
-
-  const handleReaponseUpload = async (
-    filed: FileList,
-    PONo: string,
-    uploadType: number
-  ) => {
-    console.log("handleReaponseUpload");
-    await uploadFiles(filed, PONo, uploadType);
-  };
-
-  // const handleQueryChange = async ({
-  //     pageIndex:
-  //     pageSize:
-  //     sorting:
-  //     columnFilters
-  // }) => {
-  //   const res = await fetchDataFromAPI({
-  //     pageIndex,
-  //     pageSize,
-  //     sorting,
-  //     columnFilters,
-  //   });
-  //   setData(res.items);
-  //   setTotalCount(res.total);
-  // };
   const handleDeleteFile = (PONo: string) => {
     deleteFile(PONo);
   };
@@ -159,63 +105,23 @@ export default function DataTable({
         setIsEdit,
         editItem,
         handleEdit,
-        isDesktop,
-        openPopoverPONo,
-        setOpenPopoverPONo,
-        handleReaponseUpload,
-        handleDeleteFile,
-        updateDescriptionFile
+        isDesktop
       ),
-    [
-      handleDelete,
-      isEdit,
-      setIsEdit,
-      editItem,
-      handleEdit,
-      isDesktop,
-      openPopoverPONo,
-      setOpenPopoverPONo,
-      handleReaponseUpload,
-      handleDeleteFile,
-      updateDescriptionFile,
-    ]
+    [handleDelete, isEdit, setIsEdit, editItem, handleEdit, isDesktop]
   );
-  const subColumns = getSubColumns(
-    originalFinalETA ? originalFinalETA : new Date(),
-    setOriginalFInalETA
-  );
+  // const subColumns = getSubColumns(
+  //   originalFinalETA ? originalFinalETA : new Date(),
+  //   setOriginalFInalETA
+  // );
 
-  const findSubtableData = async (rowId: any) => {
-    console.log("findSubtableData", rowId);
-    setSubDatas([]);
-    // datas.find((item) => item.id === rowId);
-    const res = await GetPODetail(rowId);
-    const item = res.data;
-    console.log(res.data);
-
-    const newItem = item.details.map((detail: PO_Details) => {
-      const originalFinalETA = datas.find((rowId) => {
-        return rowId.PONo === detail.poNo;
-      })?.finalETADate;
-      detail.finalETADate == null
-        ? (detail.finalETADate = originalFinalETA)
-        : detail.finalETADate;
-      return { ...detail };
-    });
-    console.log(newItem);
-    setSubDatas(newItem);
-  };
   return (
     <>
       <div className="">
-        <CustomDataTable<PO_Status, PO_Details>
+        <CustomDataTable<PO_Status, null>
           className="rounded-lg border "
           data={datas}
           columns={columns}
-          collapse={true}
-          subtableData={subDatas}
-          subColumns={subColumns}
-          findSubtableData={findSubtableData}
+          collapse={false}
         />
 
         {/* <ServerSideDataTable

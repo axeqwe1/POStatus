@@ -201,7 +201,7 @@ export const getColumns = (
             <DropdownMenuContent
               align="end"
               side="bottom"
-              className="z-50 p-4 border-1 rounded-2xl bg-slate-50"
+              className="z-50 p-4 border-1 rounded-2xl bg-accent"
             >
               <DropdownMenuItem
                 className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer"

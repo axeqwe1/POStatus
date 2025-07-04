@@ -249,7 +249,7 @@ export function UserForm({
                 value={valueRole}
                 onChange={setValueRole}
                 placeholder="Select Role"
-                className="max-w-sm"
+                className="max-w-sm "
                 inputClassName="p-3"
                 dropdownClassName=" border-blue-400"
                 optionClassName="hover:bg-blue-600 hover:text-white"

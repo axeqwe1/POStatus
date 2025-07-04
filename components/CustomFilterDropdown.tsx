@@ -17,7 +17,7 @@ export default function CustomFilterDropdown({ table }: any) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="bg-slate-200 border-1">
+        <Button variant="outline" size="sm" className=" border-1">
           <IconLayoutColumns />
           <span className="hidden lg:inline">Customize Columns</span>
           <span className="lg:hidden">Columns</span>
@@ -25,7 +25,7 @@ export default function CustomFilterDropdown({ table }: any) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
-        <DropdownMenuContent align="end" className="w-56 border-3 bg-white">
+        <DropdownMenuContent align="end" className="w-56 border-3">
           {table
             .getAllColumns()
             .filter(
@@ -35,17 +35,19 @@ export default function CustomFilterDropdown({ table }: any) {
             .map((column: any) => (
               <DropdownMenuCheckboxItem
                 key={column.id}
-                className="capitalize hover:bg-slate-100 hover:cursor-pointer px-4 py-2 pl-8 relative" // <-- pl-8 เพื่อเว้นซ้ายให้ icon
+                className="capitalize hover:cursor-pointer px-4 py-2 pl-8 relative bg-accent" // <-- pl-8 เพื่อเว้นซ้ายให้ icon
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
                 {/* Check icon, only visible when checked */}
                 {column.getIsVisible() && (
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none ">
                     <IconCheck size={18} className="text-primary" />
                   </span>
                 )}
-                {column.id}
+                <span className="">
+                  {column.columnDef.meta?.label ?? column.id}
+                </span>
               </DropdownMenuCheckboxItem>
             ))}
         </DropdownMenuContent>

@@ -8,16 +8,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuth } from "@/context/authContext";
 import { IconArrowBigLeft } from "@tabler/icons-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 
 export default function page() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
-
+  const pathname = usePathname();
+  const refAuth = useAuth();
+  // Redirect ไป dashboard ถ้า login แล้ว (หลังโหลดเสร็จ)
+  useEffect(() => {
+    if (!refAuth.isLoading && refAuth.isAuthenticated) {
+      if (refAuth.user?.role === "User") {
+        console.warn("User role detected, redirecting to PO_Status");
+        router.replace("/PO_Status");
+      } else {
+        router.replace("/purchaseOffice/ViewPOApproveList");
+      }
+    }
+  }, [refAuth.isLoading, refAuth.isAuthenticated, pathname]);
   useEffect(() => {
     console.log(token);
   }, []);

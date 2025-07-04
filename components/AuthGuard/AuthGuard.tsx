@@ -26,16 +26,6 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
       console.log("Trigger ");
       const isProd = process.env.NODE_ENV === "production";
       window.location.href = isProd ? "/PO_Website/auth/login" : "/auth/login";
-    } else {
-      console.log(refAuth.user);
-      if (!refAuth.isLoading && refAuth.isAuthenticated) {
-        if (refAuth.user?.role === "User") {
-          console.warn("User role detected, redirecting to PO_Status");
-          router.replace("/PO_Status");
-        } else {
-          router.replace("/purchaseOffice/ViewPOApproveList");
-        }
-      }
     }
   }, [isAuthenticated, isLoading, router]);
 

@@ -19,6 +19,7 @@ import Head from "next/head";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/authContext";
 import AuthGuard from "@/components/AuthGuard/AuthGuard";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -40,21 +41,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <Head>
         <title>NDS Coporate</title>
       </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <AuthGuard>
-            <NavProvider>
-              {children}
-              <Toaster position="top-center" richColors={true} />
-            </NavProvider>
-          </AuthGuard>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <AuthGuard>
+              <NavProvider>
+                {children}
+                <Toaster position="top-center" richColors={true} />
+              </NavProvider>
+            </AuthGuard>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

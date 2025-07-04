@@ -28,6 +28,7 @@ import {
 import { useNav } from "@/context/navContext";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { ModeToggle } from "./theme/ModeToggle";
 
 export function SiteHeader() {
   const { breadcrump, setPathName } = useNav();
@@ -66,6 +67,7 @@ export function SiteHeader() {
 
         {/* <h1 className="text-base font-medium">Documents</h1> */}
         <div className="ml-auto flex items-center gap-2">
+          <ModeToggle />
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">Notification</Button>

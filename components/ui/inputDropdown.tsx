@@ -63,7 +63,7 @@ export function InputDropdown({
       {open && filteredOptions.length > 0 && (
         <ul
           className={cn(
-            "absolute z-10 mt-0.5 w-full max-h-48 overflow-auto rounded-b-md border border-gray-200 bg-white shadow-lg",
+            "absolute z-10 mt-0.5 w-full max-h-48 overflow-auto rounded-b-md border border-accent bg-accent shadow-lg",
             dropdownClassName
           )}
         >

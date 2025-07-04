@@ -331,7 +331,7 @@ export default function Page() {
         </TabsList>
       </Tabs>
       {isLoading ? (
-        <div className="h-[90vh] bg-white flex justify-center items-center">
+        <div className="h-[90vh] flex justify-center items-center">
           <SkeletonTable cols={3} rows={9} />
         </div>
       ) : (

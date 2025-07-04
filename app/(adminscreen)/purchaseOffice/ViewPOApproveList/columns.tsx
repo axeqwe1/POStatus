@@ -348,7 +348,7 @@ export const getColumns = (
                       {POData!.map((file: any) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                          className="flex items-center justify-between p-2 border shadow-sm rounded text-xs"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <FileIcon fileType={file.type} />
@@ -409,7 +409,7 @@ export const getColumns = (
                                 </div>
                               ) : (
                                 <div
-                                  className="text-gray-600 truncate italic flex flex-row"
+                                  className="text-gray-600 dark:text-gray-300 truncate italic flex flex-row"
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
@@ -575,7 +575,7 @@ export const getColumns = (
                       {POData!.map((file: any) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                          className="flex items-center justify-between p-2 border shadow-sm rounded text-xs"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <FileIcon fileType={file.type} />
@@ -636,7 +636,7 @@ export const getColumns = (
                                 </div>
                               ) : (
                                 <div
-                                  className="text-gray-600 truncate italic flex flex-row"
+                                  className="text-gray-600 dark:text-gray-300 truncate italic flex flex-row"
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
@@ -773,15 +773,17 @@ export const getColumns = (
           ) : (
             <IconAutomation className="fill-blue-500 dark:fill-blue-400" />
           )}
-          {isCancel === 1
-            ? "RequestCancel"
-            : isCancel === 2
-            ? "Cancel"
-            : isConfirmed
-            ? "Confirm"
-            : row.original.ClosePO
-            ? "Pending"
-            : "Process.. "}
+          <span className="dark:text-white font-semibold">
+            {isCancel === 1
+              ? "RequestCancel"
+              : isCancel === 2
+              ? "Cancel"
+              : isConfirmed
+              ? "Confirm"
+              : row.original.ClosePO
+              ? "Pending"
+              : "Process.. "}
+          </span>
         </Badge>
       );
     },
@@ -790,18 +792,12 @@ export const getColumns = (
   },
 
   {
-    accessorKey: "ApproveDate",
-    accessorFn: (row) => {
-      return !row.ClosePO
-        ? "Not Approved"
-        : row.sendDate
-        ? new Date(row.sendDate).toLocaleDateString("th-TH", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-        : "Not Approved";
-    },
+    // new Date(row.sendDate).toLocaleDateString("th-TH", {
+    //         day: "2-digit",
+    //         month: "2-digit",
+    //         year: "numeric",
+    //       })
+    accessorKey: "sendDate", // <-- ต้องมี เพื่อ match custom column system
     header: ({ column }) => (
       <Button
         className="hover:cursor-pointer !p-0"
@@ -831,14 +827,18 @@ export const getColumns = (
     },
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue?.from) return true;
-
+      // ถ้า ClosePO = false หรือไม่มี sendDate → ไม่ผ่าน filter
+      if (!row.original.ClosePO || !row.original.sendDate) return false;
       const rowDate = new Date(row.getValue(columnId));
+      if (isNaN(rowDate.getTime())) return false;
+      console.log(rowDate);
       const from = filterValue.from;
       const to = filterValue.to ?? from; // กรณีเลือกวันเดียว
 
       return rowDate >= from && rowDate <= to;
     },
     meta: {
+      label: "Lastest Approve Date", // ชื่อที่จะแสดงใน UI
       filterElement: DateRangeFilter, // custom meta key สำหรับ filter
     },
   },
@@ -1189,7 +1189,7 @@ export const getColumns = (
                       {POData!.map((file: any) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                          className="flex items-center justify-between p-2 border shadow-sm rounded text-xs"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <FileIcon fileType={file.type} />
@@ -1250,7 +1250,7 @@ export const getColumns = (
                                 </div>
                               ) : (
                                 <div
-                                  className="text-gray-600 truncate italic flex flex-row"
+                                  className="text-gray-600 dark:text-gray-300 truncate italic flex flex-row"
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);

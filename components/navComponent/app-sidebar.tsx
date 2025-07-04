@@ -106,7 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <img
                 src={`${basePath}/PO_Logo.png`}
                 alt="Image"
-                className="dark:brightness-[0.2] dark:grayscale h-[60px]"
+                className="rounded h-[60px]"
               />
               <div className="">
                 <span className="text-base font-semibold">

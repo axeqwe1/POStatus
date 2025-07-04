@@ -18,6 +18,7 @@ import {
   IconCancel,
   IconCheck,
   IconCircleCheckFilled,
+  IconCircleX,
   IconClock,
   IconCloudUpload,
   IconCross,
@@ -78,6 +79,7 @@ import {
 import { formatFileSize } from "@/utils/utilFunction";
 import { FileIcon } from "@/utils/fileIcon";
 import { DownloadFile } from "@/lib/api/uploadFile";
+import { useAuth } from "@/context/authContext";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -129,13 +131,22 @@ export const getColumns = (
       const [showFileList, setShowFileList] = useState(false);
       const [descriptionOpen, setDescriptionOpen] = useState(false);
       const [selectFileId, setSelectFileId] = useState<string>("");
+      const { user } = useAuth();
+      const [isUploadDisabled, setIsUploadDisabled] = useState<boolean>(false);
+
       const POData = row.original.attachedFiles!.filter(
         (item) => item.uploadType == 2
       );
-      // useEffect(() => {
-      //   setPOData(row.original.attachedFiles || []);
-      //   console.log(row.original.attachedFiles);
-      // }, [row.original.attachedFiles]);
+      useEffect(() => {
+        console.log(user);
+        if (user?.role === "User") {
+          console.log(isUploadDisabled);
+          setIsUploadDisabled(true); // ถ้าไม่ใช่ User จะไม่สามารถอัพโหลดได้
+        } else {
+          console.warn("User role is User, enabling upload functionality");
+          setIsUploadDisabled(false); // ถ้าไม่ใช่ User จะไม่สามารถอัพโหลดได้
+        }
+      }, [user, isUploadDisabled]);
       // Handle file upload
       const handleSelectFile = (fileId: string) => {
         POData?.find((file: any) => {
@@ -270,44 +281,51 @@ export const getColumns = (
                 </h4>
 
                 {/* File Drop Zone */}
-                <div
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={async (e) => {
-                    e.preventDefault();
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                      await handleFileUpload(files, row.original.PONo, 2);
-                      // await refreshPO(row.original.PONo); // Refresh PO after upload
-                    }
-                  }}
-                  onClick={() => {
-                    const input = document.createElement("input");
-                    input.type = "file";
-                    input.multiple = true;
-                    input.accept =
-                      ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png, .txt";
-                    input.onchange = async (e) => {
-                      const files = (e.target as HTMLInputElement).files;
-                      if (files) {
+                {isUploadDisabled && (
+                  <div className="text-red-500 text-sm mb-2">
+                    You do not have permission to upload files.
+                  </div>
+                )}
+                {!isUploadDisabled && (
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      const files = e.dataTransfer.files;
+                      if (files.length > 0) {
                         await handleFileUpload(files, row.original.PONo, 2);
                         // await refreshPO(row.original.PONo); // Refresh PO after upload
                       }
-                    };
-                    input.click();
-                  }}
-                >
-                  <IconCloudUpload
-                    size={32}
-                    className="mx-auto mb-2 text-gray-400"
-                  />
-                  <p className="text-sm text-gray-600">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    PDF, DOC, XLS, Images (Max 5MB each PO)
-                  </p>
-                </div>
+                    }}
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.multiple = true;
+                      input.accept =
+                        ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png, .txt";
+                      input.onchange = async (e) => {
+                        const files = (e.target as HTMLInputElement).files;
+                        if (files) {
+                          await handleFileUpload(files, row.original.PONo, 2);
+                          // await refreshPO(row.original.PONo); // Refresh PO after upload
+                        }
+                      };
+                      input.click();
+                    }}
+                  >
+                    <IconCloudUpload
+                      size={32}
+                      className="mx-auto mb-2 text-gray-400"
+                    />
+                    <p className="text-sm text-gray-600">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      PDF, DOC, XLS, Images (Max 5MB each PO)
+                    </p>
+                  </div>
+                )}
 
                 {/* Current Files List */}
                 {POData!.length > 0 && (
@@ -319,7 +337,7 @@ export const getColumns = (
                       {POData!.map((file: any) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                          className="flex items-center justify-between p-2 border shadow-sm rounded text-xs"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <FileIcon fileType={file.type} />
@@ -380,7 +398,7 @@ export const getColumns = (
                                 </div>
                               ) : (
                                 <div
-                                  className="text-gray-600 truncate italic flex flex-row"
+                                  className="text-gray-600 dark:text-gray-300 truncate italic flex flex-row"
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
@@ -497,44 +515,59 @@ export const getColumns = (
                 </h4>
 
                 {/* File Drop Zone */}
-                <div
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={async (e) => {
-                    e.preventDefault();
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                      await handleFileUpload(files, row.original.PONo, 2);
-                      // await refreshPO(row.original.PONo); // Refresh PO after upload
-                    }
-                  }}
-                  onClick={() => {
-                    const input = document.createElement("input");
-                    input.type = "file";
-                    input.multiple = true;
-                    input.accept =
-                      ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt";
-                    input.onchange = async (e) => {
-                      const files = (e.target as HTMLInputElement).files;
-                      if (files) {
+                {isUploadDisabled && (
+                  <>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-not-allowed">
+                      <IconCircleX
+                        size={32}
+                        className="mx-auto mb-2 text-gray-400"
+                      />
+                      <div className="text-red-500 text-sm mb-2">
+                        You do not have permission to upload files.
+                      </div>
+                    </div>
+                  </>
+                )}
+                {!isUploadDisabled && (
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      const files = e.dataTransfer.files;
+                      if (files.length > 0) {
                         await handleFileUpload(files, row.original.PONo, 2);
                         // await refreshPO(row.original.PONo); // Refresh PO after upload
                       }
-                    };
-                    input.click();
-                  }}
-                >
-                  <IconCloudUpload
-                    size={32}
-                    className="mx-auto mb-2 text-gray-400"
-                  />
-                  <p className="text-sm text-gray-600">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    PDF, DOC, XLS, Images (Max 5MB each PO)
-                  </p>
-                </div>
+                    }}
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.multiple = true;
+                      input.accept =
+                        ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png, .txt";
+                      input.onchange = async (e) => {
+                        const files = (e.target as HTMLInputElement).files;
+                        if (files) {
+                          await handleFileUpload(files, row.original.PONo, 2);
+                          // await refreshPO(row.original.PONo); // Refresh PO after upload
+                        }
+                      };
+                      input.click();
+                    }}
+                  >
+                    <IconCloudUpload
+                      size={32}
+                      className="mx-auto mb-2 text-gray-400"
+                    />
+                    <p className="text-sm text-gray-600">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      PDF, DOC, XLS, Images (Max 5MB each PO)
+                    </p>
+                  </div>
+                )}
 
                 {/* Current Files List */}
                 {POData!.length > 0 && (
@@ -546,7 +579,7 @@ export const getColumns = (
                       {POData!.map((file: any) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                          className="flex items-center justify-between p-2 border shadow-sm rounded text-xs"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <FileIcon fileType={file.type} />
@@ -607,7 +640,7 @@ export const getColumns = (
                                 </div>
                               ) : (
                                 <div
-                                  className="text-gray-600 truncate italic flex flex-row"
+                                  className="text-gray-600 dark:text-gray-300 truncate italic flex flex-row"
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);
@@ -723,15 +756,17 @@ export const getColumns = (
           ) : (
             <IconAutomation className="fill-blue-500 dark:fill-blue-400" />
           )}
-          {isCancel === 1
-            ? "RequestCancel"
-            : isCancel === 2
-            ? "Cancel"
-            : isConfirmed
-            ? "Confirm"
-            : row.original.ClosePO
-            ? "Pending"
-            : "Process.. "}
+          <span className="dark:text-white font-semibold">
+            {isCancel === 1
+              ? "RequestCancel"
+              : isCancel === 2
+              ? "Cancel"
+              : isConfirmed
+              ? "Confirm"
+              : row.original.ClosePO
+              ? "Pending"
+              : "Process.. "}
+          </span>
         </Badge>
       );
     },
@@ -739,14 +774,14 @@ export const getColumns = (
     // (optional) enableFacetedValues: true,
   },
   {
-    accessorKey: "sendDate",
+    accessorKey: "sendDate", // <-- ต้องมี เพื่อ match custom column system
     header: ({ column }) => (
       <Button
         className="hover:cursor-pointer !p-0"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Send Date
+        Lastest Approve Date
         <ArrowUpDown />
       </Button>
     ),
@@ -769,14 +804,18 @@ export const getColumns = (
     },
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue?.from) return true;
-
+      // ถ้า ClosePO = false หรือไม่มี sendDate → ไม่ผ่าน filter
+      if (!row.original.ClosePO || !row.original.sendDate) return false;
       const rowDate = new Date(row.getValue(columnId));
+      if (isNaN(rowDate.getTime())) return false;
+      console.log(rowDate);
       const from = filterValue.from;
       const to = filterValue.to ?? from; // กรณีเลือกวันเดียว
 
       return rowDate >= from && rowDate <= to;
     },
     meta: {
+      label: "Lastest Approve Date", // ชื่อที่จะแสดงใน UI
       filterElement: DateRangeFilter, // custom meta key สำหรับ filter
     },
   },
@@ -1131,7 +1170,7 @@ export const getColumns = (
                       {POData!.map((file: any) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs"
+                          className="flex items-center justify-between p-2 border shadow-sm rounded text-xs"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <FileIcon fileType={file.type} />
@@ -1192,7 +1231,7 @@ export const getColumns = (
                                 </div>
                               ) : (
                                 <div
-                                  className="text-gray-600 truncate italic flex flex-row"
+                                  className="text-gray-600 dark:text-gray-300 truncate italic flex flex-row"
                                   onClick={() => {
                                     setDescriptionOpen(!descriptionOpen);
                                     setSelectFileId(file.id);

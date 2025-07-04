@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  IconBell,
   IconCreditCard,
   IconDotsVertical,
   IconLogout,
@@ -105,8 +106,10 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                 <IconPasswordUser />
                 Change Password
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
+              <DropdownMenuItem
+                onClick={() => router.push("/FullNotifications")}
+              >
+                <IconBell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
