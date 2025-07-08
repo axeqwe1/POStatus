@@ -109,7 +109,7 @@ export default function DataTable({
       }),
       {
         loading: "Process...",
-        success: "Confirm Complete ำำำำ",
+        success: "Confirm Complete",
         error: (err: any) => {
           // รับ error object จาก reject
           return `Error: ${err.message}`;

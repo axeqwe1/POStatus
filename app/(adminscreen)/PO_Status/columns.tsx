@@ -138,12 +138,12 @@ export const getColumns = (
         (item) => item.uploadType == 2
       );
       useEffect(() => {
-        console.log(user);
+        // console.log(user);
         if (user?.role === "User") {
-          console.log(isUploadDisabled);
+          // console.log(isUploadDisabled);
           setIsUploadDisabled(true); // ถ้าไม่ใช่ User จะไม่สามารถอัพโหลดได้
         } else {
-          console.warn("User role is User, enabling upload functionality");
+          // console.warn("User role is User, enabling upload functionality");
           setIsUploadDisabled(false); // ถ้าไม่ใช่ User จะไม่สามารถอัพโหลดได้
         }
       }, [user, isUploadDisabled]);

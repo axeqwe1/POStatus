@@ -29,17 +29,17 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  useEffect(() => {
-    // ตรวจจับจาก bfcache
-    const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        window.location.reload(); // 🔁 บังคับ refresh
-      }
-    };
+  // useEffect(() => {
+  //   // ตรวจจับจาก bfcache
+  //   const handlePageShow = (event: PageTransitionEvent) => {
+  //     if (event.persisted) {
+  //       window.location.reload(); // 🔁 บังคับ refresh
+  //     }
+  //   };
 
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
+  //   window.addEventListener("pageshow", handlePageShow);
+  //   return () => window.removeEventListener("pageshow", handlePageShow);
+  // }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -83,7 +83,7 @@ const AuthGuard: React.FC<PrivateRouteProps> = ({ children }) => {
   //   }
 
   // ถ้าล็อกอินแล้ว แสดง children
-  return <>{children}</>;
+  return <React.Fragment>{children}</React.Fragment>;
 };
 
 export default AuthGuard;

@@ -33,6 +33,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { NavSidebar } from "./nav-sidebar";
 import {
@@ -48,6 +49,9 @@ import {
   UserManagement,
 } from "@/data/sidebar-menu";
 import { useAuth } from "@/context/authContext";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useSidebarState } from "@/hooks/useSidebarState";
 const data = {
   user: {
     name: "shadcn",
@@ -82,11 +86,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // const masterdataSidebar = sidebarData.find(
   //   (item) => item.label.replace(/\s+/g, "").toLowerCase() === "masterdata"
   // );
-  const [fillterNav, setFilterNav] = React.useState<any[]>([]);
+  const [fillterNav, setFilterNav] = useState<any[]>([]);
   const { user } = useAuth();
   const isProd = process.env.NODE_ENV === "production";
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-  React.useEffect(() => {
+  const { state } = useSidebar();
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  useEffect(() => {
     const filteredNavMain = data.navMain.filter((item) => {
       // ถ้าไม่ใช่ Admin → ซ่อนเมนู "User"
       if (user?.role !== "Admin" && item.title === "User") {
@@ -97,25 +103,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setFilterNav(filteredNavMain);
     console.log("User Role:", user?.role);
   }, [user]);
+  useEffect(() => {
+    if (state === "collapsed") {
+      setIsCollapsed(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  }, [state, isCollapsed]);
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex flex-row  items-center gap-3">
-              <img
-                src={`${basePath}/PO_Logo.png`}
-                alt="Image"
-                className="rounded h-[60px]"
-              />
-              <div className="">
-                <span className="text-base font-semibold">
-                  <span className="text-secondary">P</span>
-                  <span>O Purchase Order.</span>
-                </span>
-                <p className="text-xs">{user?.supplierName}</p>
-              </div>
-            </div>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex flex-row  items-center gap-3">
+                  <img
+                    src={`${basePath}/PO_Logo.png`}
+                    alt="Image"
+                    className={`rounded ${
+                      isCollapsed ? "max-h-[30px]" : "max-h-[60px]"
+                    } object-cover`}
+                  />
+                  <div className="">
+                    <span className="text-base font-semibold">
+                      <span className="text-secondary">P</span>
+                      <span>O Purchase Order.</span>
+                    </span>
+                    <p className="text-xs">{user?.supplierName}</p>
+                  </div>
+                </div>
+              </a>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

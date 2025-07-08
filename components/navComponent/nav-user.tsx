@@ -112,6 +112,10 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                 <IconBell />
                 Notifications
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/Notification")}>
+                <IconBell />
+                Notifications V2
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

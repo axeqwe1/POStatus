@@ -17,15 +17,6 @@ import { Suspense } from "react";
 import AuthGuard from "@/components/AuthGuard/AuthGuard";
 import { useAuth } from "@/context/authContext";
 import { redirect } from "next/navigation";
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "PO Status Tracking",
@@ -47,7 +38,7 @@ export default function Layout({
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" />
+        <AppSidebar variant="sidebar" collapsible="icon" />
         <SidebarInset>
           <SiteHeader />
           <div className="flex flex-1 flex-col">

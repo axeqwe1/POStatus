@@ -7,8 +7,14 @@ import {
 } from "@microsoft/signalr";
 
 const createSignalRConnection = async (): Promise<HubConnection> => {
+  const SIGNALR_URL = process.env.NEXT_PUBLIC_SIGNALR_URL;
+  if (!SIGNALR_URL) {
+    throw new Error("NEXT_PUBLIC_SIGNALR_URL is not defined in .env");
+  }
   const connection = new HubConnectionBuilder()
-    .withUrl("https://localhost:7004/hub/notification")
+    .withUrl(SIGNALR_URL, {
+      withCredentials: true,
+    })
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: (retryContext) => {
         console.warn(

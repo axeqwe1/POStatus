@@ -96,6 +96,7 @@ import {
 } from "@/lib/api/uploadFile";
 import { formatDate, formatFileSize } from "@/utils/utilFunction";
 import { GetPOByPONo } from "@/lib/api/po";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -108,28 +109,32 @@ export const getColumns = (
   isDesktop?: boolean
 ): ColumnDef<PO_Status>[] => [
   {
-    id: "PONo",
-    accessorKey: "PONo",
-    header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        {/* PONo */}
-        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-        <Button
-          className="hover:cursor-pointer !p-0"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          PO Number
-          <ArrowUpDown />
-        </Button>
-        <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
-          <IconPaperclip size={16} />
-          PO Files
-        </span>
-      </div>
+    id: "select",
+    header: ({ table, column }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
     ),
     cell: ({ row }) => {
-      return <div>test</div>;
+      return (
+        <>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        </>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+    meta: {
+      label: "Select",
     },
   },
   {
