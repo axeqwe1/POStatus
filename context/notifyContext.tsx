@@ -1,10 +1,13 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
-import { GetNotify } from "@/lib/api/notify";
+import { GetNotifyCount } from "@/lib/api/notify";
 import createSignalRConnection from "@/lib/signalR/signalR-client";
 import { toast } from "sonner";
-
+import { createPortal } from "react-dom";
+import { CustomPortalToast } from "@/components/Portal/CustomPortalToast";
+import NotificationToastPortal from "@/components/Portal/NotificationToastPortal";
+import { AnimatePresence, motion } from "motion/react";
 interface NotifyContextProps {
   clear: () => void;
   countNotify: number;
@@ -16,22 +19,27 @@ interface NotifyProviderProps {
   children: React.ReactNode;
 }
 export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
-  const [notifications, setNotifications] = useState<string[]>([]);
   const [countNotify, setCountNotify] = useState(0);
+  const [toast, setToast] = useState<null | { user: string; message: string }>(
+    null
+  );
   const { user } = useAuth();
   const clear = () => {
-    setNotifications([]);
     setCountNotify(0);
   };
 
+  const onClose = () => {
+    setToast(null);
+  };
   useEffect(() => {
     const fetchAllNotifications = async (userId: string) => {
       try {
-        const res = await GetNotify(userId);
+        const res = await GetNotifyCount(userId);
         if (res.status === 200) {
           const data = res.data;
-          setNotifications(data);
-          setCountNotify(data.length);
+          console.log("Fetched notifications:", data);
+
+          setCountNotify(data.count);
         } else {
           console.error("Failed to fetch notifications:", res.statusText);
         }
@@ -53,6 +61,11 @@ export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
       conn.on("ReceiveMessage", (user: string, message: string) => {
         setCountNotify((prevCount) => prevCount + 1);
         console.log(`📨 ${user}: ${message}`);
+        setToast({ user, message });
+
+        // <CustomPortalToast>
+
+        // </CustomPortalToast>;
       });
     });
 
@@ -60,16 +73,28 @@ export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
       if (connection) connection.stop();
     };
   }, []);
+
   return (
     <NotifyContext.Provider value={{ clear, countNotify }}>
       {children}
+      <AnimatePresence>
+        {toast && (
+          <NotificationToastPortal
+            key={toast.user + toast.message}
+            user={toast?.user!}
+            message={toast?.message!}
+            onClose={onClose}
+          />
+        )}
+      </AnimatePresence>
     </NotifyContext.Provider>
   );
 };
 
-const useNotify = () => {
+export const useNotify = () => {
   const context = useContext(NotifyContext);
   if (!context) {
     throw new Error("useNotify must be used within a NotifyProvider");
   }
+  return context;
 };

@@ -15,7 +15,7 @@ import { useEffect } from "react";
 
 export default function CustomFilterDropdown({ table }: any) {
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className=" border-1">
           <IconLayoutColumns />

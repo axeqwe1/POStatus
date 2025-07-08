@@ -52,6 +52,7 @@ import { useAuth } from "@/context/authContext";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useSidebarState } from "@/hooks/useSidebarState";
+import { useNotify } from "@/context/notifyContext";
 const data = {
   user: {
     name: "shadcn",
@@ -92,6 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   const { state } = useSidebar();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const { countNotify } = useNotify();
   useEffect(() => {
     const filteredNavMain = data.navMain.filter((item) => {
       // ถ้าไม่ใช่ Admin → ซ่อนเมนู "User"
@@ -162,8 +164,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSidebar items={userDataSideBar} LabelName={"User"} /> */}
         {/* <NavSecondary items={data.navSecondary} className="" /> */}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="relative">
         <NavUser user={user} />
+        {countNotify > 0 && state == "collapsed" && (
+          <span className="flex flex-row items-center justify-center absolute top-1.5 right-1 h-1.75 w-1.75 rounded-full bg-red-500 text-white text-[9px]"></span>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

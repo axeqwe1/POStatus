@@ -1,9 +1,11 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { CustomDataTable } from "@/components/CustomDataTable";
 import { getColumns } from "./columns";
 import {
   FileItem,
+  NotificationReceivers,
+  Notifications,
   PO_Details,
   PO_Status,
   Product,
@@ -32,67 +34,73 @@ import { TabsTrigger } from "@radix-ui/react-tabs";
 import { GetPOByPONo, GetPODetail, SaveStatusDownload } from "@/lib/api/po";
 import { toast } from "sonner";
 import { ServerSideDataTable } from "@/components/CustomServerTable";
-import { ColumnDef } from "@tanstack/react-table";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+  VisibilityState,
+} from "@tanstack/react-table";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ColumnFilter } from "@/components/ColumnFilter";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import CustomTableFooter from "@/components/CustomTableFooter";
 
 interface DataTableProps {
-  data: PO_Status[];
-  totalCount: number;
+  data: NotificationReceivers[];
   isLoading: boolean;
-  onSuccess: () => void;
-  uploadFiles: (
-    filed: FileList,
-    PONo: string,
-    uploadType: number
-  ) => Promise<void>;
-  deleteFile: (fileId: string) => Promise<void>;
-  onPaginChange?: (pageIndex: number, pageSize: number) => void;
-  updateDescriptionFile?: (
-    FileId: string,
-    description: string,
-    PONo: string
-  ) => Promise<void>;
 }
-export default function DataTable({
-  data,
-  totalCount,
-  isLoading,
-  onSuccess,
-  uploadFiles,
-  deleteFile,
-  onPaginChange,
-  updateDescriptionFile,
-}: DataTableProps) {
+export default function DataTable({ data, isLoading }: DataTableProps) {
   const [datas, setDatas] = useState(data);
-  const [subDatas, setSubDatas] = useState<PO_Details[]>([]);
   const [isEdit, setIsEdit] = useState(false);
-  const [originalFinalETA, setOriginalFInalETA] = useState<Date | null>(null);
   const [editItem, setEditItem] = useState<string>("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [openPopoverPONo, setOpenPopoverPONo] = useState<string | null>(null);
-  const [uploadedFilesMap, setUploadedFilesMap] = useState<
-    Record<string, FileItem[]>
-  >({});
-  const [popoverState, setPopoverState] = useState<{
-    open: boolean;
-    anchorRect: DOMRect | null;
-    row: PO_Status | null;
-  }>({ open: false, anchorRect: null, row: null });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+
   // pagin
   useEffect(() => {
     setDatas(data);
     // console.log(data);
   }, [data]);
+
   const handleDelete = async (fileId: string) => {
-    setDatas((prev) => prev.filter((u) => u.PONo !== fileId));
+    // setDatas((prev) => prev.filter((u) => u.PONo !== fileId));
   };
 
   const handleEdit = (PONo: string) => {
     setEditItem(PONo);
     setIsEdit(true);
   };
-  const handleDeleteFile = (PONo: string) => {
-    deleteFile(PONo);
-  };
+
   useEffect(() => {
     setDatas(data);
   }, [data]);
@@ -109,36 +117,110 @@ export default function DataTable({
       ),
     [handleDelete, isEdit, setIsEdit, editItem, handleEdit, isDesktop]
   );
-  // const subColumns = getSubColumns(
-  //   originalFinalETA ? originalFinalETA : new Date(),
-  //   setOriginalFInalETA
-  // );
+
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
 
   return (
     <>
-      <div className="">
-        <CustomDataTable<PO_Status, null>
-          className="rounded-lg border "
-          data={datas}
-          columns={columns}
-          collapse={false}
-        />
-
-        {/* <ServerSideDataTable
-          data={data}
-          columns={columns}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPaginationChange={({ pageIndex, pageSize }) => {
-            setPageIndex(pageIndex);
-            setPageSize(pageSize);
-            onPaginChange?.(pageIndex, pageSize);
-          }}
-          isLoading={isLoading}
-          
-        /> */}
-        {/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
+      <div className="w-full">
+        <div className="flex items-center py-4">
+          <ColumnFilter table={table} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div>
+          {/*  */}
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <CustomTableFooter table={table} />
       </div>
     </>
   );

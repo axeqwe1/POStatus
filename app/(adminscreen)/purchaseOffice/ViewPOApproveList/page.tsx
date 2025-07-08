@@ -122,7 +122,6 @@ export default function Page() {
   const handleChangeTab = useCallback(
     (value: string) => {
       const latest = masterDataRef.current; // ✅ ใช้ข้อมูลล่าสุดเสมอ
-      console.log(latest.find((item) => item.PONo === "YPTPO-25-02113"));
       const filtered = filterByTab(value, latest);
       setPoData(filtered);
       SetTab(value);
@@ -318,24 +317,40 @@ export default function Page() {
       <Tabs
         onValueChange={handleChangeTab}
         defaultValue="all"
-        className="w-[400px] mb-1"
+        className="max-w-[400px] mb-1 "
       >
         <TabsList>
           <TabsTrigger value="all">
-            <p>{`ALL (${countAll})`}</p>
+            <div>
+              <p className="text-xs">{`ALL (${
+                countAll > 99 ? "99+" : countAll
+              })`}</p>
+            </div>
           </TabsTrigger>
           <TabsTrigger value="process">
-            <p>{`Process (${countProcess})`}</p>
+            <div>
+              <p className="text-xs">{`Process (${
+                countProcess > 99 ? "99+" : countProcess
+              })`}</p>
+            </div>
           </TabsTrigger>
           <TabsTrigger value="pending">
-            <p>{`Pending (${countPending})`}</p>
+            <div>
+              <p className="text-xs">{`Pending (${
+                countPending > 99 ? "99+" : countPending
+              })`}</p>
+            </div>
           </TabsTrigger>
           <TabsTrigger value="confirm">
-            <p>{`Confirm (${countConfirm})`}</p>
+            <div>
+              <p className="text-xs">{`Confirm (${
+                countConfirm > 99 ? "99+" : countConfirm
+              })`}</p>
+            </div>
           </TabsTrigger>
-          <TabsTrigger value="cancel">
+          {/* <TabsTrigger value="cancel">
             <p>{`Cancel (${countCancel})`}</p>
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
       </Tabs>
       {isLoading ? (

@@ -83,3 +83,23 @@ export interface FileItem {
   remark?: string; // optional, สำหรับบันทึก remark ของไฟล์
   uploadType?: number; // 1 = PO, 2 = Supplier
 }
+
+export interface Notifications {
+  noti_id: string; // รหัสการแจ้งเตือน
+  title: string; // หัวข้อการแจ้งเตือน
+  message: string; // ข้อความการแจ้งเตือน
+  type: string;
+  refId: string;
+  refType: string; // ประเภทการอ้างอิง เช่น 'PO', 'Supplier', 'User'
+  createAt: string; // วันที่และเวลาที่สร้างการแจ้งเตือน
+  createBy: string; // ผู้สร้างการแจ้งเตือน (อาจจะเป็น userId หรือ username)
+}
+
+export interface NotificationReceivers {
+  noti_recvId: string;
+  noti_id: string;
+  isRead: boolean; // true ถ้าอ่านแล้ว
+  readAt?: Date; // วันที่อ่าน (optional)
+  isArchived: boolean; // true ถ้าเก็บไว้ใน archive
+  notification: Notifications;
+}

@@ -8,17 +8,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Table } from "@tanstack/react-table";
 import { Fragment, useEffect, useState } from "react";
-
+import { useSearchParams } from "next/navigation";
 interface ColumnFilterProps<TData> {
   table: Table<TData>;
 }
 
 export function ColumnFilter<TData>({ table }: ColumnFilterProps<TData>) {
+  const searchParams = useSearchParams();
+  const poNo = searchParams.get("PONo");
   const firstChoice = table
     .getAllColumns()
     .filter((column) => column.getCanFilter())
     .map((column) => column.columnDef.id)
     .filter((item) => item != undefined)[0] as string;
+  useEffect(() => {
+    console.log(poNo);
+    if (poNo) {
+      console.log(table);
+      table.getColumn("PONo")?.setFilterValue(poNo);
+    }
+  }, []);
   const [selectedColumn, setSelectedColumn] = useState<string>(firstChoice);
   return (
     <>

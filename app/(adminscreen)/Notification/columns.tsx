@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   FileItem,
+  NotificationReceivers,
+  Notifications,
   PO_Details,
   PO_Status,
   Product,
@@ -97,6 +99,8 @@ import {
 import { formatDate, formatFileSize } from "@/utils/utilFunction";
 import { GetPOByPONo } from "@/lib/api/po";
 import { Checkbox } from "@/components/ui/checkbox";
+import Link from "next/link";
+import { useAuth } from "@/context/authContext";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -107,7 +111,7 @@ export const getColumns = (
   editItem?: string,
   setEditItem?: (item: string) => void,
   isDesktop?: boolean
-): ColumnDef<PO_Status>[] => [
+): ColumnDef<NotificationReceivers>[] => [
   {
     id: "select",
     header: ({ table, column }) => (
@@ -138,85 +142,139 @@ export const getColumns = (
     },
   },
   {
-    accessorKey: "supplierName",
+    id: "title",
+    accessorFn: (row) => row.notification.title,
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
       <div className="flex items-center gap-2">
-        SupplierName
-        <ColumnCheckboxFilter column={column} table={table} />
+        Title
+        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
       </div>
     ),
     // รองรับ filter แบบ multi-checkbox
     filterFn: (row, columnId, filterValue) => {
-      if (!filterValue || filterValue.length === 0) return true;
-      // ในกรณีที่ filterValue เป็น array
-      return filterValue.includes(row.getValue(columnId));
+      if (
+        !filterValue ||
+        (Array.isArray(filterValue) && filterValue.length === 0)
+      )
+        return true;
+      const title = row.original.notification.title
+        ?.toString()
+        .toLowerCase()
+        .trim();
+
+      if (Array.isArray(filterValue)) {
+        return filterValue
+          .map((f) =>
+            typeof f === "string"
+              ? f.toLowerCase().trim()
+              : (f.value ?? "").toLowerCase().trim()
+          )
+          .includes(title);
+      } else {
+        // กรณี string (text input)
+        return title.includes(filterValue.toString().toLowerCase().trim());
+      }
     },
     cell: ({ row }) => {
-      return <div>{row.original.supplierName}</div>;
+      return <div>{row.original.notification.title}</div>;
     },
-
+    meta: {
+      label: "Title",
+    },
     // (optional) enableFacetedValues: true,
   },
   {
-    accessorKey: "Status",
-    accessorFn: (row) =>
-      row.cancelStatus === 1
-        ? "RequestCancel"
-        : row.cancelStatus === 2
-        ? "Cancel"
-        : row.Supreceive
-        ? "Confirm"
-        : !row.ClosePO
-        ? "Process.. "
-        : "Pending",
+    id: "refId",
+    accessorFn: (row) => row.notification.refId, // ✅ แก้ตรงนี้
+    header: ({ column }) => (
+      <Button
+        className="hover:cursor-pointer !p-0"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        ReferenceId
+        <ArrowUpDown />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const { user } = useAuth();
+      const Url =
+        user?.role === "User"
+          ? "/PO_Status"
+          : "/purchaseOffice/ViewPOApproveList";
+      return (
+        <>
+          {row.original.notification.type === "PO" && (
+            <Link
+              target="_blank"
+              href={`${Url}?PONo=${row.original.notification.refId}`}
+              className="text-blue-300 hover:underline"
+            >
+              {row.original.notification.refId}
+            </Link>
+          )}
+          {row.original.notification.type === "UploadFile" && (
+            <Link
+              target="_blank"
+              href={`${Url}?PONo=${row.original.notification.refId}`}
+              className="text-blue-300 hover:underline"
+            >
+              {row.original.notification.refId}
+            </Link>
+          )}
+        </>
+
+        // <span className="pl-1">
+        //   {row.original.notification.refId}
+        //   </span>
+      );
+    },
+    meta: {
+      label: "ReferenceId",
+    },
+  },
+  {
+    id: "type",
+    accessorKey: "type",
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
       <div className="flex items-center gap-2">
-        Status
+        Type
         <ColumnCheckboxFilter column={column} table={table} />
       </div>
     ),
     // รองรับ filter แบบ multi-checkbox
     filterFn: (row, columnId, filterValue) => {
-      if (!filterValue || filterValue.length === 0) return true;
-      // ในกรณีที่ filterValue เป็น array
-      return filterValue.includes(row.getValue(columnId));
+      if (
+        !filterValue ||
+        (Array.isArray(filterValue) && filterValue.length === 0)
+      )
+        return true;
+      const type = row.original.notification.type
+        ?.toString()
+        .toLowerCase()
+        .trim();
+
+      if (Array.isArray(filterValue)) {
+        return filterValue
+          .map((f) =>
+            typeof f === "string"
+              ? f.toLowerCase().trim()
+              : (f.value ?? "").toLowerCase().trim()
+          )
+          .includes(type);
+      } else {
+        // กรณี string (text input)
+        return type.includes(filterValue.toString().toLowerCase().trim());
+      }
     },
     cell: ({ row }) => {
-      const isConfirmed = row.original.Supreceive;
-      const isCancel = row.original.cancelStatus;
+      // const isConfirmed = row.original.Supreceive;
+      // const isCancel = row.original.cancelStatus;
       return (
-        <Badge
-          variant="outline"
-          className={`text-muted-foreground px-1.5 ${
-            isCancel
-              ? "bg-red-200 dark:bg-red-900"
-              : isConfirmed
-              ? "bg-green-200 dark:bg-green-900"
-              : row.original.ClosePO
-              ? "bg-yellow-200 dark:bg-yellow-900"
-              : "bg-blue-200 dark:bg-blue-900"
-          }`}
-        >
-          {isCancel ? (
-            <IconCancel className="fill-red-500 dark:fill-red-400" />
-          ) : isConfirmed ? (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-          ) : row.original.ClosePO ? (
-            <IconClock className="fill-yellow-500 dark:fill-yellow-400" />
-          ) : (
-            <IconAutomation className="fill-blue-500 dark:fill-blue-400" />
-          )}
-          {isCancel === 1
-            ? "RequestCancel"
-            : isCancel === 2
-            ? "Cancel"
-            : isConfirmed
-            ? "Confirm"
-            : row.original.ClosePO
-            ? "Pending"
-            : "Process.. "}
+        <Badge variant="outline" className={`text-muted-foreground px-1.5 `}>
+          {row.original.notification.type}
         </Badge>
       );
     },
@@ -225,211 +283,62 @@ export const getColumns = (
   },
 
   {
-    accessorKey: "ApproveDate",
-    accessorFn: (row) => {
-      return !row.ClosePO
-        ? "Not Approved"
-        : row.sendDate
-        ? new Date(row.sendDate).toLocaleDateString("th-TH", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-        : "Not Approved";
-    },
+    id: "message",
+    accessorKey: "Message",
     header: ({ column }) => (
-      <Button
-        className="hover:cursor-pointer !p-0"
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Lastest Approve Date
-        <ArrowUpDown />
-      </Button>
+      <div className="hover:cursor-pointer !p-0">Message</div>
     ),
     cell: ({ row }) => {
-      const date = row.original.sendDate;
       return (
         <span className="pl-1">
-          {!row.original.ClosePO
-            ? "Not Approved"
-            : row.original.sendDate
-            ? new Date(row.original.sendDate).toLocaleDateString("th-TH", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })
-            : "Not Approved"}
+          {row.original.notification.message}
           {/* {date ? new Date(date).toLocaleDateString() : "Not downloaded"} */}
         </span>
       );
     },
-    filterFn: (row, columnId, filterValue) => {
-      if (!filterValue?.from) return true;
-
-      const rowDate = new Date(row.getValue(columnId));
-      const from = filterValue.from;
-      const to = filterValue.to ?? from; // กรณีเลือกวันเดียว
-
-      return rowDate >= from && rowDate <= to;
-    },
     meta: {
-      filterElement: DateRangeFilter, // custom meta key สำหรับ filter
+      // filterElement: DateRangeFilter, // custom meta key สำหรับ filter
+      label: "Message",
     },
+    // filterFn: (row, columnId, filterValue) => {
+    //   if (!filterValue?.from) return true;
+
+    //   const rowDate = new Date(row.getValue(columnId));
+    //   const from = filterValue.from;
+    //   const to = filterValue.to ?? from; // กรณีเลือกวันเดียว
+
+    //   return rowDate >= from && rowDate <= to;
+    // },
   },
+
   {
-    accessorKey: "confirmDate",
+    id: "createAt",
+    accessorFn: (row) => new Date(row.notification.createAt), // ✅ เปลี่ยนตรงนี้
     header: ({ column }) => (
       <Button
         className="hover:cursor-pointer !p-0"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Confirm Date
+        Date
         <ArrowUpDown />
       </Button>
     ),
     cell: ({ row }) => {
-      const date = row.original.confirmDate;
+      const data = new Date(row.original.notification.createAt);
+      // console.log(row.original.notification.createAt);
       return (
         <span className="pl-1">
-          {date
-            ? new Date(row.original.confirmDate).toLocaleDateString("th-TH", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })
-            : "Not Confirm"}
+          {data.toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}
         </span>
       );
     },
-  },
-  {
-    id: "actions",
-    header: ({ column, table }) => {
-      return <div>Confirm/Cancel</div>;
-    },
-    cell: ({ row }) => {
-      const [remark, setRemark] = useState("");
-      const [isOpen, setIsOpen] = useState(false);
-      const [shouldClose, setShouldClose] = useState(false);
-
-      const handleSubmit = (e: any) => {
-        if (remark.trim() === "") {
-          toast.error("Please enter a reason for cancellation.");
-          return;
-        }
-
-        toast.success("Send request success.");
-        onCancel?.(row.original.PONo, remark);
-
-        setShouldClose(true);
-        setTimeout(() => {
-          setIsOpen(false);
-          setShouldClose(false);
-        }, 1000); // ตรงกับ duration
-        e.preventDefault();
-      };
-
-      return (
-        <>
-          <div className="flex gap-3 pl-4">
-            {row.original.ClosePO ? (
-              <>
-                {/* Confirm PO Button */}
-                {!row.original.Supreceive && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button className="w-[25px] h-[25px] bg-neutral-200 hover:bg-neutral-300/70 hover:cursor-pointer">
-                        <IconCheck
-                          className="text-green-500 font-bold"
-                          size={40}
-                        />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogPortal>
-                      <AlertDialogContent className="sm:max-w-[425px]">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you want to Confirm PO?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            confirm your data.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="hover:cursor-pointer">
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction asChild>
-                            <Button
-                              type="button"
-                              className="hover:cursor-pointer text-white"
-                              onClick={() => setEditItem?.(row.original.PONo)}
-                            >
-                              Confirm
-                            </Button>
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialogPortal>
-                  </AlertDialog>
-                )}
-
-                {/* Cancel PO Button */}
-                <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      className="w-[25px] h-[25px] hover:cursor-pointer"
-                    >
-                      <IconX />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogPortal>
-                    <AlertDialogContent className="sm:max-w-[425px] z-50">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you want to Cancel PO?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          cancel your data.
-                          <Label className="mt-3">Reason</Label>
-                          <Textarea
-                            className="mt-2"
-                            placeholder="Enter reason for cancel"
-                            onChange={(e) => {
-                              setRemark?.(e.target.value);
-                            }}
-                          />
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="hover:cursor-pointer">
-                          Cancel
-                        </AlertDialogCancel>
-                        <Button
-                          type="button"
-                          className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
-                          onClick={handleSubmit}
-                        >
-                          Confirm
-                        </Button>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialogPortal>
-                </AlertDialog>
-              </>
-            ) : (
-              <span>Not Available</span>
-            )}
-          </div>
-
-          {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
-        </>
-      );
+    meta: {
+      label: "ReferenceId",
     },
   },
 ];
