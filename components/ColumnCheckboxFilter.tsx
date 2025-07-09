@@ -19,14 +19,17 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
   // เอาค่า unique จาก facetedUniqueValues ของคอลัมน์นั้น
   const valuesMap = column.getFacetedUniqueValues();
   const values: string[] = valuesMap ? Array.from(valuesMap.keys()) : [];
-
   // ค่าที่ถูกเลือกไว้
   const selected = (column.getFilterValue() as string[]) ?? [];
 
+  useEffect(() => {
+    console.log(valuesMap);
+  }, [valuesMap]);
   const toggleValue = (val: string) => {
     const next = selected.includes(val)
       ? selected.filter((v) => v !== val)
       : [...selected, val];
+    console.log(next);
     column.setFilterValue(next.length ? next : undefined);
   };
 

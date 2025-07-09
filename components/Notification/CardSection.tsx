@@ -22,12 +22,14 @@ interface CardSectionProps {
   onMarkAllAsRead?: () => void;
   notRead: number;
   Readable: number;
+  archived: number;
   total: number;
 }
 export default function CardSection({
   onMarkAllAsRead,
   notRead,
   Readable,
+  archived,
   total,
 }: CardSectionProps) {
   const [cooldown, setCooldown] = useState<number>(0);
@@ -54,43 +56,30 @@ export default function CardSection({
   };
   return (
     <div>
-      <Card className="w-full p-6  shadow-md rounded-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          {/* <CardDescription>test</CardDescription> */}
-          <CardTitle className="text-lg font-semibold">
-            Notification ({total})
-          </CardTitle>
-          <CardAction>
-            <Button
-              onClick={handleMarkAllAsRead}
-              variant="secondary"
-              className="text-white"
-              size={"default"}
-              disabled={cooldown > 0}
-              data-slot="card"
-            >
-              <span className="flex flex-row items-center justify-center gap-2">
-                <div className="flex items-center justify-center w-[18px] h-[18px]">
-                  {cooldown > 0 ? (
-                    <span className="flex items-center">{cooldown}</span>
-                  ) : (
-                    <IconCircleCheckFilled size={18} />
-                  )}
-                </div>
-                Mark all {mobile ? "" : "as Read"}
-              </span>
-            </Button>
-          </CardAction>
-        </CardHeader>
-      </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2 mt-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card">
+        <Card className="@container/card w-full p-6  shadow-md rounded-lg justify-center">
+          <CardHeader className="flex flex-row items-center justify-between">
+            {/* <CardDescription>test</CardDescription> */}
+            <CardTitle className="text-lg font-semibold">
+              Notification is not archived
+            </CardTitle>
+            <CardAction>
+              <Badge className="w-10 h-10 rounded-full bg-blue-500 text-white">
+                <span className="text-lg">{total}</span>
+              </Badge>
+            </CardAction>
+          </CardHeader>
+        </Card>
         <Card className="@container/card w-full p-6  shadow-md rounded-lg justify-center">
           <CardHeader className="flex flex-row items-center justify-between">
             {/* <CardDescription>test</CardDescription> */}
             <CardTitle className="text-lg font-semibold">Not Read</CardTitle>
             <CardAction>
-              <Badge variant={"destructive"} className="w-35 h-10 text-white">
-                <span className="text-lg">{notRead} Not Read</span>
+              <Badge
+                variant={"destructive"}
+                className="w-10 h-10 rounded-full text-white"
+              >
+                <span className="text-lg">{notRead}</span>
               </Badge>
             </CardAction>
           </CardHeader>
@@ -104,8 +93,29 @@ export default function CardSection({
               <IconPencil size={18} />
             </CardTitle>
             <CardAction>
-              <Badge variant={"default"} className="w-35 h-10 text-white">
-                <span className="text-lg">{Readable} Readable</span>
+              <Badge
+                variant={"default"}
+                className="w-10 h-10 rounded-full text-white"
+              >
+                <span className="text-lg">{Readable}</span>
+              </Badge>
+            </CardAction>
+          </CardHeader>
+        </Card>
+        <Card className="@container/card w-full p-6  shadow-md rounded-lg justify-center">
+          <CardHeader className="flex flex-row items-center justify-between">
+            {/* <CardDescription>test</CardDescription> */}
+
+            <CardTitle className="text-lg font-semibold flex flex-row items-center gap-2">
+              Archived
+              <IconPencil size={18} />
+            </CardTitle>
+            <CardAction>
+              <Badge
+                variant={"secondary"}
+                className="w-10 h-10 rounded-full text-white"
+              >
+                <span className="text-lg">{archived}</span>
               </Badge>
             </CardAction>
           </CardHeader>

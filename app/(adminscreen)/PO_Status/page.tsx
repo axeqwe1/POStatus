@@ -58,6 +58,10 @@ export default function Page() {
         supplierName: item?.supplierName,
         POReady: item?.poReady,
         ClosePO: item?.closePO,
+        amountNoVat: item?.amountNoVat,
+        amountTotal: item?.amountTotal,
+        totalVat: item?.totalVat,
+        totalChange: item?.totalChange,
         attachedFiles:
           item?.files.map((item: any) => {
             return {

@@ -104,14 +104,7 @@ import { useAuth } from "@/context/authContext";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
-export const getColumns = (
-  onCancel?: (PONo: string, Remark: string) => void,
-  isEdit?: boolean,
-  setIsEdit?: (isEdit: boolean) => void,
-  editItem?: string,
-  setEditItem?: (item: string) => void,
-  isDesktop?: boolean
-): ColumnDef<NotificationReceivers>[] => [
+export const getColumns = (): ColumnDef<NotificationReceivers>[] => [
   {
     id: "select",
     header: ({ table, column }) => (
@@ -177,7 +170,15 @@ export const getColumns = (
       }
     },
     cell: ({ row }) => {
-      return <div>{row.original.notification.title}</div>;
+      const isRead = row.original.isRead;
+      return (
+        <div className="relative">
+          {row.original.notification.title}
+          {!isRead && (
+            <span className="absolute bg-red-500 p-1 rounded -left-2 -top-0"></span>
+          )}
+        </div>
+      );
     },
     meta: {
       label: "Title",
@@ -207,18 +208,30 @@ export const getColumns = (
         <>
           {row.original.notification.type === "PO" && (
             <Link
+              key={row.original.noti_id}
               target="_blank"
               href={`${Url}?PONo=${row.original.notification.refId}`}
-              className="text-blue-300 hover:underline"
+              className="dark:text-blue-300 text-blue-700 hover:underline"
             >
               {row.original.notification.refId}
             </Link>
           )}
           {row.original.notification.type === "UploadFile" && (
             <Link
+              key={row.original.noti_id}
               target="_blank"
               href={`${Url}?PONo=${row.original.notification.refId}`}
-              className="text-blue-300 hover:underline"
+              className="dark:text-blue-300 text-blue-700 hover:underline"
+            >
+              {row.original.notification.refId}
+            </Link>
+          )}
+          {row.original.notification.type === "Update" && (
+            <Link
+              key={row.original.noti_id}
+              target="_blank"
+              href={`${Url}?PONo=${row.original.notification.refId}`}
+              className="dark:text-blue-300 text-blue-700 hover:underline"
             >
               {row.original.notification.refId}
             </Link>
@@ -235,8 +248,8 @@ export const getColumns = (
     },
   },
   {
-    id: "type",
     accessorKey: "type",
+    accessorFn: (row) => `${row.notification?.type ?? ""}`.trim(),
     // ใส่ filter header dropdown!
     header: ({ column, table }) => (
       <div className="flex items-center gap-2">
@@ -296,10 +309,14 @@ export const getColumns = (
         </span>
       );
     },
+
+    enableSorting: false,
+    enableHiding: false,
     meta: {
       // filterElement: DateRangeFilter, // custom meta key สำหรับ filter
       label: "Message",
     },
+
     // filterFn: (row, columnId, filterValue) => {
     //   if (!filterValue?.from) return true;
 

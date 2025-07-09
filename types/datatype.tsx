@@ -37,6 +37,10 @@ export interface PO_Status {
   supplierName?: string;
   attachedFiles?: FileItem[]; // เพิ่ม field นี้
   Remark?: string;
+  amountNoVat?: number;
+  amountTotal?: number;
+  totalVat?: number;
+  totalChange?: number;
 }
 
 export interface PO_Details {
@@ -47,6 +51,12 @@ export interface PO_Details {
   color?: string;
   size?: string;
   finalETADate?: Date;
+  totalAmount?: number;
+  unit?: string;
+  chargeAmt: number;
+  chargeValue: number;
+  price: number;
+  qty: number;
 }
 
 export interface Supplier {

@@ -72,7 +72,7 @@ export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
     return () => {
       if (connection) connection.stop();
     };
-  }, []);
+  }, [user]);
 
   return (
     <NotifyContext.Provider value={{ clear, countNotify }}>

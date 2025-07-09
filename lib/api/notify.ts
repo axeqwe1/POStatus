@@ -22,3 +22,27 @@ export const GetNotifyData = async (userId: string) => {
     throw error;
   }
 };
+
+export const MarkAsRead = async (notiRecvId: string[]) => {
+  try {
+    const res = await apiService.post(
+      `/api/Notification/MarkAsRead`,
+      notiRecvId
+    );
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const Archived = async (notiRecvId: string[]) => {
+  try {
+    const res = await apiService.post(`/api/Notification/Archived`, notiRecvId);
+
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

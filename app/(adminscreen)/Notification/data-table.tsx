@@ -43,8 +43,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
+  Table as ReactTableType,
   useReactTable,
   VisibilityState,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import {
@@ -71,12 +74,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import CustomTableFooter from "@/components/CustomTableFooter";
+import { apiService } from "@/lib/axios";
+import { MarkAsRead } from "@/lib/api/notify";
 
 interface DataTableProps {
   data: NotificationReceivers[];
   isLoading: boolean;
+  markAsRead: (
+    recvId: string[],
+    table: ReactTableType<NotificationReceivers>
+  ) => void;
 }
-export default function DataTable({ data, isLoading }: DataTableProps) {
+export default function DataTable({
+  data,
+  isLoading,
+  markAsRead,
+}: DataTableProps) {
   const [datas, setDatas] = useState(data);
   const [isEdit, setIsEdit] = useState(false);
   const [editItem, setEditItem] = useState<string>("");
@@ -85,7 +98,10 @@ export default function DataTable({ data, isLoading }: DataTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   // pagin
   useEffect(() => {
     setDatas(data);
@@ -105,37 +121,36 @@ export default function DataTable({ data, isLoading }: DataTableProps) {
     setDatas(data);
   }, [data]);
 
-  const columns = useMemo(
-    () =>
-      getColumns(
-        handleDelete,
-        isEdit,
-        setIsEdit,
-        editItem,
-        handleEdit,
-        isDesktop
-      ),
-    [handleDelete, isEdit, setIsEdit, editItem, handleEdit, isDesktop]
-  );
+  const columns = useMemo(() => getColumns(), [isEdit, editItem, isDesktop]);
 
   const table = useReactTable({
     data,
     columns,
+    onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination, // ✅ เพิ่มตรงนี้
+    getPaginationRowModel: getPaginationRowModel(), // ✅ สำหรับ client-side pagin
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
+  useEffect(() => {
+    const rows = table.getSelectedRowModel().rows.map((item) => item.original);
+    const recvId = rows.map((item) => item.noti_recvId);
+    // console.log(recvId);
+    markAsRead(recvId, table);
+  }, [table.getState().rowSelection]);
 
   return (
     <>
@@ -194,7 +209,7 @@ export default function DataTable({ data, isLoading }: DataTableProps) {
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
-                    key={row.id}
+                    key={`${row.original.noti_id}-${row.original.noti_recvId}`}
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (

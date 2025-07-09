@@ -872,7 +872,11 @@ export const getColumns = (
   {
     id: "actions",
     header: ({ column, table }) => {
-      return <div>Confirm/Cancel</div>;
+      return (
+        <>
+          <div className="flex justify-center items-center">Confirm</div>
+        </>
+      );
     },
     cell: ({ row }) => {
       const [remark, setRemark] = useState("");
@@ -898,7 +902,7 @@ export const getColumns = (
 
       return (
         <>
-          <div className="flex gap-3 pl-4">
+          <div className="flex justify-center items-center">
             {row.original.ClosePO ? (
               <>
                 {/* Confirm PO Button */}
@@ -941,54 +945,14 @@ export const getColumns = (
                     </AlertDialogPortal>
                   </AlertDialog>
                 )}
-
-                {/* Cancel PO Button */}
-                <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      className="w-[25px] h-[25px] hover:cursor-pointer"
-                    >
-                      <IconX />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogPortal>
-                    <AlertDialogContent className="sm:max-w-[425px] z-50">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you want to Cancel PO?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          cancel your data.
-                          <Label className="mt-3">Reason</Label>
-                          <Textarea
-                            className="mt-2"
-                            placeholder="Enter reason for cancel"
-                            onChange={(e) => {
-                              setRemark?.(e.target.value);
-                            }}
-                          />
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="hover:cursor-pointer">
-                          Cancel
-                        </AlertDialogCancel>
-                        <Button
-                          type="button"
-                          className="hover:cursor-pointer text-white bg-red-500 hover:bg-red-500/90"
-                          onClick={handleSubmit}
-                        >
-                          Confirm
-                        </Button>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialogPortal>
-                </AlertDialog>
+                {row.original.Supreceive && (
+                  <Badge className="bg-green-400 dark:bg-green-900 dark:text-white text-white">
+                    Confirmed
+                  </Badge>
+                )}
               </>
             ) : (
-              <span>Not Available</span>
+              <Badge variant={"destructive"}>Not Available</Badge>
             )}
           </div>
 
@@ -1316,6 +1280,54 @@ export const getColumns = (
       );
     },
   },
+  {
+    id: "amountNoVat",
+    accessorKey: "amountNoVat",
+    header: () => <div className="">AmountNoVat</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>{row.original.amountNoVat}</span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "amountTotal",
+    accessorKey: "amountTotal",
+    header: () => <div className="">AmountWithVat</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>{row.original.amountTotal}</span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "totalVat",
+    accessorKey: "totalVat",
+    header: () => <div className="">TotalVat</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>{row.original.totalVat}</span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "totalChange",
+    accessorKey: "totalChange",
+    header: () => <div className="">TotalChange</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>{row.original.totalChange}</span>
+        </div>
+      );
+    },
+  },
 ];
 
 export const getSubColumns = (
@@ -1441,6 +1453,44 @@ export const getSubColumns = (
         <>
           <div>{row.original.size ? `${row.original.size}` : ``}</div>
         </>
+      );
+    },
+  },
+  {
+    id: "price",
+    accessorKey: "price",
+    header: () => <div className="">Price/Unit</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>{row.original.price}</span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "qty",
+    accessorKey: "chargeAmt",
+    header: () => <div className="">Qty/Unit</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>
+            {row.original.qty} {row.original.unit}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "totalAmount",
+    accessorKey: "totalAmount",
+    header: () => <div className="">TotalAmount</div>,
+    cell: ({ row }) => {
+      return (
+        <div>
+          <span>{row.original.totalAmount}</span>
+        </div>
       );
     },
   },
