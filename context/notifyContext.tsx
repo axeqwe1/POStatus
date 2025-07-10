@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "motion/react";
 interface NotifyContextProps {
   clear: () => void;
   countNotify: number;
+  activeNotify: () => void;
 }
 
 const NotifyContext = createContext<NotifyContextProps | undefined>(undefined);
@@ -24,6 +25,23 @@ export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
     null
   );
   const { user } = useAuth();
+
+  const fetchAllNotifications = async (userId: string) => {
+    try {
+      const res = await GetNotifyCount(userId);
+      if (res.status === 200) {
+        const data = res.data;
+        console.log("Fetched notifications:", data);
+
+        setCountNotify(data.count);
+      } else {
+        console.error("Failed to fetch notifications:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
   const clear = () => {
     setCountNotify(0);
   };
@@ -32,21 +50,6 @@ export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
     setToast(null);
   };
   useEffect(() => {
-    const fetchAllNotifications = async (userId: string) => {
-      try {
-        const res = await GetNotifyCount(userId);
-        if (res.status === 200) {
-          const data = res.data;
-          console.log("Fetched notifications:", data);
-
-          setCountNotify(data.count);
-        } else {
-          console.error("Failed to fetch notifications:", res.statusText);
-        }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
     if (user && user.id) {
       fetchAllNotifications(user.id);
     }
@@ -73,9 +76,14 @@ export const NotifyProvider: React.FC<NotifyProviderProps> = ({ children }) => {
       if (connection) connection.stop();
     };
   }, [user]);
+  const activeNotify = () => {
+    if (user && user.id) {
+      fetchAllNotifications(user.id);
+    }
+  };
 
   return (
-    <NotifyContext.Provider value={{ clear, countNotify }}>
+    <NotifyContext.Provider value={{ clear, countNotify, activeNotify }}>
       {children}
       <AnimatePresence>
         {toast && (

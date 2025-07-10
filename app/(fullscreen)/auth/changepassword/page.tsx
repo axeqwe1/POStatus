@@ -1,5 +1,5 @@
 "use client";
-import { ChangePasswordForm } from "@/components/change-password-form";
+import { ChangePasswordForm } from "@/components/AuthForm/change-password-form";
 import { LoginForm } from "@/components/login-form";
 import {
   Card,

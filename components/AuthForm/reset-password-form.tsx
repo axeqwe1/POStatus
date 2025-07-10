@@ -5,14 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { redirect, useSearchParams } from "next/navigation";
 import { log } from "console";
-import { useEffect, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { ComponentProps, useEffect, useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useAuth } from "@/context/authContext";
 
+interface ResetPasswordFormProps extends ComponentProps<"form"> {
+  open: boolean;
+  resetPassword: (newPass: string, confirmNewPass: string) => void;
+}
 export function ResetPasswordForm({
+  resetPassword,
+  open,
   className,
   ...props
-}: React.ComponentProps<"form">) {
+}: ResetPasswordFormProps) {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { setIsAuthenticated, setUser, login, user } = useAuth();
@@ -22,24 +28,17 @@ export function ResetPasswordForm({
   }, []);
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    redirect("/auth/changepassword?token=1234567890"); // Temporary redirect to change password page
-    // console.log(e.target.username.value, e.target.password.value);
-    // const res = await login(e.target.username.value, e.target.password.value);
-    // if (res != null && res.status === 200) {
-    //   redirect("/PO_Status");
-    // } else {
-    //   // Handle error, e.g., show error message
-    //   if (res != null && res.status === 401) {
-    //     setErrorMessage("Invalid username or password. Please try again.");
-    //     setIsError(true);
-    //   } else if (res != null && res.status === 500) {
-    //     setErrorMessage("Server error. Please try again later.");
-    //     setIsError(true);
-    //   } else {
-    //     setErrorMessage("An unexpected error occurred. Please try again.");
-    //     setIsError(true);
-    //   }
-    // }
+    if (e.target.new_password.value != e.target.confirm_new_password.value) {
+      setIsError(true);
+      setErrorMessage("New password and confirm password is incorrect.");
+    } else {
+      setIsError(false);
+      setErrorMessage("");
+    }
+    resetPassword(
+      e.target.new_password.value,
+      e.target.confirm_new_password.value
+    );
   };
 
   return (
@@ -58,7 +57,7 @@ export function ResetPasswordForm({
         {isError && (
           <Alert className="text-red-500 text-sm bg-red-200">
             <AlertTitle>
-              <span className="font-semibold">Login Failed!</span>
+              <span className="font-semibold">Failed!</span>
             </AlertTitle>
             <AlertDescription className="text-red-500 text-sm text-center">
               {errorMessage}
@@ -67,27 +66,32 @@ export function ResetPasswordForm({
         )}
         <div className="grid gap-3">
           <div className="grid gap-3">
-            <Label htmlFor="username">New Password</Label>
+            <Label htmlFor="new-password">New Password</Label>
             <Input
-              id="new-password"
+              id="new_password"
               type="password"
+              className="disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="New Password"
               required
+              disabled={!open}
             />
           </div>
           <div className="grid gap-3">
             <Label htmlFor="username">Confirm New Password</Label>
             <Input
-              id="confirm-new-password"
+              id="confirm_new_password"
               type="password"
+              className="disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Confirm New Password"
               required
+              disabled={!open}
             />
           </div>
           <Button
             variant={"default"}
             type="submit"
-            className="w-full hover:cursor-pointer text-white mt-3  "
+            className="w-full hover:cursor-pointer text-white mt-3  disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={!open}
           >
             Send
           </Button>

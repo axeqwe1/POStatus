@@ -74,7 +74,7 @@ export interface User {
   userId: number;
   firstName: string;
   lastName: string;
-  email: string;
+  email: string[];
   username: string;
   password: string;
   role: string; // เช่น 'admin', 'user', 'supplier'
@@ -112,4 +112,11 @@ export interface NotificationReceivers {
   readAt?: Date; // วันที่อ่าน (optional)
   isArchived: boolean; // true ถ้าเก็บไว้ใน archive
   notification: Notifications;
+}
+
+export interface UserEmail {
+  emailId: string;
+  email: string;
+  userId: number;
+  isActive: boolean;
 }

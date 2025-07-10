@@ -84,11 +84,13 @@ interface DataTableProps {
     recvId: string[],
     table: ReactTableType<NotificationReceivers>
   ) => void;
+  selectRead: (recvId: string) => void;
 }
 export default function DataTable({
   data,
   isLoading,
   markAsRead,
+  selectRead,
 }: DataTableProps) {
   const [datas, setDatas] = useState(data);
   const [isEdit, setIsEdit] = useState(false);
@@ -108,10 +110,6 @@ export default function DataTable({
     // console.log(data);
   }, [data]);
 
-  const handleDelete = async (fileId: string) => {
-    // setDatas((prev) => prev.filter((u) => u.PONo !== fileId));
-  };
-
   const handleEdit = (PONo: string) => {
     setEditItem(PONo);
     setIsEdit(true);
@@ -121,7 +119,10 @@ export default function DataTable({
     setDatas(data);
   }, [data]);
 
-  const columns = useMemo(() => getColumns(), [isEdit, editItem, isDesktop]);
+  const columns = useMemo(
+    () => getColumns(selectRead),
+    [isEdit, editItem, isDesktop]
+  );
 
   const table = useReactTable({
     data,

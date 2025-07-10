@@ -78,7 +78,6 @@ export default function DataTable({
   // pagin
   useEffect(() => {
     setDatas(data);
-    console.log(data);
   }, [data]);
   const handleDelete = async (fileId: string) => {
     setDatas((prev) => prev.filter((u) => u.PONo !== fileId));

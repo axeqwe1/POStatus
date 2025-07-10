@@ -22,9 +22,6 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
   // ค่าที่ถูกเลือกไว้
   const selected = (column.getFilterValue() as string[]) ?? [];
 
-  useEffect(() => {
-    console.log(valuesMap);
-  }, [valuesMap]);
   const toggleValue = (val: string) => {
     const next = selected.includes(val)
       ? selected.filter((v) => v !== val)

@@ -1,5 +1,5 @@
 "use client";
-import { ForgetPasswordForm } from "@/components/forgot-password-form";
+import { ForgetPasswordForm } from "@/components/AuthForm/forgot-password-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,10 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/authContext";
+import { forgetPassword } from "@/lib/api/auth";
 import { IconArrowBigLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
+import { toast } from "sonner";
 
 export default function page() {
   const searchParams = useSearchParams();
@@ -34,6 +36,21 @@ export default function page() {
   useEffect(() => {
     console.log(token);
   }, []);
+  const sendMail = async (Email: string) => {
+    try {
+      const res = await forgetPassword(Email);
+      if (res.success) {
+        toast.success(res.message);
+        router.replace(`/auth/resetpassword?token=${res.token}`);
+      } else {
+        if (res.status == 404) toast.error("Not found Email in system");
+        if (res.status == 500) toast.error("Server Error");
+      }
+      console.log(res);
+    } catch (error) {
+      toast.error(`$Error : {error}`);
+    }
+  };
   return (
     <div className="h-screen w-screen bg-gradient-to-tr from-violet-200 to-violet-400 ">
       <div className=" p-6 md:p-10 h-full flex flex-col items-center justify-center">
@@ -54,7 +71,7 @@ export default function page() {
               <CardDescription></CardDescription>
             </CardHeader>
             <CardContent>
-              <ForgetPasswordForm />
+              <ForgetPasswordForm sendMail={sendMail} />
             </CardContent>
           </Card>
         </div>

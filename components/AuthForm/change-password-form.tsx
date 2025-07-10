@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { redirect, useRouter } from "next/navigation";
 import { log } from "console";
 import { useEffect, useRef, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useAuth } from "@/context/authContext";
 import { changePasswordUser } from "@/lib/api/user";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./ui/alert-dialog";
+} from "../ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -138,7 +138,7 @@ export function ChangePasswordForm({
           {isError && (
             <Alert className="text-red-500 text-sm bg-red-200">
               <AlertTitle>
-                <span className="font-semibold">Login Failed!</span>
+                <span className="font-semibold">Failed!</span>
               </AlertTitle>
               <AlertDescription className="text-red-500 text-sm text-center">
                 {errorMessage}

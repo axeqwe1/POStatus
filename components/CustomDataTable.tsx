@@ -123,12 +123,20 @@ export function CustomDataTable<TData, TSubData>({
   });
 
   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    setIsLoading(true);
     console.log(subtableData.length);
-    if (subtableData.length > 0) {
-      // If subColumns are provided, set the subtableData to an empty array initially
-      setIsLoading(false);
-      console.log("Subtable columns provided, initializing subtable data.");
+    if (subtableData.length === 0) {
+      timer = setTimeout(() => {
+        setIsLoading(false); // ✅ ปรับเป็น false หลังจาก 1 วิ
+      }, 1000);
+    } else {
+      setIsLoading(false); // ถ้ามีข้อมูลแล้ว ไม่ต้องรอ
     }
+
+    return () => {
+      if (timer) clearTimeout(timer); // ✅ cleanup กัน memory leak ถ้าเปลี่ยน state ก่อนครบเวลา
+    };
   }, [subtableData, subColumns, openRow]);
 
   return (

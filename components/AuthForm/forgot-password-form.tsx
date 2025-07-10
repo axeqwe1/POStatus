@@ -5,14 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { redirect, useSearchParams } from "next/navigation";
 import { log } from "console";
-import { useEffect, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { ComponentProps, useEffect, useRef, useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useAuth } from "@/context/authContext";
 
+interface ForgetPasswordFormProps extends ComponentProps<"form"> {
+  sendMail: (Email: string) => void;
+}
 export function ForgetPasswordForm({
+  sendMail,
   className,
   ...props
-}: React.ComponentProps<"form">) {
+}: ForgetPasswordFormProps) {
   const COOLDOWN_KEY = "fp_cooldown_expire";
 
   const [isError, setIsError] = useState(false);
@@ -20,6 +24,7 @@ export function ForgetPasswordForm({
   const [isSending, setIsSending] = useState(false);
   const [cooldown, setCooldown] = useState(0); // in seconds
   const { setIsAuthenticated, setUser, login, user } = useAuth();
+  const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const storedExpire = localStorage.getItem(COOLDOWN_KEY);
@@ -53,6 +58,12 @@ export function ForgetPasswordForm({
     e.preventDefault();
 
     if (isSending) return;
+    const email = emailRef.current?.value;
+    if (!email) {
+      setErrorMessage("Email is required");
+      setIsError(true);
+      return;
+    }
 
     const cooldownSeconds = 30;
     const expireTimestamp = Date.now() + cooldownSeconds * 1000;
@@ -63,7 +74,7 @@ export function ForgetPasswordForm({
 
     // ❗TODO: replace with real API call
     console.log("Sending reset password email...");
-
+    sendMail(email!);
     // simulate success
     setTimeout(() => {
       // redirect("/resetpassword?token=1234567890");
@@ -84,7 +95,7 @@ export function ForgetPasswordForm({
         {isError && (
           <Alert className="text-red-500 text-sm bg-red-200">
             <AlertTitle>
-              <span className="font-semibold">Login Failed!</span>
+              <span className="font-semibold">Failed!</span>
             </AlertTitle>
             <AlertDescription className="text-red-500 text-sm text-center">
               {errorMessage}
@@ -93,7 +104,13 @@ export function ForgetPasswordForm({
         )}
 
         <div className="grid gap-3">
-          <Input id="email" type="email" placeholder="Email" required />
+          <Input
+            ref={emailRef}
+            id="email"
+            type="email"
+            placeholder="Email"
+            required
+          />
 
           <Button
             type="submit"

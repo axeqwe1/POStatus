@@ -39,6 +39,7 @@ import { useEffect, useState } from "react";
 import { getRoleAll } from "@/lib/api/role";
 import { changePassword, registerUser, updateUser } from "@/lib/api/user";
 import { useAuth } from "@/context/authContext";
+import { IconPlus, IconX } from "@tabler/icons-react";
 interface UserFormProps extends React.ComponentProps<"form"> {
   data?: User;
   onSuccess?: () => void; // ✅ เพิ่ม
@@ -54,23 +55,41 @@ export function UserForm({
   const [valueSupplier, setValueSupplier] = useState("");
   const [suppliers, setSuppliers] = useState<string[]>([]);
   const [valueRole, setValueRole] = useState("");
+  const [emails, setEmails] = useState<string[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const formRef = React.useRef<HTMLFormElement>(null);
+  const emailInputRef = React.useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    console.log(user);
-  }, []);
+    console.log(data);
+    setEmails(data?.email ? data.email : []);
+  }, [data]);
+  const addEmails = () => {
+    const value = emailInputRef.current?.value?.trim();
+    if (value && !emails.includes(value)) {
+      setEmails([...emails, value]);
+      emailInputRef.current!.value = ""; // เคลียร์ input
+    }
+  };
+  const removeEmails = (email: string) => {
+    setEmails((prev) => prev.filter((item) => item != email));
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted");
     const formData = new FormData(formRef.current!);
     const password = formData.get("password");
+
+    emails.forEach((item) => {
+      formData.append("Email", item);
+    });
+
     const dataPayload: any = {
       Username: formData.get("username"),
       FirstName: formData.get("firstName"),
       LastName: formData.get("lastName"),
-      Email: formData.get("email"),
+      Email: emails,
       RoleName: valueRole,
       SupplierId: valueSupplier, // ถ้า backend ไม่ใช้ก็ลบออก
     };
@@ -79,7 +98,7 @@ export function UserForm({
       dataPayload.Password = password; // ใส่ password เฉพาะตอนมีการกรอกใหม่
     }
 
-    console.log("Data to submit:", formData.entries().toArray());
+    console.log("Data to submit:", formData.entries());
 
     let errormessage = "";
     await toast.promise(
@@ -229,13 +248,44 @@ export function UserForm({
             <Label className="pb-1" htmlFor="email">
               Email
             </Label>
-            <Input
-              id="email"
-              name="email"
-              type="text"
-              placeholder="Email"
-              defaultValue={data?.email ?? ""}
-            />
+            <div className="relative">
+              <Input
+                id="email"
+                name="email"
+                type="text"
+                placeholder="Email"
+                defaultValue={""}
+                ref={emailInputRef}
+              />
+              <Button
+                className="absolute -right-0 top-0.5 cursor-pointer bg-blue-500 hover:bg-blue-500/50 text-white"
+                size="sm"
+                onClick={(e) => addEmails()}
+                type="button"
+              >
+                <IconPlus />
+              </Button>
+            </div>
+
+            <div className="flex flex-row gap-1">
+              {emails.map((item) => {
+                return (
+                  <span
+                    key={item}
+                    className="text-xs bg-blue-500 px-3 py-1 rounded-full text-white flex flex-row items-center justify-center gap-1"
+                  >
+                    {/*  */}
+                    {item}
+
+                    <IconX
+                      className="hover:cursor-pointer"
+                      size={14}
+                      onClick={() => removeEmails(item)}
+                    />
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </div>
         <div className="grid gap-3">

@@ -54,6 +54,7 @@ export default function page() {
   const { countNotify } = useNotify();
   const [cooldown, setCooldown] = useState<number>(0);
   const mobile = useIsMobile();
+  const { activeNotify } = useNotify();
   useEffect(() => {
     if (cooldown > 0) {
       const timer = setInterval(() => {
@@ -107,6 +108,30 @@ export default function page() {
       setData(object);
     }
   };
+
+  const selectRead = async (recvId: string) => {
+    try {
+      // asd
+      if (recvId == "" || recvId == null) {
+        toast.warning("Please select data to mark as read");
+        return;
+      }
+      const arr: string[] = [recvId];
+      const res = await MarkAsRead(arr);
+      if (res.success) {
+        const table = tableRef.current;
+        if (table != null) table.toggleAllRowsSelected(false);
+
+        activeNotify();
+        await fetchNoti();
+        // toast.success(res.message);
+      }
+      console.log("Marking all notifications as read...");
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
   const handleMarkAsRead = async (
     recvId: string[],
     table: Table<NotificationReceivers>
@@ -128,6 +153,7 @@ export default function page() {
         const table = tableRef.current;
         if (table != null) table.toggleAllRowsSelected(false);
         setCooldown(5);
+        activeNotify();
         await fetchNoti();
         toast.success(res.message);
       }
@@ -148,6 +174,7 @@ export default function page() {
       if (res.success) {
         const table = tableRef.current;
         if (table != null) table.toggleAllRowsSelected(false);
+        activeNotify();
         await fetchNoti();
         toast.success(res.message);
       }
@@ -239,6 +266,7 @@ export default function page() {
           data={data}
           markAsRead={handleMarkAsRead}
           isLoading={false}
+          selectRead={selectRead}
         />
       </div>
     </div>

@@ -54,4 +54,24 @@ export const me = async () => {
     return error; // Re-throw the error for further handling if needed
   }
 };
+
+export const forgetPassword = async (Email: string) => {
+  try {
+    const res = await apiService.post("/api/Auth/forget-password", {
+      email: Email, // ✅ ต้องเป็น object ที่ตรงกับ DTO
+    });
+    return res.data;
+  } catch (error: any) {
+    return error;
+  }
+};
+
+export const resetPasswordToken = async (token: string) => {
+  try {
+    const res = await apiService.get(`/api/Auth/reset-password?token=${token}`);
+    return res.data;
+  } catch (error: any) {
+    return error;
+  }
+};
 export default { signIn, signOut, me };

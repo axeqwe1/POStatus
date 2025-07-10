@@ -77,3 +77,40 @@ export const deleteUser = async (userId: number) => {
     throw error;
   }
 };
+
+export const getEmail = async (userId: number) => {
+  try {
+    const res = await apiService.get(`/api/User/GetEmail/${userId}`);
+    console.log(res);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const setActiveEmail = async (emailId: string, isActive: boolean) => {
+  try {
+    const res = await apiService.put(
+      `/api/User/setActiveEmail/${emailId}?isActive=${isActive}`
+    );
+    console.log(res);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const resetPassword = async (userId: number, newPassword: string) => {
+  try {
+    const res = await apiService.put(`/api/User/${userId}/change-password`, {
+      NewPassword: newPassword,
+    });
+    console.log(res);
+    return res;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

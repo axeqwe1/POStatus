@@ -1,7 +1,7 @@
 import { ColumnDef, RowExpanding } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PO_Status, Product, User, Variant } from "@/types/datatype"; // สมมุติ
+import { PO_Status, Product, User, UserEmail, Variant } from "@/types/datatype"; // สมมุติ
 import { ColumnCheckboxFilter } from "@/components/ColumnCheckboxFilter";
 
 import {
@@ -100,19 +100,6 @@ export const getColumns = (
       </span>
     ),
     // (optional) enableFacetedValues: true,
-  },
-  {
-    id: "Email",
-    accessorKey: "email",
-    header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        Email
-        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-      </div>
-    ),
-    cell: ({ row }) => {
-      return <span className="pl-1">{row.original.email}</span>;
-    },
   },
   {
     // id: "Role",
@@ -259,5 +246,113 @@ export const getColumns = (
         {/* Dialog/Drawer อยู่ภายนอก Dropdown */}
       </>
     ),
+  },
+];
+
+export const getSubColumns = (
+  setActive: (emailId: string, bool: boolean) => void
+): ColumnDef<UserEmail>[] => [
+  {
+    id: "email",
+    accessorKey: "email",
+    header: () => {
+      return (
+        <>
+          <div className="pl-4">Email</div>
+        </>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <>
+          <div>{row.original.email}</div>
+        </>
+      );
+    },
+  },
+  {
+    id: "isActive",
+    accessorKey: "isActive",
+    header: () => {
+      return (
+        <>
+          <div className="pl-4">Active</div>
+        </>
+      );
+    },
+    cell: ({ row }) => {
+      const isActive = row.original.isActive;
+
+      return (
+        <>
+          <div>
+            {isActive ? (
+              <>
+                <Badge className="bg-green-500 dark:bg-green-900 text-white">
+                  <span> Active </span>
+                </Badge>
+              </>
+            ) : (
+              <>
+                <Badge className="bg-red-500 dark:bg-red-900 text-white">
+                  <span> Deactive </span>
+                </Badge>
+              </>
+            )}
+          </div>
+        </>
+      );
+    },
+  },
+  {
+    id: "action",
+    cell: ({ row }) => {
+      const isActive = row.original.isActive;
+      return (
+        <div className="flex flex-row-reverse pr-6">
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <IconDotsVertical />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuContent
+                align="end"
+                side="bottom"
+                className="z-50 p-4 border-1 rounded-2xl bg-accent"
+              >
+                {isActive ? (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setActive(row.original.emailId, false)}
+                      className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer text-red-500"
+                    >
+                      SET Deactive
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setActive(row.original.emailId, true)}
+                      className="hover:bg-slate-200 p-1 rounded-md hover:cursor-pointer text-green-500"
+                    >
+                      SET Active
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                <DropdownMenuSeparator />
+              </DropdownMenuContent>
+            </DropdownMenuPortal>
+          </DropdownMenu>
+        </div>
+      );
+    },
   },
 ];

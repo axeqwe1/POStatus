@@ -104,7 +104,9 @@ import { useAuth } from "@/context/authContext";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
-export const getColumns = (): ColumnDef<NotificationReceivers>[] => [
+export const getColumns = (
+  markAsRead: (noti_recvId: string) => void
+): ColumnDef<NotificationReceivers>[] => [
   {
     id: "select",
     header: ({ table, column }) => (
@@ -212,6 +214,7 @@ export const getColumns = (): ColumnDef<NotificationReceivers>[] => [
               target="_blank"
               href={`${Url}?PONo=${row.original.notification.refId}`}
               className="dark:text-blue-300 text-blue-700 hover:underline"
+              onClick={() => markAsRead(row.original.noti_recvId)}
             >
               {row.original.notification.refId}
             </Link>
@@ -222,6 +225,7 @@ export const getColumns = (): ColumnDef<NotificationReceivers>[] => [
               target="_blank"
               href={`${Url}?PONo=${row.original.notification.refId}`}
               className="dark:text-blue-300 text-blue-700 hover:underline"
+              onClick={() => markAsRead(row.original.noti_recvId)}
             >
               {row.original.notification.refId}
             </Link>
@@ -232,6 +236,7 @@ export const getColumns = (): ColumnDef<NotificationReceivers>[] => [
               target="_blank"
               href={`${Url}?PONo=${row.original.notification.refId}`}
               className="dark:text-blue-300 text-blue-700 hover:underline"
+              onClick={() => markAsRead(row.original.noti_recvId)}
             >
               {row.original.notification.refId}
             </Link>

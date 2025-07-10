@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CustomDataTable } from "@/components/CustomDataTable";
-import { getColumns } from "./columns";
-import { PO_Status, Product, User, Variant } from "@/types/datatype";
+import { getColumns, getSubColumns } from "./columns";
+import { PO_Status, Product, User, UserEmail, Variant } from "@/types/datatype";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,8 @@ import {
 import { Drawer } from "vaul";
 import { json } from "stream/consumers";
 import { UserForm } from "./edit-dialog";
-import { deleteUser } from "@/lib/api/user";
+import { deleteUser, getEmail, setActiveEmail } from "@/lib/api/user";
+import { toast } from "sonner";
 
 interface DataTableProps {
   data: User[];
@@ -31,10 +32,12 @@ interface DataTableProps {
 }
 export default function DataTable({ data, onSuccess }: DataTableProps) {
   const [datas, setDatas] = useState<User[]>([]);
+  const [subDatas, setSubDatas] = useState<UserEmail[]>([]);
   const [isEdit, setIsEdit] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [editItem, setEditItem] = useState<User | null>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const IdRef = useRef<number>(0);
   const RefreshonSuccess = () => {
     onSuccess?.();
   };
@@ -49,7 +52,14 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
     console.log(isOpen);
     setIsOpenModal(isOpen);
   };
+  const setActive = async (emailId: string, bool: boolean) => {
+    const res = await setActiveEmail(emailId, bool);
 
+    if (res.success) {
+      findSubtableData(IdRef.current);
+      toast.success(`Set ${bool ? "Active" : "Deactive"} Success`);
+    }
+  };
   const columns = getColumns(
     handleDelete,
     isEdit,
@@ -58,25 +68,41 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
     setEditItem,
     isDesktop
   );
+  const subColumns = getSubColumns(setActive);
+  const findSubtableData = async (rowId: any) => {
+    setSubDatas([]);
+    try {
+      console.log("findSubtable", rowId);
+      const res = await getEmail(rowId);
+      IdRef.current = rowId;
+      setSubDatas(res.data);
+      console.log(res.data);
+    } catch (error) {}
+  };
 
   useEffect(() => {
     if (!isEdit) {
       setEditItem(null);
     }
   }, [isEdit]);
+
   useEffect(() => {
+    console.log(data);
     setDatas(data);
   }, [data]);
   return (
     <>
       <div className="max-w-[1200px] mx-auto">
-        <CustomDataTable<User, null>
+        <CustomDataTable<User, UserEmail>
           className="rounded-lg border "
           data={datas}
           columns={columns}
-          collapse={false}
+          collapse={true}
           setOpenModal={setOpenModal}
           showAddBtn={true}
+          subColumns={subColumns}
+          subtableData={subDatas}
+          findSubtableData={findSubtableData}
         />
         {/* {isEdit && <DrawerDialogDemo id={"1"} />} */}
       </div>
