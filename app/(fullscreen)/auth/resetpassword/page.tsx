@@ -44,8 +44,6 @@ export default function page() {
       const now = Date.now();
       const diff = Math.max(0, targetTime - now);
       setRemainingTime(diff);
-      console.log(diff);
-      if (Number.isNaN(diff)) router.replace("/auth/forgetpassword");
       if (diff <= 0) {
         clearInterval(interval);
         alert("Time out");

@@ -267,7 +267,7 @@ export function UserForm({
               </Button>
             </div>
 
-            <div className="flex flex-row gap-1">
+            <div className="flex flex-row flex-wrap gap-1 max-w-[400]">
               {emails.map((item) => {
                 return (
                   <span

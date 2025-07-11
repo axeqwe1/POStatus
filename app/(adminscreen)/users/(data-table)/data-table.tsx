@@ -44,7 +44,10 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
   const handleDelete = async (id: number) => {
     const res = await deleteUser(id);
     if (res.status === 200) {
+      toast.success("Delete Success");
       RefreshonSuccess();
+    } else {
+      toast.success("Something weng wrong");
     }
   };
 

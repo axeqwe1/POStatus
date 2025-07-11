@@ -65,7 +65,7 @@ export function ForgetPasswordForm({
       return;
     }
 
-    const cooldownSeconds = 30;
+    const cooldownSeconds = 10;
     const expireTimestamp = Date.now() + cooldownSeconds * 1000;
     localStorage.setItem(COOLDOWN_KEY, expireTimestamp.toString());
 

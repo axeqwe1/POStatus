@@ -41,7 +41,7 @@ export default function page() {
       const res = await forgetPassword(Email);
       if (res.success) {
         toast.success(res.message);
-        router.replace(`/auth/resetpassword?token=${res.token}`);
+        // router.replace(`/auth/resetpassword?token=${res.token}`);
       } else {
         if (res.status == 404) toast.error("Not found Email in system");
         if (res.status == 500) toast.error("Server Error");
