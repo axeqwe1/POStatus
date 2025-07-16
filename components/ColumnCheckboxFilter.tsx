@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Table } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Input } from "./ui/input";
 
 type Props<TData> = {
   column: any; // คุณสามารถใช้ Column<TData, TValue> ถ้า import type มาถูกต้อง
@@ -21,7 +22,8 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
   const values: string[] = valuesMap ? Array.from(valuesMap.keys()) : [];
   // ค่าที่ถูกเลือกไว้
   const selected = (column.getFilterValue() as string[]) ?? [];
-
+  // const [inputValue, setInputValue] = useState<string>();
+  const [filterValue, setFilterValue] = useState<string[]>([]);
   const toggleValue = (val: string) => {
     const next = selected.includes(val)
       ? selected.filter((v) => v !== val)
@@ -29,49 +31,63 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
     console.log(next);
     column.setFilterValue(next.length ? next : undefined);
   };
-
+  const filter = (val: string) => {
+    setFilterValue(values.filter((item) => item.includes(val)));
+  };
+  useEffect(() => {
+    setFilterValue(values);
+  }, []);
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <ChevronDown />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="max-h-64 overflow-y-auto">
-        {values.map((val, index) => (
-          <div key={index} className="flex items-center gap-2 px-2 py-1">
-            {val !== "" ? (
-              <>
-                <Checkbox
-                  checked={selected.includes(val)}
-                  onCheckedChange={() => toggleValue(val)}
-                  id={`filter-${column.id}-${val}`}
-                />
-                <label
-                  htmlFor={`filter-${column.id}-${val}`}
-                  className="text-sm cursor-pointer"
-                >
-                  {val}
-                </label>
-              </>
-            ) : null}
-          </div>
-        ))}
-        {values.length === 0 && (
-          <span className="text-muted-foreground px-2 py-1 text-xs">
-            No values
-          </span>
-        )}
-        <div className="flex justify-end p-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => column.setFilterValue(undefined)}
-          >
-            Clear
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <ChevronDown />
           </Button>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="max-h-64 overflow-y-auto">
+          <div>
+            <input
+              className="w-full px-1"
+              type="text"
+              onChange={(e) => filter(e.target.value)}
+            />
+          </div>
+          {filterValue.map((val, index) => (
+            <div key={index} className="flex items-center gap-2 px-2 py-1">
+              {val !== "" ? (
+                <>
+                  <Checkbox
+                    checked={selected.includes(val)}
+                    onCheckedChange={() => toggleValue(val)}
+                    id={`filter-${column.id}-${val}`}
+                  />
+                  <label
+                    htmlFor={`filter-${column.id}-${val}`}
+                    className="text-sm cursor-pointer"
+                  >
+                    {val}
+                  </label>
+                </>
+              ) : null}
+            </div>
+          ))}
+          {values.length === 0 && (
+            <span className="text-muted-foreground px-2 py-1 text-xs">
+              No values
+            </span>
+          )}
+          <div className="flex justify-end p-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => column.setFilterValue(undefined)}
+            >
+              Clear
+            </Button>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
