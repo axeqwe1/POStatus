@@ -102,10 +102,17 @@ export const setActiveEmail = async (emailId: string, isActive: boolean) => {
   }
 };
 
-export const resetPassword = async (userId: number, newPassword: string) => {
+export const resetPassword = async (
+  userId: number,
+  newPassword: string,
+  token?: string,
+  email?: string
+) => {
   try {
     const res = await apiService.put(`/api/User/${userId}/change-password`, {
       NewPassword: newPassword,
+      TokenResetPassword: token,
+      Email: email,
     });
     console.log(res);
     return res;

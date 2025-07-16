@@ -60,7 +60,7 @@ export default function page() {
               <CardTitle>
                 <div className="flex justify-center gap-2 md:justify-start">
                   <a
-                    onClick={() => router.back()}
+                    onClick={() => router.replace("/auth/login")}
                     className="flex items-center gap-2 font-medium hover:cursor-pointer"
                   >
                     <IconArrowBigLeft className="size-4 text-primary" />

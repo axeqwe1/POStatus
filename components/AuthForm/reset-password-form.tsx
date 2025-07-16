@@ -22,10 +22,25 @@ export function ResetPasswordForm({
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { setIsAuthenticated, setUser, login, user } = useAuth();
+  const [valid, setValid] = useState<boolean>(false);
+  const [charValid, setCharValid] = useState<boolean>(false);
+  const isValidPassword = (password: string) =>
+    password.length >= 6 &&
+    /[A-Za-z]/.test(password) && // ต้องมีตัวอักษร
+    /\d/.test(password); // ต้องมีตัวเลข
 
-  useEffect(() => {
-    console.log(user);
-  }, []);
+  const checkInput = (password: string) => {
+    if (password.length >= 6) {
+      setCharValid(true);
+    } else {
+      setCharValid(false);
+    }
+    if (/[A-Za-z]/.test(password) && /\d/.test(password)) {
+      setValid(true);
+    } else {
+      setValid(false);
+    }
+  };
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (e.target.new_password.value != e.target.confirm_new_password.value) {
@@ -35,12 +50,22 @@ export function ResetPasswordForm({
       setIsError(false);
       setErrorMessage("");
     }
+
+    if (!isValidPassword(e.target.new_password.value)) {
+      setIsError(true);
+      setErrorMessage(
+        "Password must be at least 6 characters and contain both letters and numbers."
+      );
+      return;
+    }
     resetPassword(
       e.target.new_password.value,
       e.target.confirm_new_password.value
     );
   };
-
+  useEffect(() => {
+    console.log(user);
+  }, []);
   return (
     <>
       <form
@@ -72,9 +97,30 @@ export function ResetPasswordForm({
               type="password"
               className="disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="New Password"
+              onChange={(e) => checkInput(e.target.value)}
               required
               disabled={!open}
             />
+
+            <Alert className="text-sm bg-gray-100">
+              {/* <AlertTitle>
+                <span className="font-semibold">Failed!</span>
+              </AlertTitle> */}
+              <AlertDescription className="text-[8px] text-center">
+                <Label
+                  className={`${
+                    charValid ? "text-green-400" : "text-gray-400"
+                  } `}
+                >
+                  Password must be at least 6 characters
+                </Label>
+                <Label
+                  className={`${valid ? "text-green-400" : "text-gray-400"} `}
+                >
+                  Contain both and numbers
+                </Label>
+              </AlertDescription>
+            </Alert>
           </div>
           <div className="grid gap-3">
             <Label htmlFor="username">Confirm New Password</Label>
@@ -93,7 +139,7 @@ export function ResetPasswordForm({
             className="w-full hover:cursor-pointer text-white mt-3  disabled:cursor-not-allowed disabled:opacity-50"
             disabled={!open}
           >
-            Send
+            Reset
           </Button>
           {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
           <span className="bg-background text-muted-foreground relative z-10 px-2">

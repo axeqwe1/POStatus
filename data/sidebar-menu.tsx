@@ -130,11 +130,11 @@ export const purchasingOfficerSideBar: SidebarItem[] = [
     url: "/purchaseOffice/ViewPOApproveList",
     icon: IconReceipt,
   },
-  {
-    title: "Request Cancel List",
-    url: "/purchaseOffice/RequestCancelList",
-    icon: IconDeviceTabletCancel,
-  },
+  // {
+  //   title: "Request Cancel List",
+  //   url: "/purchaseOffice/RequestCancelList",
+  //   icon: IconDeviceTabletCancel,
+  // },
 ];
 
 export const UserManagement: SidebarItem[] = [

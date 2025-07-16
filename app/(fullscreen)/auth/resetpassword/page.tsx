@@ -27,6 +27,7 @@ export default function page() {
   const [userId, setUserId] = useState<number | null>();
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [expire, setExpire] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   // Redirect ไป dashboard ถ้า login แล้ว (หลังโหลดเสร็จ)
   useEffect(() => {
     if (!refAuth.isLoading && refAuth.isAuthenticated) {
@@ -58,6 +59,7 @@ export default function page() {
     console.log(res);
     setUserId(res.userId);
     setExpire(res.expires);
+    setEmail(res.email);
     if (res.code && res.code == "ERR_BAD_REQUEST") {
       setOpen(false);
       router.replace("/auth/forgetpassword");
@@ -82,7 +84,12 @@ export default function page() {
       return;
     }
 
-    const res = await resetPassword(userId!, newPassword);
+    const res = await resetPassword(
+      userId!,
+      newPassword,
+      token as string,
+      email
+    );
     if (res.status == 200) {
       toast.success("Change password success.");
       router.replace("/auth/login");

@@ -130,12 +130,12 @@ export function NavUser({ user }: { user: UserDTO | null }) {
                   </span>
                 </div>
               </DropdownMenuItem>
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 onClick={() => router.push("/FullNotifications")}
               >
                 <IconBell />
                 test signalR
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

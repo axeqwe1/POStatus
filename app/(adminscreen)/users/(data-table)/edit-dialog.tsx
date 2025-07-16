@@ -340,25 +340,29 @@ export function UserForm({
             defaultValue={data?.username ?? ""}
           />
         </div>
-        <div className="grid gap-1">
-          <Label className="pb-1" htmlFor="password">
-            Password
-          </Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            readOnly={user?.role !== "SupperAdmin" && isEdit}
-            className={`${
-              user?.role !== "SupperAdmin" && isEdit
-                ? "cursor-not-allowed opacity-[0.6]"
-                : ""
-            }`}
-            placeholder={`${
-              isEdit ? "Leave blank to keep current password" : "Enter Password"
-            }`}
-          />
-        </div>
+        {isEdit && (
+          <div className="grid gap-1">
+            <Label className="pb-1" htmlFor="password">
+              Password
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              readOnly={user?.role !== "SupperAdmin" && isEdit}
+              className={`${
+                user?.role !== "SupperAdmin" && isEdit
+                  ? "cursor-not-allowed opacity-[0.6]"
+                  : ""
+              }`}
+              placeholder={`${
+                isEdit
+                  ? "Leave blank to keep current password"
+                  : "Enter Password"
+              }`}
+            />
+          </div>
+        )}
       </form>
 
       <AlertDialog>
