@@ -117,7 +117,7 @@ export function ResetPasswordForm({
                 <Label
                   className={`${valid ? "text-green-400" : "text-gray-400"} `}
                 >
-                  Contain both and numbers
+                  Contain both letters and numbers
                 </Label>
               </AlertDescription>
             </Alert>
