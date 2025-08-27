@@ -36,6 +36,7 @@ export interface PO_Status {
   finalETADate?: Date;
   supplierName?: string;
   attachedFiles?: FileItem[]; // เพิ่ม field นี้
+  typePO?: string;
   Remark?: string;
   amountNoVat?: number;
   amountTotal?: number;

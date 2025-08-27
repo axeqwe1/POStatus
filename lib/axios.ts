@@ -44,11 +44,13 @@ Axios.interceptors.response.use(
     const originalRequest = error.config;
 
     const isUnauthorized = error.response?.status === 401;
+    const BAD_REQUEST_REFRESH = error.response?.status === 400;
     const url = new URL(originalRequest.url, API_BASE_URL).pathname;
     const isRefreshCall = url === "/api/Auth/refresh";
     const isLoginCall = url === "/api/Auth/login";
     const isLogoutCall = url === "/api/Auth/logout";
     const hasAuthenCookie = document.cookie.includes("auth_status");
+    const hasRefreshCookie = document.cookie.includes("refresh_token_PO");
     // const isCheckAuthen = url === "/api/Auth/me";
 
     // ถ้าเป็น login call ที่ fail ให้ส่ง error กลับไปตรงๆ
@@ -61,6 +63,7 @@ Axios.interceptors.response.use(
       !originalRequest._retry &&
       !isRefreshCall &&
       !isLoginCall &&
+      !BAD_REQUEST_REFRESH &&
       hasAuthenCookie
     ) {
       originalRequest._retry = true;

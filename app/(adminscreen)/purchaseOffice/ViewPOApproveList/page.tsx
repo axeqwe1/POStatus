@@ -54,6 +54,7 @@ export default function Page() {
         supplierName: item?.supplierName,
         POReady: item?.poReady,
         ClosePO: item?.closePO,
+        typePO: item?.typePO,
         amountNoVat: item?.amountNoVat,
         amountTotal: item?.amountTotal,
         totalVat: item?.totalVat,

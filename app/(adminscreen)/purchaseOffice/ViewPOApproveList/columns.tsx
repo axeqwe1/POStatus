@@ -95,7 +95,8 @@ import {
   uploadFile,
 } from "@/lib/api/uploadFile";
 import { formatDate, formatFileSize } from "@/utils/utilFunction";
-import { GetPOByPONo } from "@/lib/api/po";
+import { GetPOByPONo, InsertTemp } from "@/lib/api/po";
+import { useAuth } from "@/context/authContext";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -147,6 +148,7 @@ export const getColumns = (
       const [showFileList, setShowFileList] = useState(false);
       const [descriptionOpen, setDescriptionOpen] = useState(false);
       const [selectFileId, setSelectFileId] = useState<string>("");
+      const { user } = useAuth();
       const POData = row.original.attachedFiles!.filter(
         (item) => item.uploadType == 2
       );
@@ -243,7 +245,15 @@ export const getColumns = (
       return row.original.Supreceive ? (
         <div className="flex flex-row items-center jsutify-center gap-2">
           <a
-            href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
+            onClick={async () => {
+              // const res = await InsertTemp(row.original.PONo, user!.username);
+              // console.log(res);
+
+              window.open(
+                `${downloadUrl}pono=${row.original.PONo}&Company=POMatr&typePO=${row.original.typePO}&Comname=${user?.username}`,
+                "_blank"
+              );
+            }}
             // onMouseDown={() => {
             //   if (!row.original.Supreceive) {
             //     setEditItem?.(row.original.PONo);
@@ -254,7 +264,7 @@ export const getColumns = (
             //   );
             // }}
             target="_blank"
-            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+            className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
           >
             {row.original.PONo}
           </a>

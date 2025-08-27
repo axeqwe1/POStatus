@@ -64,4 +64,15 @@ export const RequestCancelPO = async (PONo: string, Remark: string) => {
   }
 };
 
+export const InsertTemp = async (PONo: string, Comname: string) => {
+  try {
+    const request = { PONo, Comname };
+    const res = await apiService.post(`/api/PO/InsertTemp`, request);
+    return res;
+  } catch (err: any) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export default { GetPO };

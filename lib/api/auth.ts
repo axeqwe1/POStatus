@@ -43,7 +43,7 @@ export const refresh = async () => {
       return null;
     }
     // error อื่น log ปกติ
-    console.error(error);
+    console.log(error);
   }
 };
 export const me = async () => {

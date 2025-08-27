@@ -80,6 +80,7 @@ import { formatFileSize } from "@/utils/utilFunction";
 import { FileIcon } from "@/utils/fileIcon";
 import { DownloadFile } from "@/lib/api/uploadFile";
 import { useAuth } from "@/context/authContext";
+import { InsertTemp } from "@/lib/api/po";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -222,10 +223,19 @@ export const getColumns = (
           toast.error("Failed to download file");
         }
       };
+
       return row.original.Supreceive ? (
         <div className="flex flex-row items-center jsutify-center gap-2">
           <a
-            href={`${downloadUrl}pono=${row.original.PONo}&Company=POMatr`}
+            onClick={async () => {
+              // const res = await InsertTemp(row.original.PONo, user!.username);
+              // console.log(res);
+
+              window.open(
+                `${downloadUrl}pono=${row.original.PONo}&Company=POMatr&typePO=${row.original.typePO}&Comname=${user?.username}`,
+                "_blank"
+              );
+            }}
             // onMouseDown={() => {
             //   if (!row.original.Supreceive) {
             //     setEditItem?.(row.original.PONo);
@@ -236,7 +246,7 @@ export const getColumns = (
             //   );
             // }}
             target="_blank"
-            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+            className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
           >
             {row.original.PONo}
           </a>
