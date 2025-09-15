@@ -814,7 +814,7 @@ export const getColumns = (
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Lastest Approve Date
+        POIssueDate
         <ArrowUpDown />
       </Button>
     ),

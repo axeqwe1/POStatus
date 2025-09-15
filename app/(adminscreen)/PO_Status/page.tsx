@@ -78,6 +78,9 @@ export default function Page() {
           }) ?? [],
       }));
       // console.log(`Detail : ${detailList}`);
+      console.log(
+        list.find((item: PO_Status) => item.PONo === "YPTPO-25-01480")
+      );
       masterDataRef.current = [...list]; // เก็บข้อมูล masterData ใน ref เพื่อไม่ให้เกิดการ re-render ทุกครั้งที่เปลี่ยนแปลง
       setMasterData([...list]);
       // setPoDetailData(detailList);
