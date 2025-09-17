@@ -36,7 +36,7 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
   };
   useEffect(() => {
     setFilterValue(values);
-  }, []);
+  }, [valuesMap]);
   return (
     <>
       <DropdownMenu>
@@ -47,7 +47,7 @@ export function ColumnCheckboxFilter<TData>({ column, table }: Props<TData>) {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="max-h-64 overflow-y-auto">
           <div>
-            <input
+            <Input
               className="w-full px-1"
               type="text"
               onChange={(e) => filter(e.target.value)}

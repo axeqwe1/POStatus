@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ETtable } from "./ETtable";
 import { PickDate } from "./calendar";
+import { CardStatus } from "./cardStatus";
 import { UpdateDeliveryRequest } from "@/data/dataDTO";
 import { useAuth } from "@/context/authContext";
 import {
@@ -54,15 +55,17 @@ import {
 
 interface FormETProps {
   POno: string;
+  supplierMode: boolean;
 }
 
-export function FormET({ POno }: FormETProps) {
+export function FormET({ POno, supplierMode }: FormETProps) {
   const [tab, setTab] = React.useState<string>("");
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [deliveryData, setDeliveryData] = React.useState<PO_Delivery | null>(
     null
   );
+  const [isWarning, setIsWarning] = React.useState<boolean>(false);
   const fetchData = async () => {
     const res = await GetPODeliveryData(POno);
     console.log(res);
@@ -71,13 +74,41 @@ export function FormET({ POno }: FormETProps) {
 
   React.useEffect(() => {
     fetchData();
-    setTab("View");
+    setTab("Status");
   }, []);
   const handleChangeTab = (tab: string) => {
     // console.log(tab);
     setTab(tab);
   };
+  const handleSubmit = async () => {
+    await fetchData();
+    console.log("submit");
+  };
+  React.useEffect(() => {
+    if (!deliveryData) return;
 
+    const strArr: string[] = [];
+    const { etc, etd, eta, etaFinal } = deliveryData;
+
+    // ตรวจสอบการข้าม Step
+    const steps = [etc, etd, eta, etaFinal];
+    const stepNames = ["ETC", "ETD", "ETA", "ETAFinal"];
+    const skippedSteps: string[] = [];
+
+    for (let i = 0; i < steps.length; i++) {
+      // ถ้า step ปัจจุบันว่าง แต่ step หลังมีค่า → ข้าม step
+      if (!steps[i] && steps.slice(i + 1).some((v) => v)) {
+        skippedSteps.push(stepNames[i]);
+      }
+    }
+
+    if (skippedSteps.length > 0) {
+      setIsWarning(true);
+      //   skippedSteps.forEach((s) => strArr.push(`Step ${s} is skipped!`));
+    } else {
+      setIsWarning(false);
+    }
+  }, [deliveryData]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -90,10 +121,12 @@ export function FormET({ POno }: FormETProps) {
             variant="outline"
             className={`text-xs cursor-pointer pointer-events-none ${
               deliveryData
-                ? deliveryData.etaFinal
+                ? isWarning
+                  ? "bg-red-400 dark:bg-red-900"
+                  : deliveryData.etaFinal
                   ? "bg-green-400 dark:bg-green-900"
                   : "bg-yellow-400 dark:bg-yellow-900"
-                : ""
+                : "bg-accent/70"
             } `}
           >
             <Package size={12} />
@@ -118,9 +151,17 @@ export function FormET({ POno }: FormETProps) {
                     <p className="text-xs">Delivery Form</p>
                   </div>
                 </TabsTrigger>
-                <TabsTrigger value="View">
+                {!supplierMode && (
+                  <TabsTrigger value="View">
+                    <div>
+                      <p className="text-xs">Delivery Log</p>
+                    </div>
+                  </TabsTrigger>
+                )}
+
+                <TabsTrigger value="Status">
                   <div>
-                    <p className="text-xs">Delivery Log</p>
+                    <p className="text-xs">Delivery Status</p>
                   </div>
                 </TabsTrigger>
 
@@ -131,7 +172,12 @@ export function FormET({ POno }: FormETProps) {
             </Tabs>
           </div>
         </DialogHeader>
-        <ProfileForm tab={tab} POno={POno} DeliveryData={deliveryData} />
+        <ProfileForm
+          tab={tab}
+          POno={POno}
+          DeliveryData={deliveryData}
+          submitCallback={handleSubmit}
+        />
       </DialogContent>
     </Dialog>
   );
@@ -204,12 +250,14 @@ type ProfileFormProps = React.ComponentProps<"form"> & {
   tab: string;
   POno: string;
   DeliveryData: PO_Delivery | null;
+  submitCallback: () => void;
 };
 function ProfileForm({
   className,
   tab,
   POno,
   DeliveryData,
+  submitCallback,
   ...props
 }: ProfileFormProps) {
   const [etc, setETC] = React.useState<Date | null>(null);
@@ -219,6 +267,7 @@ function ProfileForm({
   const [remark, setRemark] = React.useState<string>("");
   const [deliRequest, setDeliRequest] =
     React.useState<UpdateDeliveryRequest | null>(null);
+
   const [logs, setLogs] = React.useState<PO_DeliveryLogs[]>([]);
   const { user } = useAuth();
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -253,7 +302,8 @@ function ProfileForm({
         const res = await UpdateDelivery(deliRequest);
         if (res.status === 200) {
           toast.success(res.data);
-          fetchData();
+          await fetchData();
+          submitCallback();
         } else {
           toast.warning("Please enter the field");
         }
@@ -317,6 +367,11 @@ function ProfileForm({
 
   return (
     <React.Fragment>
+      {tab == "Status" && (
+        <div>
+          <CardStatus deliveryData={DeliveryData} />
+        </div>
+      )}
       {tab == "View" && (
         <div className="flex justify-center items-center">
           <ETtable data={logs} />

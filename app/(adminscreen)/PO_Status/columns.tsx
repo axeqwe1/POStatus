@@ -81,7 +81,7 @@ import { FileIcon } from "@/utils/fileIcon";
 import { DownloadFile } from "@/lib/api/uploadFile";
 import { useAuth } from "@/context/authContext";
 import { InsertTemp } from "@/lib/api/po";
-import { FormET } from "./modal";
+import { FormET } from "../../../components/DeliveryComponent/modal";
 
 const downloadUrl = process.env.NEXT_PUBLIC_PO_URL;
 
@@ -499,7 +499,7 @@ export const getColumns = (
               </PopoverContent>
             </Popover>
             {/* Popup form */}
-            <FormET POno={row.original.PONo} />
+            <FormET supplierMode={true} POno={row.original.PONo} />
           </div>
         </div>
       );
