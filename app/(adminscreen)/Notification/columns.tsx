@@ -208,39 +208,15 @@ export const getColumns = (
           : "/purchaseOffice/ViewPOApproveList";
       return (
         <>
-          {row.original.notification.type === "PO" && (
-            <Link
-              key={row.original.noti_id}
-              target="_blank"
-              href={`${Url}?PONo=${row.original.notification.refId}`}
-              className="dark:text-blue-300 text-blue-700 hover:underline"
-              onClick={() => markAsRead(row.original.noti_recvId)}
-            >
-              {row.original.notification.refId}
-            </Link>
-          )}
-          {row.original.notification.type === "UploadFile" && (
-            <Link
-              key={row.original.noti_id}
-              target="_blank"
-              href={`${Url}?PONo=${row.original.notification.refId}`}
-              className="dark:text-blue-300 text-blue-700 hover:underline"
-              onClick={() => markAsRead(row.original.noti_recvId)}
-            >
-              {row.original.notification.refId}
-            </Link>
-          )}
-          {row.original.notification.type === "Update" && (
-            <Link
-              key={row.original.noti_id}
-              target="_blank"
-              href={`${Url}?PONo=${row.original.notification.refId}`}
-              className="dark:text-blue-300 text-blue-700 hover:underline"
-              onClick={() => markAsRead(row.original.noti_recvId)}
-            >
-              {row.original.notification.refId}
-            </Link>
-          )}
+          <Link
+            key={row.original.noti_id}
+            target="_blank"
+            href={`${Url}?PONo=${row.original.notification.refId}`}
+            className="dark:text-blue-300 text-blue-700 hover:underline"
+            onClick={() => markAsRead(row.original.noti_recvId)}
+          >
+            {row.original.notification.refId}
+          </Link>
         </>
 
         // <span className="pl-1">

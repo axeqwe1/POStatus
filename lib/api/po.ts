@@ -1,3 +1,4 @@
+import { UpdateDeliveryRequest } from "@/data/dataDTO";
 import { apiService } from "../axios";
 
 export const GetPO = async (suppCode: string) => {
@@ -71,6 +72,37 @@ export const InsertTemp = async (PONo: string, Comname: string) => {
     return res;
   } catch (err: any) {
     console.error(err);
+    throw err;
+  }
+};
+
+export const GetPODeliveryData = async (POno: string) => {
+  try {
+    const res = await apiService.get(
+      `/api/PO/GetPODeliveryByPONo?POno=${POno}`
+    );
+    return res;
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+export const GetPODeliveryLOGByPONo = async (POno: string) => {
+  try {
+    const res = await apiService.get(
+      `/api/PO/GetPODeliveryLOGByPONo?POno=${POno}`
+    );
+    return res;
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+export const UpdateDelivery = async (request: UpdateDeliveryRequest) => {
+  try {
+    const res = await apiService.post(`/api/PO/UpdateDelivery`, request);
+    return res;
+  } catch (err: any) {
     throw err;
   }
 };

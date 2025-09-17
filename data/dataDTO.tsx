@@ -14,3 +14,13 @@ export interface poResponse {
   poInfo: PoData[];
   receiveInfo: PO_Status[];
 }
+
+export interface UpdateDeliveryRequest {
+  POno: string;
+  ETC: Date | null;
+  ETD: Date | null;
+  ETA: Date | null;
+  ETAFinal: Date | null;
+  CreateBy: string | null;
+  Remark: string | null;
+}

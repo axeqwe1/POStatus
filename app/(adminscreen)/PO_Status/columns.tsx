@@ -127,7 +127,7 @@ export const getColumns = (
         </span>
         <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
           <Package size={16} />
-          ET
+          Delivery
         </span>
       </div>
     ),
@@ -270,7 +270,7 @@ export const getColumns = (
               </TooltipContent>
             </Tooltip>
           )}
-          <div className="flex flex-row justify-start items-center">
+          <div className="flex flex-row justify-start items-center gap-5">
             {/* Popup Attach File */}
             <Popover
               key={`${row.original.PONo}-type-1`} // ใช้ PONo เป็น key เพื่อแยก popover แต่ละรายการ
@@ -499,7 +499,7 @@ export const getColumns = (
               </PopoverContent>
             </Popover>
             {/* Popup form */}
-            <FormET />
+            <FormET POno={row.original.PONo} />
           </div>
         </div>
       );

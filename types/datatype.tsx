@@ -121,3 +121,30 @@ export interface UserEmail {
   userId: number;
   isActive: boolean;
 }
+
+export interface PO_Delivery {
+  id: number;
+  poNo: string;
+  etc: Date;
+  etd: Date;
+  eta: Date;
+  etaFinal: Date;
+  remark: string;
+  createDate: Date;
+  createBy: string;
+  updateDate: Date;
+  updateBy: string;
+}
+export interface PO_DeliveryLogs {
+  id: number;
+  pO_DeliveryID: number;
+  poNo: string;
+  etc: Date;
+  etd: Date;
+  eta: Date;
+  etaFinal: Date;
+  ip_address: string;
+  remark: string;
+  createDate: Date;
+  createBy: string;
+}

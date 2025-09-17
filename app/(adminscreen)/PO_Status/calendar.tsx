@@ -14,14 +14,17 @@ import {
 interface CalendarProps {
   onChange: (date: Date) => void;
   label: string;
+  initialData: Date | null;
 }
-export function PickDate({ onChange, label }: CalendarProps) {
+export function PickDate({ onChange, label, initialData }: CalendarProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(undefined);
-
+  React.useEffect(() => {
+    if (initialData) setDate(new Date(initialData));
+  }, [initialData]);
   return (
     <div className=" w-full flex flex-col gap-3">
-      <Label htmlFor="date" className="px-1">
+      <Label htmlFor={label + "date"} className="px-1">
         {label}
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
