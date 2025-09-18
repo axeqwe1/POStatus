@@ -49,6 +49,7 @@ interface DataTableProps {
     description: string,
     PONo: string
   ) => Promise<void>;
+  deliveryRefresh: () => void;
 }
 export default function DataTable({
   data,
@@ -59,6 +60,7 @@ export default function DataTable({
   deleteFile,
   onPaginChange,
   updateDescriptionFile,
+  deliveryRefresh,
 }: DataTableProps) {
   const [datas, setDatas] = useState(data);
   const [subDatas, setSubDatas] = useState<PO_Details[]>([]);
@@ -161,7 +163,8 @@ export default function DataTable({
         setOpenPopoverPONo,
         handleReaponseUpload,
         handleDeleteFile,
-        updateDescriptionFile
+        updateDescriptionFile,
+        deliveryRefresh
       ),
     [
       handleDelete,
@@ -175,6 +178,7 @@ export default function DataTable({
       handleReaponseUpload,
       handleDeleteFile,
       updateDescriptionFile,
+      deliveryRefresh,
     ]
   );
   const subColumns = getSubColumns(

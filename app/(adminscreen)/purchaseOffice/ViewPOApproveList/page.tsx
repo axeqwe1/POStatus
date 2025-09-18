@@ -373,6 +373,7 @@ export default function Page() {
             totalCount={countAll}
             uploadFiles={uploadFiles}
             deleteFile={deleteFiles}
+            deliveryRefresh={handleRefreshData}
             updateDescriptionFile={updateDescription}
           />
         </Suspense>

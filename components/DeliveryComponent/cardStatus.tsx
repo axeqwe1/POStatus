@@ -280,17 +280,19 @@ export function CardStatus({
                   : "Progress"
                 : "Not Progress"}
             </Badge>
-            <div className="font-bold">
+            {/* <div className="font-bold">
               {deliveryData
-                ? deliveryData?.etaFinal
-                  ? new Date(deliveryData?.etaFinal).toLocaleString("th-TH", {
+                ? deliveryData?.pO_ReceiveDelivery.createDate
+                  ? new Date(
+                      deliveryData?.pO_ReceiveDelivery.createDate
+                    ).toLocaleString("th-TH", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
                     })
                   : ""
                 : ""}
-            </div>
+            </div> */}
           </div>
           {isWarning && (
             <Alert variant={"destructive"} className="text-xs">

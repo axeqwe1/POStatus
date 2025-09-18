@@ -370,6 +370,7 @@ export default function Page() {
             onPaginChange={handdlerSetPageCount}
             isLoading={isLoading}
             totalCount={countAll}
+            deliveryRefresh={handleRefreshData}
             uploadFiles={uploadFiles}
             deleteFile={deleteFiles}
             updateDescriptionFile={updateDescription}

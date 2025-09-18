@@ -56,9 +56,10 @@ import {
 interface FormETProps {
   POno: string;
   supplierMode: boolean;
+  onRefresh: () => void;
 }
 
-export function FormET({ POno, supplierMode }: FormETProps) {
+export function FormET({ POno, supplierMode, onRefresh }: FormETProps) {
   const [tab, setTab] = React.useState<string>("");
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -82,10 +83,12 @@ export function FormET({ POno, supplierMode }: FormETProps) {
   };
   const handleSubmit = async () => {
     await fetchData();
+    onRefresh();
     console.log("submit");
   };
   const handleReceive = async () => {
     await fetchData();
+    onRefresh();
   };
   React.useEffect(() => {
     if (!deliveryData) return;

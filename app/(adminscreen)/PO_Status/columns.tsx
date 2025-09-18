@@ -104,7 +104,8 @@ export const getColumns = (
     fileId: string,
     description: string,
     PONo: string
-  ) => Promise<void>
+  ) => Promise<void>,
+  onRefreshFromDelivery?: () => void
 ): ColumnDef<PO_Status>[] => [
   {
     id: "PONo",
@@ -499,7 +500,11 @@ export const getColumns = (
               </PopoverContent>
             </Popover>
             {/* Popup form */}
-            <FormET supplierMode={true} POno={row.original.PONo} />
+            <FormET
+              onRefresh={onRefreshFromDelivery as () => void}
+              supplierMode={true}
+              POno={row.original.PONo}
+            />
           </div>
         </div>
       );
