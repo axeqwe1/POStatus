@@ -42,6 +42,7 @@ export interface PO_Status {
   amountTotal?: number;
   totalVat?: number;
   totalChange?: number;
+  delivery?: PO_Delivery;
 }
 
 export interface PO_Details {
@@ -134,6 +135,7 @@ export interface PO_Delivery {
   createBy: string;
   updateDate: Date;
   updateBy: string;
+  pO_ReceiveDelivery: PO_ReceiveDelivery;
 }
 export interface PO_DeliveryLogs {
   id: number;
@@ -143,7 +145,18 @@ export interface PO_DeliveryLogs {
   etd: Date;
   eta: Date;
   etaFinal: Date;
+  received: Date;
   ip_address: string;
+  remark: string;
+  createDate: Date;
+  createBy: string;
+}
+export interface PO_ReceiveDelivery {
+  id: number;
+  pO_DeliveryID: number;
+  poNo: string;
+  isReceive: boolean;
+  receiveBy: string;
   remark: string;
   createDate: Date;
   createBy: string;

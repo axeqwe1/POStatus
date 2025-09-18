@@ -24,3 +24,9 @@ export interface UpdateDeliveryRequest {
   CreateBy: string | null;
   Remark: string | null;
 }
+
+export interface ReceiveDeliveryRequest {
+  PO_DeliveryID: number;
+  POno: string;
+  CreateBy: string;
+}

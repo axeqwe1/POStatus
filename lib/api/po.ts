@@ -1,4 +1,4 @@
-import { UpdateDeliveryRequest } from "@/data/dataDTO";
+import { ReceiveDeliveryRequest, UpdateDeliveryRequest } from "@/data/dataDTO";
 import { apiService } from "../axios";
 
 export const GetPO = async (suppCode: string) => {
@@ -107,4 +107,12 @@ export const UpdateDelivery = async (request: UpdateDeliveryRequest) => {
   }
 };
 
+export const ReceiveDelivery = async (request: ReceiveDeliveryRequest) => {
+  try {
+    const res = await apiService.post(`/api/PO/ReceiveDelivery`, request);
+    return res;
+  } catch (err: any) {
+    throw err;
+  }
+};
 export default { GetPO };

@@ -83,6 +83,15 @@ const columns: ColumnDef<PO_DeliveryLogs>[] = [
     },
   },
   {
+    accessorKey: "received",
+    header: "Received",
+    cell: ({ row }) => {
+      const val = row.original.received as Date | string | null | undefined;
+      console.log(val);
+      return val ? new Date(val).toLocaleDateString() : "No Date";
+    },
+  },
+  {
     accessorKey: "remark",
     header: "Remark",
     cell: ({ row }) => {

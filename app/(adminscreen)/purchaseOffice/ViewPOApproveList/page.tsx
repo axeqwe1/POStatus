@@ -42,7 +42,7 @@ export default function Page() {
     const res = await GetAllPO();
     if (res.status === 200) {
       console.log(
-        res.data.items.find((item: any) => item.poNo === "YPTPO-25-01480")
+        res.data.items.find((item: any) => item.poNo === "YPTPO-25-03477")
       );
       const list: PO_Status[] = res.data.items.map((item: any) => ({
         PONo: item.poNo,
@@ -59,6 +59,7 @@ export default function Page() {
         amountTotal: item?.amountTotal,
         totalVat: item?.totalVat,
         totalChange: item?.totalChange,
+        delivery: item?.delivery,
         attachedFiles:
           item?.files.map((item: any) => {
             return {

@@ -94,7 +94,11 @@ import {
   UpdateDescription,
   uploadFile,
 } from "@/lib/api/uploadFile";
-import { formatDate, formatFileSize } from "@/utils/utilFunction";
+import {
+  formatDate,
+  formatFileSize,
+  getDeliveryStatus,
+} from "@/utils/utilFunction";
 import { GetPOByPONo, InsertTemp } from "@/lib/api/po";
 import { useAuth } from "@/context/authContext";
 import { FormET } from "@/components/DeliveryComponent/modal";
@@ -124,28 +128,30 @@ export const getColumns = (
   {
     id: "PONo",
     accessorKey: "PONo",
-    header: ({ column }) => (
-      <div className="flex items-center gap-2">
-        {/* PONo */}
-        {/* <ColumnCheckboxFilter column={column} table={table} /> */}
-        <Button
-          className="hover:cursor-pointer !p-0"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          PO Number
-          <ArrowUpDown />
-        </Button>
-        <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
-          <IconPaperclip size={16} />
-          PO Files
-        </span>
-        <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
-          <Package size={16} />
-          Delivery
-        </span>
-      </div>
-    ),
+    header: ({ column, table }) => {
+      return (
+        <div className="flex items-center gap-2">
+          {/* PONo */}
+          {/* <ColumnCheckboxFilter column={column} table={table} /> */}
+          <Button
+            className="hover:cursor-pointer !p-0"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            PO Number
+            <ArrowUpDown />
+          </Button>
+          <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
+            <IconPaperclip size={16} />
+            PO Files
+          </span>
+          <span className="flex flex-row items-center gap-1 text-xs text-gray-500">
+            <Package size={16} />
+            Delivery
+          </span>
+        </div>
+      );
+    },
     cell: ({ row }) => {
       const [isUploading, setIsUploading] = useState(false);
       const [desc, setDesc] = useState<string>(""); // ใช้ Remark เป็นค่าเริ่มต้น
@@ -509,6 +515,43 @@ export const getColumns = (
           </div>
         </div>
       );
+    },
+  },
+  {
+    id: "deliveryStatus", // ตั้งชื่อ column เอง
+    header: ({ column, table }) => (
+      <div className="flex items-center ">
+        Delivery Status
+        <ColumnCheckboxFilter column={column} table={table} />
+      </div>
+    ),
+    accessorFn: (row) => getDeliveryStatus(row.delivery ? row.delivery : null), // คืนค่าเป็น string: Not Progress, Progress, Pending, Receive, Error
+    cell: ({ getValue }) => {
+      const status = getValue() as string;
+      return (
+        <div className="w-full flex justify-center items-center">
+          <Badge
+            variant={"outline"}
+            className={`min-w-[80px] text-center ${
+              status == "Not Progress"
+                ? "bg-accent text-black dark:text-white"
+                : status == "Error"
+                ? "bg-red-400 dark:bg-red-900 text-red-700 dark:text-amber-300"
+                : status == "Waiting to Receive"
+                ? "g-yellow-300bg-yellow-400 dark:bg-yellow-900 text-blue-700 dark:text-white"
+                : status == "Progress"
+                ? "bg-blue-400 dark:bg-blue-900 text-blue-700 dark:text-white"
+                : "bg-green-400 dark:bg-green-900 text-green-700 dark:text-white"
+            }`}
+          >
+            {status}
+          </Badge>
+        </div>
+      );
+    },
+    filterFn: (row, columnId, filterValue: string[]) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      return filterValue.includes(row.getValue(columnId));
     },
   },
   {

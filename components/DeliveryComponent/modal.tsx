@@ -68,7 +68,7 @@ export function FormET({ POno, supplierMode }: FormETProps) {
   const [isWarning, setIsWarning] = React.useState<boolean>(false);
   const fetchData = async () => {
     const res = await GetPODeliveryData(POno);
-    console.log(res);
+    // console.log(res);
     setDeliveryData(res.data.data);
   };
 
@@ -84,14 +84,17 @@ export function FormET({ POno, supplierMode }: FormETProps) {
     await fetchData();
     console.log("submit");
   };
+  const handleReceive = async () => {
+    await fetchData();
+  };
   React.useEffect(() => {
     if (!deliveryData) return;
 
     const strArr: string[] = [];
-    const { etc, etd, eta, etaFinal } = deliveryData;
+    const { etc, etd, eta, etaFinal, pO_ReceiveDelivery } = deliveryData;
 
     // ตรวจสอบการข้าม Step
-    const steps = [etc, etd, eta, etaFinal];
+    const steps = [etc, etd, eta, etaFinal, pO_ReceiveDelivery];
     const stepNames = ["ETC", "ETD", "ETA", "ETAFinal"];
     const skippedSteps: string[] = [];
 
@@ -123,9 +126,11 @@ export function FormET({ POno, supplierMode }: FormETProps) {
               deliveryData
                 ? isWarning
                   ? "bg-red-400 dark:bg-red-900"
-                  : deliveryData.etaFinal
+                  : deliveryData.pO_ReceiveDelivery
                   ? "bg-green-400 dark:bg-green-900"
-                  : "bg-yellow-400 dark:bg-yellow-900"
+                  : deliveryData.etaFinal
+                  ? "bg-yellow-400 dark:bg-yellow-900"
+                  : "bg-blue-400 dark:bg-blue-900"
                 : "bg-accent/70"
             } `}
           >
@@ -172,12 +177,16 @@ export function FormET({ POno, supplierMode }: FormETProps) {
             </Tabs>
           </div>
         </DialogHeader>
-        <ProfileForm
-          tab={tab}
-          POno={POno}
-          DeliveryData={deliveryData}
-          submitCallback={handleSubmit}
-        />
+        <div className="w-full">
+          <ProfileForm
+            tab={tab}
+            POno={POno}
+            supplierMode={supplierMode}
+            DeliveryData={deliveryData}
+            submitCallback={handleSubmit}
+            onReceiveCallback={handleReceive}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -250,7 +259,9 @@ type ProfileFormProps = React.ComponentProps<"form"> & {
   tab: string;
   POno: string;
   DeliveryData: PO_Delivery | null;
+  supplierMode: boolean;
   submitCallback: () => void;
+  onReceiveCallback: () => void;
 };
 function ProfileForm({
   className,
@@ -258,6 +269,8 @@ function ProfileForm({
   POno,
   DeliveryData,
   submitCallback,
+  onReceiveCallback,
+  supplierMode,
   ...props
 }: ProfileFormProps) {
   const [etc, setETC] = React.useState<Date | null>(null);
@@ -314,7 +327,10 @@ function ProfileForm({
       toast.error("Fail to update Deliery Data " + err);
     }
   };
-
+  const handleReceive = async () => {
+    onReceiveCallback();
+    await fetchData();
+  };
   const fetchData = async () => {
     const [logResult] = await Promise.all([
       GetPODeliveryLOGByPONo(POno),
@@ -344,6 +360,7 @@ function ProfileForm({
     setDeliRequest(data);
   }, [POno, etc, etd, eta, etaFinal, remark]);
   React.useEffect(() => {
+    console.log(DeliveryData);
     if (DeliveryData) {
       const data = DeliveryData;
       if (data.eta) {
@@ -351,7 +368,6 @@ function ProfileForm({
       }
       if (data.etd) {
         setETD(data.etd);
-        console.log(eta);
       }
       if (data.etc) {
         setETC(data.etc);
@@ -368,8 +384,13 @@ function ProfileForm({
   return (
     <React.Fragment>
       {tab == "Status" && (
-        <div>
-          <CardStatus deliveryData={DeliveryData} />
+        <div className="w-full flex justify-center items-center ">
+          <CardStatus
+            supplierMode={supplierMode}
+            receiveCallback={handleReceive}
+            POno={POno}
+            deliveryData={DeliveryData}
+          />
         </div>
       )}
       {tab == "View" && (

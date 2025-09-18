@@ -76,7 +76,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatFileSize } from "@/utils/utilFunction";
+import { formatFileSize, getDeliveryStatus } from "@/utils/utilFunction";
 import { FileIcon } from "@/utils/fileIcon";
 import { DownloadFile } from "@/lib/api/uploadFile";
 import { useAuth } from "@/context/authContext";
@@ -503,6 +503,43 @@ export const getColumns = (
           </div>
         </div>
       );
+    },
+  },
+  {
+    id: "deliveryStatus", // ตั้งชื่อ column เอง
+    header: ({ column, table }) => (
+      <div className="flex items-center ">
+        Delivery Status
+        <ColumnCheckboxFilter column={column} table={table} />
+      </div>
+    ),
+    accessorFn: (row) => getDeliveryStatus(row.delivery ? row.delivery : null), // คืนค่าเป็น string: Not Progress, Progress, Pending, Receive, Error
+    cell: ({ getValue }) => {
+      const status = getValue() as string;
+      return (
+        <div className="w-full flex justify-center items-center">
+          <Badge
+            variant={"outline"}
+            className={`min-w-[80px] text-center ${
+              status == "Not Progress"
+                ? "bg-accent text-black dark:text-white"
+                : status == "Error"
+                ? "bg-red-400 dark:bg-red-900 text-red-700 dark:text-amber-300"
+                : status == "Waiting to Receive"
+                ? "g-yellow-300bg-yellow-400 dark:bg-yellow-900 text-blue-700 dark:text-white"
+                : status == "Progress"
+                ? "bg-blue-400 dark:bg-blue-900 text-blue-700 dark:text-white"
+                : "bg-green-400 dark:bg-green-900 text-green-700 dark:text-white"
+            }`}
+          >
+            {status}
+          </Badge>
+        </div>
+      );
+    },
+    filterFn: (row, columnId, filterValue: string[]) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      return filterValue.includes(row.getValue(columnId));
     },
   },
   {

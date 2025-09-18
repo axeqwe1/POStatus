@@ -61,6 +61,7 @@ export default function Page() {
         typePO: item?.typePO,
         amountNoVat: item?.amountNoVat,
         amountTotal: item?.amountTotal,
+        delivery: item?.delivery,
         totalVat: item?.totalVat,
         totalChange: item?.totalChange,
         attachedFiles:
