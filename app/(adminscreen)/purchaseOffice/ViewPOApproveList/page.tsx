@@ -319,7 +319,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="max-w-[1200px] mx-auto w-full">
+    <div className=" w-full">
       <Tabs
         onValueChange={handleChangeTab}
         defaultValue="all"
