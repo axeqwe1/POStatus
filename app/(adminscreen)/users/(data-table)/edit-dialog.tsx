@@ -40,6 +40,7 @@ import { getRoleAll } from "@/lib/api/role";
 import { changePassword, registerUser, updateUser } from "@/lib/api/user";
 import { useAuth } from "@/context/authContext";
 import { IconPlus, IconX } from "@tabler/icons-react";
+import { Item } from "@radix-ui/react-dropdown-menu";
 interface UserFormProps extends React.ComponentProps<"form"> {
   data?: User;
   onSuccess?: () => void; // ✅ เพิ่ม
@@ -188,7 +189,16 @@ export function UserForm({
       try {
         const res = await getRoleAll();
         // console.log(res.data.map((role: any) => role.name));
-        setRoles(res.data.map((role: any) => role.roleName)); // Assuming the API returns an array of roles with a 'name' property
+        // if (user?.role !== "SupperAdmin") {
+        //   setRoles(
+        //     res.data
+        //       .filter((item: any) => item.roleId != 1 && item.roleId != 2)
+        //       .map((role: any) => role.roleName)
+        //   );
+        // } else {
+        setRoles(res.data.map((role: any) => role.roleName));
+        // }
+
         if (data?.roleId) {
           setValueRole(
             res.data.find((role: any) => role.roleId === data.roleId)

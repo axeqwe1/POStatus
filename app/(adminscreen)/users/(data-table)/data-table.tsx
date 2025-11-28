@@ -25,6 +25,7 @@ import { json } from "stream/consumers";
 import { UserForm } from "./edit-dialog";
 import { deleteUser, getEmail, setActiveEmail } from "@/lib/api/user";
 import { toast } from "sonner";
+import { useAuth } from "@/context/authContext";
 
 interface DataTableProps {
   data: User[];
@@ -36,6 +37,7 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
   const [isEdit, setIsEdit] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [editItem, setEditItem] = useState<User | null>(null);
+  const { user } = useAuth();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const IdRef = useRef<number>(0);
   const RefreshonSuccess = () => {
@@ -90,7 +92,16 @@ export default function DataTable({ data, onSuccess }: DataTableProps) {
   }, [isEdit]);
 
   useEffect(() => {
-    console.log(data);
+    // console.log(data);
+    // console.log(user);
+    // if (user?.role == "Admin") {
+    //   let filterSupp = data.filter(
+    //     (item) => item.supplierCode == user.supplierId && item.roleId !== 1
+    //   );
+    //   setDatas(filterSupp);
+    // } else {
+    //   setDatas(data);
+    // }
     setDatas(data);
   }, [data]);
   return (
