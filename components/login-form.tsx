@@ -64,12 +64,7 @@ export function LoginForm({
         <div className="grid gap-6">
           <div className="grid gap-3">
             <Label htmlFor="username">Account</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="username or email"
-              required
-            />
+            <Input id="username" type="text" placeholder="username " required />
           </div>
           <div className="grid gap-3">
             <div className="flex items-center">
